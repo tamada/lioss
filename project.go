@@ -1,6 +1,7 @@
 package lioss
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -10,6 +11,7 @@ import (
 
 type Project interface {
 	Basedir() string
+	LicensePath() string
 	Open() (io.Reader, error)
 	Close()
 }
@@ -17,7 +19,6 @@ type Project interface {
 type BasicProject struct {
 	baseDir     string
 	licenseFile string
-	license     License
 	reader      *os.File
 }
 
@@ -31,7 +32,14 @@ func (project *BasicProject) Basedir() string {
 	return project.baseDir
 }
 
+func (project *BasicProject) LicensePath() string {
+	return project.licenseFile
+}
+
 func (project *BasicProject) Open() (io.Reader, error) {
+	if project.licenseFile == "" {
+		return nil, fmt.Errorf("license file not found")
+	}
 	reader, err := os.Open(project.licenseFile)
 	if err != nil {
 		project.reader = reader

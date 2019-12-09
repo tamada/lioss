@@ -6,13 +6,14 @@ import (
 	"strings"
 
 	flag "github.com/spf13/pflag"
+	"github.com/tamada/lioss"
 )
 
 type options struct {
 	helpFlag  bool
 	dbpath    string
 	algorithm string
-	threshold float32
+	threshold float64
 	args      []string
 }
 
@@ -20,7 +21,7 @@ func printHelp(appName string) {
 	fmt.Printf(`%s [OPTIONS] <PROJECTS...>
 OPTIONS
         --dbpath <DBPATH>          specifying database path.
-    -a, --algorithm <ALGORITHM>    specifies algorithm. Default is tfidf.
+    -a, --algorithm <ALGORITHM>    specifies algorithm. Default is 5gram.
                                    Available values are: tfidf, kgram, ...
     -t, --threshold <THRESHOLD>    specifies threshold for the algorithm.
                                    Each algorithm has default value.
@@ -30,8 +31,30 @@ PROJECTS
 `, appName)
 }
 
-func perform(opts *options) {
+func printResult(project lioss.Project, results []lioss.LiossResult) {
+	fmt.Println(project.Basedir())
+	for _, result := range results {
+		fmt.Printf("\t%s (%1.4f)\n", result.Name, result.Probability)
+	}
+}
 
+func perform(opts *options) int {
+	identifier, err := lioss.NewIdentifier(opts.algorithm, opts.threshold)
+	if err != nil {
+		fmt.Println(err.Error())
+		return 1
+	}
+	for _, arg := range opts.args {
+		project := lioss.NewBasicProject(arg)
+		results, err := identifier.Identify(project)
+		if err != nil {
+			fmt.Printf("%s: %s\n", project.Basedir(), err.Error())
+			continue
+		}
+		printResult(project, results)
+	}
+
+	return 0
 }
 
 func buildFlagSet() (*flag.FlagSet, *options) {
@@ -40,8 +63,8 @@ func buildFlagSet() (*flag.FlagSet, *options) {
 	flags.Usage = func() { printHelp("lioss") }
 	flags.BoolVarP(&opts.helpFlag, "help", "h", false, "print this message")
 	flags.StringVarP(&opts.dbpath, "dbpath", "d", "data", "specifies database path")
-	flags.StringVarP(&opts.algorithm, "algorithm", "a", "tfidf", "specifies algorithm")
-	flags.Float32VarP(&opts.threshold, "threshold", "t", 0.75, "specifies threshold")
+	flags.StringVarP(&opts.algorithm, "algorithm", "a", "5gram", "specifies algorithm")
+	flags.Float64VarP(&opts.threshold, "threshold", "t", 0.75, "specifies threshold")
 	return flags, opts
 }
 
@@ -76,7 +99,7 @@ func goMain(args []string) int {
 	return perform(opts)
 }
 
-func Main() {
+func main() {
 	var status = goMain(os.Args)
 	os.Exit(status)
 }
