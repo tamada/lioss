@@ -91,6 +91,9 @@ func licenseNameOf(licensePath string) string {
 	return filepath.Base(licensePath)
 }
 
+/*
+TODO build from some database.
+*/
 func (identifier *Identifier) BuildMasterLicenses(dbpath string) {
 	files, err := ioutil.ReadDir(dbpath)
 	projects := []Project{}
@@ -178,11 +181,12 @@ func (algo *NGramAlgorithm) Parse(project Project) (*License, error) {
 	if err != nil {
 		return nil, err
 	}
-	return buildNGram(algo.ngram, result)
+	return algo.buildNGram(result)
 }
 
-func buildNGram(n int, result string) (*License, error) {
+func (algo *NGramAlgorithm) buildNGram(result string) (*License, error) {
 	freq := map[string]int{}
+	n := algo.ngram
 	len := len(result) - n + 1
 	data := []byte(result)
 	for i := 0; i < len; i++ {
@@ -193,7 +197,7 @@ func buildNGram(n int, result string) (*License, error) {
 		}
 		freq[ngram] = value + 1
 	}
-	return &License{frequencies: freq}, nil
+	return NewLicense(algo.String(), freq), nil
 }
 
 func normalize(dataArray []byte) string {

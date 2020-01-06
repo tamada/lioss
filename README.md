@@ -7,10 +7,14 @@ License Identification tool for OSS project.
 
 ## Usage
 
+### `lioss`
+
 ```
 $ lioss [OPTIONS] <PROJECTS...>
 OPTIONS
         --dbpath <DBPATH>          specifying database path.
+                                   the default value is $LIOSS_HOME/licenses.db
+                                   The database is build by 'mkliossdb' command.
     -a, --algorithm <ALGORITHM>    specifies algorithm. Default is tfidf.
                                    Available values are: tfidf, kgram, ...
     -t, --threshold <THRESHOLD>    specifies threshold for the algorithm.
@@ -18,6 +22,21 @@ OPTIONS
     -h, --help                     print this message.
 PROJECTS
     project directories, and/or archive files contains LICENSE file.
+```
+
+### `mkliossdb`
+
+Creates the database of lioss.
+If the database was exists, this command updates the database.
+
+```
+$ mkliossdb [OPTIONS] <DIRs...>
+OPTIONS
+    -d, --dest <PATH>             specifies the destination path of licenses.db.
+                                  the default value is $LIOSS_HOME/licenses.db
+DIRs...
+    directories containing the license files.
+    The license files must name the license name.
 ```
 
 ### Algorithm

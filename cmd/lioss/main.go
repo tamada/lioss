@@ -9,6 +9,8 @@ import (
 	"github.com/tamada/lioss"
 )
 
+const VERSION = "1.0.0"
+
 type options struct {
 	helpFlag  bool
 	dbpath    string
@@ -19,6 +21,7 @@ type options struct {
 
 func printHelp(appName string) {
 	fmt.Printf(`%s [OPTIONS] <PROJECTS...>
+%s version %s
 OPTIONS
         --dbpath <DBPATH>          specifying database path.
     -a, --algorithm <ALGORITHM>    specifies algorithm. Default is 5gram.
@@ -28,7 +31,7 @@ OPTIONS
     -h, --help                     print this message.
 PROJECTS
     project directories, and/or archive files contains LICENSE file.
-`, appName)
+`, appName, appName, VERSION)
 }
 
 func printResult(project lioss.Project, results []lioss.LiossResult) {

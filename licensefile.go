@@ -1,9 +1,18 @@
 package lioss
 
-import "math"
+import (
+	"math"
+	"time"
+)
 
 type License struct {
+	LicenseName string
 	frequencies map[string]int
+	LoadDate    time.Time
+}
+
+func NewLicense(name string, data map[string]int) *License {
+	return &License{LicenseName: name, frequencies: data, LoadDate: time.Now()}
 }
 
 func (license *License) Of(key string) int {
