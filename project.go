@@ -12,7 +12,7 @@ import (
 type Project interface {
 	Basedir() string
 	LicensePath() string
-	Open() (io.Reader, error)
+	Open() (io.ReadCloser, error)
 	Close()
 }
 
@@ -36,7 +36,7 @@ func (project *BasicProject) LicensePath() string {
 	return project.licenseFile
 }
 
-func (project *BasicProject) Open() (io.Reader, error) {
+func (project *BasicProject) Open() (io.ReadCloser, error) {
 	if project.licenseFile == "" {
 		return nil, fmt.Errorf("license file not found")
 	}

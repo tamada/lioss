@@ -38,7 +38,8 @@ func TestReadfully(t *testing.T) {
 	}
 	for _, td := range testdata {
 		project := NewBasicProject(td.projectDir)
-		resultString, err := readFully(project)
+		reader, _ := project.Open()
+		resultString, err := readFully(reader)
 		if err != nil {
 			for _, item := range td.contains {
 				if strings.Index(resultString, item) < 0 {
@@ -60,7 +61,7 @@ func TestBuildAlgorithm(t *testing.T) {
 		{"unknown", true, ""},
 	}
 	for _, td := range testdata {
-		algorithm, err := BuildAlgorithm(td.giveName)
+		algorithm, err := CreateAlgorithm(td.giveName)
 		if (err != nil) != td.errorFlag {
 			t.Errorf("errorFlag of BuildAlgorithm(%s) should be %v, but %v (%v)", td.giveName, td.errorFlag, !td.errorFlag, err)
 		}
@@ -74,12 +75,13 @@ func TestBuildAlgorithm(t *testing.T) {
 
 func buildLicense(filePath string, algorithm Algorithm) *License {
 	project := &BasicProject{baseDir: filepath.Dir(filePath), licenseFile: filePath}
-	license, _ := algorithm.Parse(project)
+	reader, _ := project.Open()
+	license, _ := algorithm.Parse(reader, filepath.Base(filePath))
 	return license
 }
 
 func TestCompare(t *testing.T) {
-	algorithm, _ := BuildAlgorithm("9gram")
+	algorithm, _ := CreateAlgorithm("9gram")
 	licenses := map[string]*License{
 		"wtfpl": buildLicense("data/WTFPL", algorithm), "gpl3": buildLicense("data/GPLv3.0", algorithm),
 		"apache": buildLicense("data/Apache-License-2.0", algorithm), "bsd2": buildLicense("data/BSD-2-Clause", algorithm),

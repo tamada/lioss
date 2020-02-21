@@ -5,8 +5,6 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"sort"
-	"strconv"
-	"strings"
 )
 
 type Identifier struct {
@@ -23,25 +21,13 @@ type LiossResult struct {
 func NewIdentifier(algorithmName string, threshold float64) (*Identifier, error) {
 	identifier := new(Identifier)
 	identifier.Threshold = threshold
-	algorithm, err := BuildAlgorithm(algorithmName)
+	algorithm, err := CreateAlgorithm(algorithmName)
 	if err != nil {
 		return nil, err
 	}
 	identifier.Algorithm = algorithm
 	identifier.BuildMasterLicenses("data")
 	return identifier, nil
-}
-
-type Algorithm interface {
-	Parse(project Project) (*License, error)
-	String() string
-}
-
-type TfidfAlgorithm struct {
-}
-
-type NGramAlgorithm struct {
-	ngram int
 }
 
 type MasterLicenses struct {
@@ -53,7 +39,12 @@ func (identifier *Identifier) LicenseOf(project Project) (*License, bool) {
 	key := filepath.Base(project.LicensePath())
 	value, ok := identifier.master.licenses[key]
 	if !ok {
-		license, err := identifier.Algorithm.Parse(project)
+		reader, err := project.Open()
+		if err != nil {
+			return nil, false
+		}
+		defer reader.Close()
+		license, err := identifier.Algorithm.Parse(reader, key)
 		if err != nil {
 			fmt.Printf("%s: %s\n", project.LicensePath(), err.Error())
 			return nil, false
@@ -65,7 +56,12 @@ func (identifier *Identifier) LicenseOf(project Project) (*License, bool) {
 }
 
 func (identifier *Identifier) Identify(project Project) ([]LiossResult, error) {
-	license, err := identifier.Algorithm.Parse(project)
+	reader, err := project.Open()
+	if err != nil {
+		return nil, err
+	}
+	defer reader.Close()
+	license, err := identifier.Algorithm.Parse(reader, filepath.Base(project.LicensePath()))
 	if err != nil {
 		return nil, err
 	}
@@ -91,9 +87,6 @@ func licenseNameOf(licensePath string) string {
 	return filepath.Base(licensePath)
 }
 
-/*
-TODO build from some database.
-*/
 func (identifier *Identifier) BuildMasterLicenses(dbpath string) {
 	files, err := ioutil.ReadDir(dbpath)
 	projects := []Project{}
@@ -102,8 +95,8 @@ func (identifier *Identifier) BuildMasterLicenses(dbpath string) {
 	}
 	for _, file := range files {
 		if !file.IsDir() {
-			project := BasicProject{baseDir: dbpath, licenseFile: filepath.Join(dbpath, file.Name())}
-			projects = append(projects, &project)
+			project := &BasicProject{baseDir: dbpath, licenseFile: filepath.Join(dbpath, file.Name())}
+			projects = append(projects, project)
 		}
 	}
 	identifier.master = &MasterLicenses{projects: projects, licenses: map[string]*License{}}
@@ -128,99 +121,5 @@ func collectKeys(keys []string, freq map[string]int) []string {
 }
 
 func (identifier *Identifier) Compare(license1, license2 *License) float64 {
-	// fmt.Printf("debug: license1: %v, license2: %v\n", license1, license2)
-	keys := collectKeys([]string{}, license1.frequencies)
-	keys = collectKeys(keys, license2.frequencies)
-
-	numerator := 0
-	for _, key := range keys {
-		numerator = numerator + license1.Of(key)*license2.Of(key)
-	}
-	return float64(numerator) / (license1.Magnitude() * license2.Magnitude())
-}
-
-func BuildAlgorithm(name string) (Algorithm, error) {
-	lowerName := strings.ToLower(name)
-	if strings.HasSuffix(lowerName, "gram") {
-		nString := strings.Replace(lowerName, "gram", "", -1)
-		value, err := strconv.Atoi(nString)
-		if err != nil {
-			return nil, fmt.Errorf("%s: invalid algorithm name, %s", name, err.Error())
-		}
-		return NewNGramAlgorithm(value), nil
-	} else if lowerName == "tfidf" {
-		return NewTfidfAlgorithm(), nil
-	}
-	return nil, fmt.Errorf("%s: unknown algorithm", lowerName)
-}
-
-func NewTfidfAlgorithm() *TfidfAlgorithm {
-	return new(TfidfAlgorithm)
-}
-
-func (algo *TfidfAlgorithm) String() string {
-	return "tfidf"
-}
-
-func (algo *TfidfAlgorithm) Parse(project Project) (*License, error) {
-	return nil, nil
-}
-
-func NewNGramAlgorithm(n int) *NGramAlgorithm {
-	ngram := new(NGramAlgorithm)
-	ngram.ngram = n
-	return ngram
-}
-
-func (algo *NGramAlgorithm) String() string {
-	return fmt.Sprintf("%dgram", algo.ngram)
-}
-
-func (algo *NGramAlgorithm) Parse(project Project) (*License, error) {
-	result, err := readFully(project)
-	if err != nil {
-		return nil, err
-	}
-	return algo.buildNGram(result)
-}
-
-func (algo *NGramAlgorithm) buildNGram(result string) (*License, error) {
-	freq := map[string]int{}
-	n := algo.ngram
-	len := len(result) - n + 1
-	data := []byte(result)
-	for i := 0; i < len; i++ {
-		ngram := string(data[i : i+n])
-		value, ok := freq[ngram]
-		if !ok {
-			value = 0
-		}
-		freq[ngram] = value + 1
-	}
-	return NewLicense(algo.String(), freq), nil
-}
-
-func normalize(dataArray []byte) string {
-	data := strings.ReplaceAll(string(dataArray), "\r", " ")
-	data = strings.ReplaceAll(data, "\n", " ")
-	data = strings.ReplaceAll(data, "\t", " ")
-	for strings.Index(data, "  ") >= 0 {
-		data = strings.ReplaceAll(data, "  ", " ")
-	}
-	return strings.TrimSpace(data)
-}
-
-func readFully(project Project) (string, error) {
-	reader, err := project.Open()
-	if err != nil {
-		return "", err
-	}
-	defer project.Close()
-
-	data, err := ioutil.ReadAll(reader)
-	if err != nil {
-		return "", err
-	}
-	result := normalize(data)
-	return result, nil
+	return license1.Similarity(license2)
 }
