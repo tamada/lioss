@@ -2,23 +2,30 @@ package lioss
 
 import (
 	"fmt"
-	"io/ioutil"
-	"path/filepath"
 	"sort"
 )
 
+/*
+Identifier is to identify the license.
+*/
 type Identifier struct {
 	Threshold float64
 	Algorithm Algorithm
-	master    *MasterLicenses
+	Database  *Database
 }
 
-type LiossResult struct {
+/*
+Result shows identified results.
+*/
+type Result struct {
 	Name        string
 	Probability float64
 }
 
-func NewIdentifier(algorithmName string, threshold float64) (*Identifier, error) {
+/*
+NewIdentifier creates an instance of Identifier.
+*/
+func NewIdentifier(algorithmName string, threshold float64, db *Database) (*Identifier, error) {
 	identifier := new(Identifier)
 	identifier.Threshold = threshold
 	algorithm, err := CreateAlgorithm(algorithmName)
@@ -26,100 +33,44 @@ func NewIdentifier(algorithmName string, threshold float64) (*Identifier, error)
 		return nil, err
 	}
 	identifier.Algorithm = algorithm
-	identifier.BuildMasterLicenses("data")
+	identifier.Database = db
 	return identifier, nil
 }
 
-type MasterLicenses struct {
-	projects []Project
-	licenses map[string]*License
+/*
+ReadLicense reads License from given LicenseFile.
+*/
+func (identifier *Identifier) ReadLicense(file LicenseFile) (*License, error) {
+	license, err := identifier.Algorithm.Parse(file, file.ID())
+	defer file.Close()
+	if err != nil {
+		return nil, fmt.Errorf("%s: %s", file.ID(), err.Error())
+	}
+	return license, nil
 }
 
-func (identifier *Identifier) LicenseOf(project Project) (*License, bool) {
-	key := filepath.Base(project.LicensePath())
-	value, ok := identifier.master.licenses[key]
-	if !ok {
-		reader, err := project.Open()
-		if err != nil {
-			return nil, false
-		}
-		defer reader.Close()
-		license, err := identifier.Algorithm.Parse(reader, key)
-		if err != nil {
-			fmt.Printf("%s: %s\n", project.LicensePath(), err.Error())
-			return nil, false
-		}
-		identifier.master.licenses[key] = license
-		value = license
-	}
-	return value, true
-}
-
-func (identifier *Identifier) Identify(project Project) ([]LiossResult, error) {
-	reader, err := project.Open()
-	if err != nil {
-		return nil, err
-	}
-	defer reader.Close()
-	license, err := identifier.Algorithm.Parse(reader, filepath.Base(project.LicensePath()))
-	if err != nil {
-		return nil, err
-	}
-	results := []LiossResult{}
-	for _, masterProject := range identifier.master.projects {
-		masterLicense, ok := identifier.LicenseOf(masterProject)
-		if !ok {
-			fmt.Printf("%s: not found\n", masterProject.LicensePath())
-			continue
-		}
-		similarity := identifier.Compare(masterLicense, license)
-		if similarity > identifier.Threshold {
-			results = append(results, LiossResult{Probability: similarity, Name: licenseNameOf(masterProject.LicensePath())})
+func filter(results []*Result, threshold float64) []*Result {
+	filteredResults := []*Result{}
+	for _, r := range results {
+		if r.Probability >= threshold {
+			filteredResults = append(filteredResults, r)
 		}
 	}
-	sort.Slice(results, func(i, j int) bool {
-		return results[i].Probability > results[j].Probability
+	sort.Slice(filteredResults, func(i, j int) bool {
+		return filteredResults[i].Probability > filteredResults[j].Probability
 	})
-	return results, nil
+	return filteredResults
 }
 
-func licenseNameOf(licensePath string) string {
-	return filepath.Base(licensePath)
-}
-
-func (identifier *Identifier) BuildMasterLicenses(dbpath string) {
-	files, err := ioutil.ReadDir(dbpath)
-	projects := []Project{}
-	if err != nil {
-		panic(err)
+/*
+Identify identifies the given license.
+*/
+func (identifier *Identifier) Identify(baseLicense *License) ([]*Result, error) {
+	licenses := identifier.Database.Entries(identifier.Algorithm.String())
+	results := []*Result{}
+	for _, license := range licenses {
+		similarity := baseLicense.Similarity(license)
+		results = append(results, &Result{Name: license.Name, Probability: similarity})
 	}
-	for _, file := range files {
-		if !file.IsDir() {
-			project := &BasicProject{baseDir: dbpath, licenseFile: filepath.Join(dbpath, file.Name())}
-			projects = append(projects, project)
-		}
-	}
-	identifier.master = &MasterLicenses{projects: projects, licenses: map[string]*License{}}
-}
-
-func contains(slice []string, item string) bool {
-	for _, element := range slice {
-		if element == item {
-			return true
-		}
-	}
-	return false
-}
-
-func collectKeys(keys []string, freq map[string]int) []string {
-	for key, _ := range freq {
-		if !contains(keys, key) {
-			keys = append(keys, key)
-		}
-	}
-	return keys
-}
-
-func (identifier *Identifier) Compare(license1, license2 *License) float64 {
-	return license1.Similarity(license2)
+	return filter(results, identifier.Threshold), nil
 }

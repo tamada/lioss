@@ -18,7 +18,8 @@ test: setup
 	$(GO) test -covermode=count -coverprofile=coverage.out $$(go list ./...)
 
 build: test
-	$(GO) build -o $(NAME) -v cmd/$(NAME)/main.go
+	$(GO) build -o lioss -v cmd/lioss/main.go
+	$(GO) build -o mkliossdb -v cmd/mkliossdb/main.go
 
 clean:
 	$(GO) clean

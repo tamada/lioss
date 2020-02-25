@@ -20,8 +20,8 @@ type options struct {
 func helpMessage() string {
 	return `mkliossdb [OPTIONS] <LICENSE...>
 OPTIONS
-	-d, --dest <DEST>        specifies the destination file path. Default is 'liossdb.json'
-	-f, --format <FORMAT>    specifies format. Default is 'json'
+    -d, --dest <DEST>        specifies the destination file path. Default is 'liossdb.json'
+    -f, --format <FORMAT>    specifies format. Default is 'json'
     -h, --help               print this message.
 LICENSE
     specifies license files.`
@@ -50,6 +50,10 @@ func (opts *options) destination() string {
 		return opts.dest + "." + opts.format
 	}
 	return opts.dest[0:index] + "." + opts.format
+}
+
+func (opts *options) isHelpFlag() bool {
+	return opts.helpFlag
 }
 
 var algorithms = []string{"1gram", "2gram", "3gram", "4gram", "5gram", "6gram", "7gram", "8gram", "9gram"}
@@ -111,6 +115,10 @@ func goMain(args []string) int {
 	if err != nil {
 		fmt.Println(err.Error())
 		return 1
+	}
+	if opts.isHelpFlag() {
+		fmt.Println(helpMessage())
+		return 0
 	}
 	return perform(opts)
 }

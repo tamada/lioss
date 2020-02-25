@@ -8,19 +8,32 @@ import (
 	"strings"
 )
 
+/*
+Algorithm shows an algorithm for identifying the license.
+*/
 type Algorithm interface {
 	Parse(reader io.Reader, licenseName string) (*License, error)
 	Compare(license1, license2 *License) float64
 	String() string
 }
 
+/*
+Tfidf is an implementation type of Algorithm.
+*/
 type Tfidf struct {
 }
 
+/*
+NGram is an implementation type of Algorithm.
+*/
 type NGram struct {
 	nValue int
 }
 
+/*
+CreateAlgorithm create an instance of Algorithm.
+Available values are [1-9]gram, and tfidf.
+*/
 func CreateAlgorithm(name string) (Algorithm, error) {
 	lowerName := strings.ToLower(name)
 	if strings.HasSuffix(lowerName, "gram") {
@@ -36,6 +49,9 @@ func CreateAlgorithm(name string) (Algorithm, error) {
 	return nil, fmt.Errorf("%s: unknown algorithm", lowerName)
 }
 
+/*
+NewTfidf creates an instance of Tfidf.
+*/
 func NewTfidf() *Tfidf {
 	return new(Tfidf)
 }
@@ -44,14 +60,23 @@ func (tfidf *Tfidf) String() string {
 	return "tfidf"
 }
 
+/*
+Parse parses given data and create an instance of License by tfidf.
+*/
 func (tfidf *Tfidf) Parse(reader io.Reader, licenseName string) (*License, error) {
 	return nil, nil
 }
 
+/*
+Compare computes similarity between given two licenses.
+*/
 func (tfidf *Tfidf) Compare(license1, license2 *License) float64 {
 	return license1.Similarity(license2)
 }
 
+/*
+NewNGram creates an instance of n-gram.
+*/
 func NewNGram(n int) *NGram {
 	ngram := new(NGram)
 	ngram.nValue = n
@@ -78,9 +103,11 @@ func readFully(reader io.Reader) (string, error) {
 		return "", err
 	}
 	return normalize(result), nil
-
 }
 
+/*
+Parse parses given data and create an instance of License by n-gram.
+*/
 func (ngram *NGram) Parse(reader io.Reader, licenseName string) (*License, error) {
 	result, err := readFully(reader)
 	if err != nil {
@@ -101,9 +128,12 @@ func (ngram *NGram) buildNGram(result, licenseName string) (*License, error) {
 		}
 		freq[ngram] = value + 1
 	}
-	return NewLicense(licenseName, freq), nil
+	return newLicense(licenseName, freq), nil
 }
 
+/*
+Compare computes similarity between given two licenses.
+*/
 func (ngram *NGram) Compare(license1, license2 *License) float64 {
 	return license1.Similarity(license2)
 }

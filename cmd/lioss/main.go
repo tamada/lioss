@@ -9,6 +9,9 @@ import (
 	"github.com/tamada/lioss"
 )
 
+/*
+VERSION shows the version of the lioss.
+*/
 const VERSION = "1.0.0"
 
 type options struct {
@@ -34,29 +37,52 @@ PROJECTS
 `, appName, appName, VERSION)
 }
 
-func printResult(project lioss.Project, results []lioss.LiossResult) {
-	fmt.Println(project.Basedir())
+func printResult(project lioss.Project, results []*lioss.Result) {
+	fmt.Println(project.BasePath())
 	for _, result := range results {
 		fmt.Printf("\t%s (%1.4f)\n", result.Name, result.Probability)
 	}
 }
 
-func perform(opts *options) int {
-	identifier, err := lioss.NewIdentifier(opts.algorithm, opts.threshold)
-	if err != nil {
-		fmt.Println(err.Error())
-		return 1
-	}
-	for _, arg := range opts.args {
-		project := lioss.NewBasicProject(arg)
-		results, err := identifier.Identify(project)
+func printErrors(err error, status int) int {
+	fmt.Println(err.Error())
+	return status
+}
+
+func performEach(identifier *lioss.Identifier, arg string, opts *options) {
+	project := lioss.NewBasicProject(arg)
+	for _, id := range project.LicenseIDs() {
+		file, err := project.LicenseFile(id)
 		if err != nil {
-			fmt.Printf("%s: %s\n", project.Basedir(), err.Error())
+			fmt.Printf("%s: %s\n", project.BasePath(), err.Error())
+			continue
+		}
+		license, err := identifier.ReadLicense(file)
+		if err != nil {
+			fmt.Printf("%s: %s\n", project.BasePath(), err.Error())
+			continue
+		}
+		results, err := identifier.Identify(license)
+		if err != nil {
+			fmt.Printf("%s: %s\n", project.BasePath(), err.Error())
 			continue
 		}
 		printResult(project, results)
 	}
+}
 
+func perform(opts *options) int {
+	db, err := lioss.LoadDatabase(opts.dbpath)
+	if err != nil {
+		return printErrors(err, 1)
+	}
+	identifier, err := lioss.NewIdentifier(opts.algorithm, opts.threshold, db)
+	if err != nil {
+		return printErrors(err, 2)
+	}
+	for _, arg := range opts.args {
+		performEach(identifier, arg, opts)
+	}
 	return 0
 }
 
@@ -65,10 +91,15 @@ func buildFlagSet() (*flag.FlagSet, *options) {
 	var flags = flag.NewFlagSet("lioss", flag.ContinueOnError)
 	flags.Usage = func() { printHelp("lioss") }
 	flags.BoolVarP(&opts.helpFlag, "help", "h", false, "print this message")
-	flags.StringVarP(&opts.dbpath, "dbpath", "d", "data", "specifies database path")
+	flags.StringVarP(&opts.dbpath, "dbpath", "d", "liossdb.json", "specifies database path")
 	flags.StringVarP(&opts.algorithm, "algorithm", "a", "5gram", "specifies algorithm")
 	flags.Float64VarP(&opts.threshold, "threshold", "t", 0.75, "specifies threshold")
 	return flags, opts
+}
+
+func existsFile(filename string) bool {
+	_, err := os.Stat(filename)
+	return err == nil
 }
 
 func validateOptions(opts *options) error {
@@ -77,6 +108,9 @@ func validateOptions(opts *options) error {
 	}
 	if opts.threshold < 0.0 || opts.threshold > 1.0 {
 		return fmt.Errorf("%f: threshold must be 0.0 to 1.0", opts.threshold)
+	}
+	if !existsFile(opts.dbpath) {
+		return fmt.Errorf("%s: file not found", opts.dbpath)
 	}
 	return nil
 }
@@ -93,11 +127,19 @@ func parseOptions(args []string) (*options, error) {
 	return opts, nil
 }
 
+func (opts *options) isHelpFlag() bool {
+	return opts.helpFlag
+}
+
 func goMain(args []string) int {
 	opts, err := parseOptions(args)
 	if err != nil {
 		fmt.Println(err.Error())
 		return 1
+	}
+	if opts.isHelpFlag() {
+		printHelp(args[0])
+		return 0
 	}
 	return perform(opts)
 }

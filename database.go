@@ -5,16 +5,26 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"os"
 )
 
+/*
+Database represents the database for the lioss.
+*/
 type Database struct {
 	Data map[string][]*License `json:"algorithms"`
 }
 
+/*
+NewDatabase create an instance of database for lioss.
+*/
 func NewDatabase() *Database {
 	return new(Database)
 }
 
+/*
+Write writes database to given writer.
+*/
 func (db *Database) Write(writer io.Writer) error {
 	bytes, err := json.Marshal(db)
 	if err != nil {
@@ -30,6 +40,21 @@ func (db *Database) Write(writer io.Writer) error {
 	return nil
 }
 
+/*
+LoadDatabase reads database from given path.
+*/
+func LoadDatabase(path string) (*Database, error) {
+	reader, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer reader.Close()
+	return Load(reader)
+}
+
+/*
+Load reads database from given reader.
+*/
 func Load(reader io.Reader) (*Database, error) {
 	data, err := ioutil.ReadAll(reader)
 	if err != nil {
@@ -42,10 +67,16 @@ func Load(reader io.Reader) (*Database, error) {
 	return db, nil
 }
 
+/*
+Entries returns a slice of licenses built by given algorithm.
+*/
 func (db *Database) Entries(algorithmName string) []*License {
 	return db.Data[algorithmName]
 }
 
+/*
+Entry return an instance of license built by given algorithm with given license name.
+*/
 func (db *Database) Entry(algoirthmName, licenseName string) *License {
 	entries := db.Entries(algoirthmName)
 	for _, entry := range entries {
@@ -56,6 +87,9 @@ func (db *Database) Entry(algoirthmName, licenseName string) *License {
 	return nil
 }
 
+/*
+Put registers the given license to the database.
+*/
 func (db *Database) Put(algorithmName string, license *License) {
 	if db.Contains(algorithmName, license.Name) {
 		// TODO
@@ -70,6 +104,9 @@ func (db *Database) Put(algorithmName string, license *License) {
 	}
 }
 
+/*
+Contains checks existance with algorithm and license name.
+*/
 func (db *Database) Contains(algorithmName, licenseName string) bool {
 	licenses, ok := db.Data[algorithmName]
 	if !ok {

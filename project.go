@@ -1,7 +1,6 @@
 package lioss
 
 import (
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -9,48 +8,94 @@ import (
 	"strings"
 )
 
+/*
+LicenseFile shows the path of license in the project.
+*/
+type LicenseFile interface {
+	ID() string
+	Read(p []byte) (int, error)
+	Close() error
+}
+
+/*
+Project shows project containing some licenses.
+*/
 type Project interface {
-	Basedir() string
-	LicensePath() string
-	Open() (io.ReadCloser, error)
-	Close()
+	BasePath() string
+	LicenseIDs() []string
+	LicenseFile(licenseID string) (LicenseFile, error)
 }
 
+/*
+BasicLicenseFile is an instance of LicenseFile.
+*/
+type BasicLicenseFile struct {
+	id     string
+	reader io.ReadCloser
+}
+
+/*
+BasicProject is an instance of Project.
+*/
 type BasicProject struct {
-	baseDir     string
-	licenseFile string
-	reader      *os.File
+	baseDir      string
+	licensePaths []string
 }
 
-func NewBasicProject(baseDir string) *BasicProject {
-	project := &BasicProject{baseDir: baseDir}
-	findLicenseFile(project)
-	return project
-}
-
-func (project *BasicProject) Basedir() string {
+/*
+BasePath returns the path of the project.
+*/
+func (project *BasicProject) BasePath() string {
 	return project.baseDir
 }
 
-func (project *BasicProject) LicensePath() string {
-	return project.licenseFile
+/*
+LicenseIDs returns ids containing the project for LicenseFile method.
+*/
+func (project *BasicProject) LicenseIDs() []string {
+	return project.licensePaths
 }
 
-func (project *BasicProject) Open() (io.ReadCloser, error) {
-	if project.licenseFile == "" {
-		return nil, fmt.Errorf("license file not found")
-	}
-	reader, err := os.Open(project.licenseFile)
+/*
+LicenseFile finds the license file path from project.
+*/
+func (project *BasicProject) LicenseFile(licenseID string) (LicenseFile, error) {
+	path := filepath.Join(project.BasePath(), licenseID)
+	file, err := os.Open(path)
 	if err != nil {
-		project.reader = reader
+		return nil, err
 	}
-	return reader, err
+	return &BasicLicenseFile{id: licenseID, reader: file}, nil
 }
 
-func (project *BasicProject) Close() {
-	if project.reader != nil {
-		project.reader.Close()
-	}
+/*
+ID returns id of blf.
+*/
+func (blf *BasicLicenseFile) ID() string {
+	return blf.id
+}
+
+/*
+Read reads data from license file of blf.
+*/
+func (blf *BasicLicenseFile) Read(p []byte) (int, error) {
+	return blf.reader.Read(p)
+}
+
+/*
+Close closes the file.
+*/
+func (blf *BasicLicenseFile) Close() error {
+	return blf.reader.Close()
+}
+
+/*
+NewBasicProject construct an instance of project from file system.
+*/
+func NewBasicProject(baseDir string) *BasicProject {
+	project := &BasicProject{baseDir: baseDir, licensePaths: []string{}}
+	findLicenseFile(project)
+	return project
 }
 
 func isContainOtherWord(fileName string) bool {
@@ -60,28 +105,32 @@ func isContainOtherWord(fileName string) bool {
 
 func isLicenseFile(path string) bool {
 	fileName := strings.ToLower(filepath.Base(path))
+	return strings.HasPrefix(fileName, "license") && !isContainOtherWord(fileName)
+}
 
-	if strings.HasPrefix(fileName, "license") && !isContainOtherWord(fileName) {
-		return true
+func removeBasePath(basePath, path string) string {
+	newPath := path
+	if strings.HasPrefix(path, basePath) {
+		newPath = strings.Replace(path, basePath, "", -1)
 	}
-	return false
+	if strings.HasPrefix(newPath, "/") {
+		newPath = newPath[1:]
+	}
+	return newPath
 }
 
 func findLicenseFile(project *BasicProject) {
-	licenseFiles := []string{}
 	filepath.Walk(project.baseDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 		if !info.IsDir() && isLicenseFile(path) {
-			licenseFiles = append(licenseFiles, path)
+			path = removeBasePath(project.baseDir, path)
+			project.licensePaths = append(project.licensePaths, path)
 		}
 		return nil
 	})
-	sort.Slice(licenseFiles, func(i, j int) bool {
-		return len(licenseFiles[i]) < len(licenseFiles[j])
+	sort.Slice(project.licensePaths, func(i, j int) bool {
+		return len(project.licensePaths[i]) < len(project.licensePaths[j])
 	})
-	if len(licenseFiles) >= 1 {
-		project.licenseFile = licenseFiles[0]
-	}
 }

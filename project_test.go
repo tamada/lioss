@@ -22,19 +22,24 @@ func TestIsLicenseFile(t *testing.T) {
 
 func TestFindLicenseFile(t *testing.T) {
 	testdata := []struct {
-		basePath    string
-		licensePath string
+		basePath     string
+		licensePaths []string
 	}{
-		{"testdata/project1", "testdata/project1/LICENSE"},
-		{"testdata/project2", "testdata/project2/license.txt"},
-		{"testdata/project3", "testdata/project3/license"},
-		{"testdata/project4", ""},
+		{"testdata/project1", []string{"LICENSE"}},
+		{"testdata/project2", []string{"license.txt"}},
+		{"testdata/project3", []string{"license", "subproject/license"}},
+		{"testdata/project4", []string{}},
 	}
 
 	for _, td := range testdata {
 		project := NewBasicProject(td.basePath)
-		if project.licenseFile != td.licensePath {
-			t.Errorf("license path did not match, wont %s, got %s", td.licensePath, project.licenseFile)
+		if len(project.LicenseIDs()) != len(td.licensePaths) {
+			t.Errorf("%s: length of license path did not match, wont %d, got %d", td.basePath, len(td.licensePaths), len(project.LicenseIDs()))
+		}
+		for i, id := range project.LicenseIDs() {
+			if td.licensePaths[i] != id {
+				t.Errorf("license did not match: wont %s, got %s", td.licensePaths[i], id)
+			}
 		}
 	}
 }

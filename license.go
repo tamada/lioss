@@ -4,12 +4,15 @@ import (
 	"math"
 )
 
+/*
+License shows the license data for identifying.
+*/
 type License struct {
 	Name        string         `json:"license-name"`
 	Frequencies map[string]int `json:"frequencies"`
 }
 
-func NewLicense(name string, data map[string]int) *License {
+func newLicense(name string, data map[string]int) *License {
 	return &License{Name: name, Frequencies: data}
 }
 
@@ -24,15 +27,21 @@ func extractKeys(license1, license2 *License) map[string]int {
 	return keys
 }
 
+/*
+Similarity calculates the similarity between license and other by cosine similarity.
+*/
 func (license *License) Similarity(other *License) float64 {
 	keys := extractKeys(license, other)
 	sum := 0
-	for key, _ := range keys {
+	for key := range keys {
 		sum += (license.Frequencies[key] * other.Frequencies[key])
 	}
 	return float64(sum) / (license.Magnitude() * other.Magnitude())
 }
 
+/*
+Magnitude calculates the length of license.
+*/
 func (license *License) Magnitude() float64 {
 	sum := 0
 	for _, value := range license.Frequencies {
