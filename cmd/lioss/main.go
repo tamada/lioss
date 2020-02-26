@@ -37,8 +37,8 @@ PROJECTS
 `, appName, appName, VERSION)
 }
 
-func printResult(project lioss.Project, results []*lioss.Result) {
-	fmt.Println(project.BasePath())
+func printResult(project lioss.Project, id string, results []*lioss.Result) {
+	fmt.Printf("%s/%s\n", project.BasePath(), id)
 	for _, result := range results {
 		fmt.Printf("\t%s (%1.4f)\n", result.Name, result.Probability)
 	}
@@ -49,25 +49,30 @@ func printErrors(err error, status int) int {
 	return status
 }
 
+func identifyLicense(identifier *lioss.Identifier, project lioss.Project, id string) ([]*lioss.Result, error) {
+	file, err := project.LicenseFile(id)
+	if err != nil {
+		return nil, err
+	}
+	license, err := identifier.ReadLicense(file)
+	if err != nil {
+		return nil, err
+	}
+	return identifier.Identify(license)
+}
+
 func performEach(identifier *lioss.Identifier, arg string, opts *options) {
 	project := lioss.NewBasicProject(arg)
 	for _, id := range project.LicenseIDs() {
-		file, err := project.LicenseFile(id)
+		results, err := identifyLicense(identifier, project, id)
 		if err != nil {
-			fmt.Printf("%s: %s\n", project.BasePath(), err.Error())
+			fmt.Printf("%s/%s: %s", project.BasePath(), id, err.Error())
 			continue
 		}
-		license, err := identifier.ReadLicense(file)
-		if err != nil {
-			fmt.Printf("%s: %s\n", project.BasePath(), err.Error())
-			continue
-		}
-		results, err := identifier.Identify(license)
-		if err != nil {
-			fmt.Printf("%s: %s\n", project.BasePath(), err.Error())
-			continue
-		}
-		printResult(project, results)
+		printResult(project, id, results)
+	}
+	if len(project.LicenseIDs()) == 0 {
+		fmt.Printf("%s: license file not found\n", project.BasePath())
 	}
 }
 
