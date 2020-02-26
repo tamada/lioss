@@ -14,7 +14,7 @@ update_version:
 	@sed 's/const VERSION = .*/const VERSION = "${VERSION}"/g' cmd/lioss/main.go > a ; mv a cmd/lioss/main.go
 	@echo "Replace version to \"${VERSION}\""
 
-test: setup
+test: setup update_version
 	$(GO) test -covermode=count -coverprofile=coverage.out $$(go list ./...)
 
 build: test

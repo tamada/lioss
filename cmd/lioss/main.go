@@ -23,18 +23,18 @@ type options struct {
 }
 
 func printHelp(appName string) {
-	fmt.Printf(`%s [OPTIONS] <PROJECTS...>
-%s version %s
+	fmt.Printf(`%s version %s
+%s [OPTIONS] <PROJECTS...>
 OPTIONS
         --dbpath <DBPATH>          specifying database path.
     -a, --algorithm <ALGORITHM>    specifies algorithm. Default is 5gram.
                                    Available values are: tfidf, kgram, ...
-    -t, --threshold <THRESHOLD>    specifies threshold for the algorithm.
-                                   Each algorithm has default value.
+    -t, --threshold <THRESHOLD>    specifies threshold of the similarities of license files.
+                                   Each algorithm has default value. Default value is 0.75.
     -h, --help                     print this message.
 PROJECTS
     project directories, and/or archive files contains LICENSE file.
-`, appName, appName, VERSION)
+`, appName, VERSION, appName)
 }
 
 func printResult(project lioss.Project, id string, results []*lioss.Result) {
@@ -133,7 +133,7 @@ func parseOptions(args []string) (*options, error) {
 }
 
 func (opts *options) isHelpFlag() bool {
-	return opts.helpFlag
+	return opts.helpFlag || len(opts.args) == 0
 }
 
 func goMain(args []string) int {
