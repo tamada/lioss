@@ -87,21 +87,28 @@ func (db *Database) Entry(algoirthmName, licenseName string) *License {
 	return nil
 }
 
+func updateIfNeeded(items []*License, license *License) (updateFlag bool) {
+	for _, item := range items {
+		if item.Name == license.Name {
+			item.Frequencies = license.Frequencies
+			return true
+		}
+	}
+	return false
+}
+
 /*
 Put registers the given license to the database.
 */
 func (db *Database) Put(algorithmName string, license *License) {
-	if db.Contains(algorithmName, license.Name) {
-		// TODO
-	} else {
-		items, ok := db.Data[license.Name]
-		if ok {
-			items = append(items, license)
-		} else {
-			items = []*License{license}
-		}
-		db.Data[algorithmName] = items
+	items, ok := db.Data[algorithmName]
+	if !ok {
+		items = []*License{}
 	}
+	if !updateIfNeeded(items, license) {
+		items = append(items, license)
+	}
+	db.Data[algorithmName] = items
 }
 
 /*

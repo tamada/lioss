@@ -1,42 +1,37 @@
 package lioss
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 )
 
-func TestNormalizeReading(t *testing.T) {
+func TestIdentifier(t *testing.T) {
 	testdata := []struct {
-		giveString []byte
-		wontString string
+		algorithm   string
+		threshold   float64
+		givePath    string
+		successFlag bool
+		wontCount   int
 	}{
-		{[]byte("a  b  c\n  d  e\r\nf g \th \r i j"), "a b c d e f g h i j"},
+		{"5gram", 0.75, "LICENSE", true, 1},
 	}
+	db, _ := LoadDatabase("testdata/liossdb.json")
 	for _, td := range testdata {
-		result := normalize(td.giveString)
-		if result != td.wontString {
-			t.Errorf("normalize(%s), wont %s, but got %s", string(td.giveString), td.wontString, result)
+		identifier, _ := NewIdentifier(td.algorithm, td.threshold, db)
+		license, _ := identifier.ReadLicense(createLicenseFile(td.givePath))
+		results, err := identifier.Identify(license)
+		if (err == nil) != td.successFlag {
+			t.Errorf("the result of identify (%s, %s) did not match, wont %v", td.algorithm, td.givePath, td.successFlag)
+		}
+		if err == nil && len(results) != td.wontCount {
+			t.Errorf("result count of (%s, %s) did not match, wont %d, got %d", td.algorithm, td.givePath, td.wontCount, len(results))
 		}
 	}
 }
-func TestBuildAlgorithm(t *testing.T) {
-	testdata := []struct {
-		giveName   string
-		errorFlag  bool
-		typeString string
-	}{
-		{"9gram", false, "9gram"},
-		{"tfidf", false, "tfidf"},
-		{"unknown", true, ""},
-	}
-	for _, td := range testdata {
-		algorithm, err := CreateAlgorithm(td.giveName)
-		if (err != nil) != td.errorFlag {
-			t.Errorf("errorFlag of BuildAlgorithm(%s) should be %v, but %v (%v)", td.giveName, td.errorFlag, !td.errorFlag, err)
-		}
-		if err == nil {
-			if algorithm.String() != td.typeString {
-				t.Errorf("BuildAlgorithm(%s) created type did not match, wont %s, got %s", td.giveName, td.typeString, algorithm.String())
-			}
-		}
-	}
+
+func createLicenseFile(path string) LicenseFile {
+	name := filepath.Base(path)
+	file, _ := os.Open(path)
+	return &BasicLicenseFile{id: name, reader: file}
 }
