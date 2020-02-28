@@ -40,6 +40,11 @@ func TestFindLicenseFile(t *testing.T) {
 			if td.licensePaths[i] != id {
 				t.Errorf("license did not match: wont %s, got %s", td.licensePaths[i], id)
 			}
+			file, err := project.LicenseFile(id)
+			defer file.Close()
+			if err != nil {
+				t.Errorf("project.LicnseFile(%s) failed: %s", id, err.Error())
+			}
 		}
 	}
 }

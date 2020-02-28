@@ -69,7 +69,7 @@ func (identifier *Identifier) Identify(baseLicense *License) ([]*Result, error) 
 	licenses := identifier.Database.Entries(identifier.Algorithm.String())
 	results := []*Result{}
 	for _, license := range licenses {
-		similarity := baseLicense.Similarity(license)
+		similarity := identifier.Algorithm.Compare(baseLicense, license)
 		results = append(results, &Result{Name: license.Name, Probability: similarity})
 	}
 	return filter(results, identifier.Threshold), nil

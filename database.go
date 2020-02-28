@@ -19,7 +19,7 @@ type Database struct {
 NewDatabase create an instance of database for lioss.
 */
 func NewDatabase() *Database {
-	return new(Database)
+	return &Database{Data: map[string][]*License{}}
 }
 
 /*

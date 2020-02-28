@@ -1,6 +1,9 @@
 package lioss
 
-import "testing"
+import (
+	"bytes"
+	"testing"
+)
 
 func TestLoadDatabase(t *testing.T) {
 	db, err := LoadDatabase("testdata/liossdb.json")
@@ -13,6 +16,28 @@ func TestLoadDatabase(t *testing.T) {
 	entries := db.Entries("5gram")
 	if len(entries) != 20 {
 		t.Errorf("size of 5gram entries did not match, wont %d, got %d", 20, len(entries))
+	}
+}
+
+func TestLoadDatabaseFail(t *testing.T) {
+	_, err := LoadDatabase("testdata/notexistdb.json")
+	if err == nil {
+		t.Errorf("successfully load not exist database .")
+	}
+}
+
+func TestWriteLoad(t *testing.T) {
+	db := NewDatabase()
+	license := newLicense("hoge", map[string]int{"a": 1, "b": 2, "c": 3, "d": 4})
+	db.Put("1gram", license)
+	buffer := bytes.NewBuffer([]byte{})
+	db.Write(buffer)
+	db2, _ := Load(buffer)
+	if len(db2.Data) != 1 {
+		t.Errorf("db write/load error, wont len(db2.Data) == %d, got %d", 1, len(db2.Data))
+	}
+	if !db2.Contains("1gram", "hoge") {
+		t.Errorf(`db write/load error wont db2.Contains("%s", "%s")=true, got false`, "1gram", "hoge")
 	}
 }
 
@@ -68,6 +93,9 @@ func TestPutLicenseTo5GramWithNotContainedLicense(t *testing.T) {
 	item := db.Entry("5gram", "NYSL")
 	if item == nil || len(item.Frequencies) != 4 {
 		t.Errorf("size of map did not match, wont 4, got %d", len(item.Frequencies))
+	}
+	if entry := db.Entry("5gram", "NotExistLicense"); entry != nil {
+		t.Errorf(`db.Entry("%s", "%s") returns some instance: %v`, "5gram", "NotExistLicense", entry)
 	}
 }
 
