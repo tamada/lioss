@@ -10,8 +10,8 @@ func TestLoadDatabase(t *testing.T) {
 	if err != nil {
 		t.Errorf("error on LoadDatabase: %s", err.Error())
 	}
-	if len(db.Data) != 9 {
-		t.Errorf("size of loaded database did not match, wont %d, got %d", 9, len(db.Data))
+	if len(db.Data) != 10 {
+		t.Errorf("size of loaded database did not match, wont %d, got %d", 10, len(db.Data))
 	}
 	entries := db.Entries("5gram")
 	if len(entries) != 20 {

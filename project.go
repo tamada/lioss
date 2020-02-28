@@ -120,6 +120,18 @@ func removeBasePath(basePath, path string) string {
 }
 
 func findLicenseFile(project *BasicProject) {
+	stats, err := os.Stat(project.BasePath())
+	if err != nil {
+		return
+	}
+	if stats.IsDir() {
+		findLicenseFileInDir(project)
+	} else {
+		project.licensePaths = append(project.licensePaths, "")
+	}
+}
+
+func findLicenseFileInDir(project *BasicProject) {
 	filepath.Walk(project.baseDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err

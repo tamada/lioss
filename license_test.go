@@ -21,12 +21,14 @@ func TestLicenseSimilarity(t *testing.T) {
 		similarity float64
 	}{
 		{"5gram", "data/WTFPL", "data/WTFPL", 1.0},
+		{"5gram", "data/BSD-3-Clause", "data/BSD-4-Clause", 0.9385},
+		{"wordfreq", "data/WTFPL", "data/WTFPL", 1.0},
 	}
 	for _, td := range testdata {
 		algorithm, _ := CreateAlgorithm(td.algorithm)
 		license1, _ := algorithm.Parse(readAll(td.path1), "license1")
 		license2, _ := algorithm.Parse(readAll(td.path2), "license2")
-		similarity := license1.Similarity(license2)
+		similarity := algorithm.Compare(license1, license2)
 		if td.similarity-delta > similarity || td.similarity+delta < similarity {
 			t.Errorf("similarity between %s and %s no in the suitable range, wont %f (%f), got %f", td.path1, td.path2, td.similarity, delta, similarity)
 		}

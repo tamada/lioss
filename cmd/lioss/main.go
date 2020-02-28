@@ -28,7 +28,7 @@ func printHelp(appName string) {
 OPTIONS
         --dbpath <DBPATH>          specifying database path.
     -a, --algorithm <ALGORITHM>    specifies algorithm. Default is 5gram.
-                                   Available values are: tfidf, kgram, ...
+                                   Available values are: kgram, wordfreq, and tfidf.
     -t, --threshold <THRESHOLD>    specifies threshold of the similarities of license files.
                                    Each algorithm has default value. Default value is 0.75.
     -h, --help                     print this message.
@@ -107,8 +107,17 @@ func existsFile(filename string) bool {
 	return err == nil
 }
 
+func contains(word string, set []string) bool {
+	for _, item := range set {
+		if word == item {
+			return true
+		}
+	}
+	return false
+}
+
 func validateOptions(opts *options) error {
-	if opts.algorithm != "tfidf" && !strings.HasSuffix(opts.algorithm, "gram") {
+	if !contains(opts.algorithm, []string{"tfidf", "wordfreq"}) && !strings.HasSuffix(opts.algorithm, "gram") {
 		return fmt.Errorf("%s: unknown algorithm", opts.algorithm)
 	}
 	if opts.threshold < 0.0 || opts.threshold > 1.0 {

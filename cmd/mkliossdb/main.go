@@ -56,7 +56,7 @@ func (opts *options) isHelpFlag() bool {
 	return opts.helpFlag
 }
 
-var algorithms = []string{"1gram", "2gram", "3gram", "4gram", "5gram", "6gram", "7gram", "8gram", "9gram"}
+var algorithms = []string{"1gram", "2gram", "3gram", "4gram", "5gram", "6gram", "7gram", "8gram", "9gram", "wordfreq"}
 
 func performEach(args []string, algorithm string) ([]*lioss.License, error) {
 	fmt.Printf(`building database for algorithm "%s" ...`, algorithm)
