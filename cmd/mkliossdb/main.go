@@ -37,7 +37,9 @@ func parseOptions(args []string) (*options, error) {
 	if err := flags.Parse(args); err != nil {
 		return nil, err
 	}
-	opts.args = flags.Args()[1:]
+	if len(flags.Args()) > 0 {
+		opts.args = flags.Args()
+	}
 	return opts, nil
 }
 
@@ -53,7 +55,7 @@ func (opts *options) destination() string {
 }
 
 func (opts *options) isHelpFlag() bool {
-	return opts.helpFlag
+	return opts.helpFlag || len(opts.args) == 0
 }
 
 var algorithms = []string{"1gram", "2gram", "3gram", "4gram", "5gram", "6gram", "7gram", "8gram", "9gram", "wordfreq"}
@@ -116,6 +118,7 @@ func goMain(args []string) int {
 		fmt.Println(err.Error())
 		return 1
 	}
+
 	if opts.isHelpFlag() {
 		fmt.Println(helpMessage())
 		return 0

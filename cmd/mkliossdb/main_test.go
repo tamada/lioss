@@ -1,6 +1,36 @@
 package main
 
-import "testing"
+import (
+	"os"
+	"testing"
+
+	"github.com/tamada/lioss"
+)
+
+func TestRun(t *testing.T) {
+	goMain([]string{"-d", "../../hoge.json", "../../data/BSD"})
+	defer os.Remove("../../hoge.json")
+
+	db, err := lioss.LoadDatabase("../../hoge.json")
+	if err != nil {
+		t.Errorf("load failed: %s", err.Error())
+	}
+	if len(db.Data) != 10 {
+		t.Errorf("database did not fully outputed")
+	}
+}
+
+func Example_pritHelp() {
+	goMain([]string{})
+	// Output:
+	// mkliossdb [OPTIONS] <LICENSE...>
+	// OPTIONS
+	//     -d, --dest <DEST>        specifies the destination file path. Default is 'liossdb.json'
+	//     -f, --format <FORMAT>    specifies format. Default is 'json'
+	//     -h, --help               print this message.
+	// LICENSE
+	//     specifies license files.
+}
 
 func TestUtility(t *testing.T) {
 	testdata := []struct {
