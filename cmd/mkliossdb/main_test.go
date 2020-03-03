@@ -8,7 +8,7 @@ import (
 )
 
 func TestRun(t *testing.T) {
-	goMain([]string{"-d", "../../hoge.json", "../../data/BSD"})
+	goMain([]string{"mkliossdb", "-d", "../../hoge.json", "../../data/BSD"})
 	defer os.Remove("../../hoge.json")
 
 	db, err := lioss.LoadDatabase("../../hoge.json")

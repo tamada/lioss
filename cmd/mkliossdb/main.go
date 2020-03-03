@@ -37,8 +37,8 @@ func parseOptions(args []string) (*options, error) {
 	if err := flags.Parse(args); err != nil {
 		return nil, err
 	}
-	if len(flags.Args()) > 0 {
-		opts.args = flags.Args()
+	if len(flags.Args()) > 1 {
+		opts.args = flags.Args()[1:]
 	}
 	return opts, nil
 }
