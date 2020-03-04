@@ -60,9 +60,9 @@ func (opts *options) isHelpFlag() bool {
 
 var algorithms = []string{"1gram", "2gram", "3gram", "4gram", "5gram", "6gram", "7gram", "8gram", "9gram", "wordfreq", "tfidf"}
 
-func performEach(args []string, algorithm string) ([]*lioss.License, error) {
-	fmt.Printf(`building database for algorithm "%s" ...`, algorithm)
-	algo, err := lioss.CreateAlgorithm(algorithm)
+func performEach(args []string, comparator string) ([]*lioss.License, error) {
+	fmt.Printf(`building database for comparator "%s" ...`, comparator)
+	algo, err := lioss.CreateComparator(comparator)
 	if err != nil {
 		return nil, err
 	}

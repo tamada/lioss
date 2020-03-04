@@ -9,9 +9,9 @@ import (
 Identifier is to identify the license.
 */
 type Identifier struct {
-	Threshold float64
-	Algorithm Algorithm
-	Database  *Database
+	Threshold  float64
+	Comparator Comparator
+	Database   *Database
 }
 
 /*
@@ -25,14 +25,14 @@ type Result struct {
 /*
 NewIdentifier creates an instance of Identifier.
 */
-func NewIdentifier(algorithmName string, threshold float64, db *Database) (*Identifier, error) {
+func NewIdentifier(comparatorName string, threshold float64, db *Database) (*Identifier, error) {
 	identifier := new(Identifier)
 	identifier.Threshold = threshold
-	algorithm, err := CreateAlgorithm(algorithmName)
+	algorithm, err := CreateComparator(comparatorName)
 	if err != nil {
 		return nil, err
 	}
-	identifier.Algorithm = algorithm
+	identifier.Comparator = algorithm
 	identifier.Database = db
 	algorithm.Prepare(db)
 	return identifier, nil
@@ -42,7 +42,7 @@ func NewIdentifier(algorithmName string, threshold float64, db *Database) (*Iden
 ReadLicense reads License from given LicenseFile.
 */
 func (identifier *Identifier) ReadLicense(file LicenseFile) (*License, error) {
-	license, err := identifier.Algorithm.Parse(file, file.ID())
+	license, err := identifier.Comparator.Parse(file, file.ID())
 	defer file.Close()
 	if err != nil {
 		return nil, fmt.Errorf("%s: %s", file.ID(), err.Error())
@@ -67,10 +67,10 @@ func filter(results []*Result, threshold float64) []*Result {
 Identify identifies the given license.
 */
 func (identifier *Identifier) Identify(baseLicense *License) ([]*Result, error) {
-	licenses := identifier.Database.Entries(identifier.Algorithm.String())
+	licenses := identifier.Database.Entries(identifier.Comparator.String())
 	results := []*Result{}
 	for _, license := range licenses {
-		similarity := identifier.Algorithm.Compare(baseLicense, license)
+		similarity := identifier.Comparator.Compare(baseLicense, license)
 		results = append(results, &Result{Name: license.Name, Probability: similarity})
 	}
 	return filter(results, identifier.Threshold), nil

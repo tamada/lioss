@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestCreateAlgorithm(t *testing.T) {
+func TestCreateComparator(t *testing.T) {
 	testdata := []struct {
 		giveString  string
 		successFlag bool
@@ -16,12 +16,12 @@ func TestCreateAlgorithm(t *testing.T) {
 		{"tfidf", true},
 	}
 	for _, td := range testdata {
-		algorithm, err := CreateAlgorithm(td.giveString)
+		comparator, err := CreateComparator(td.giveString)
 		if (err == nil) != td.successFlag {
-			t.Errorf("Invalid result in CreateAlgorithm, wont %v", td.successFlag)
+			t.Errorf("Invalid result in CreateComparator, wont %v", td.successFlag)
 		}
-		if err == nil && algorithm.String() != td.giveString {
-			t.Errorf("invalid algorithm name, wont %s, got %s", td.giveString, algorithm.String())
+		if err == nil && comparator.String() != td.giveString {
+			t.Errorf("invalid comparator name, wont %s, got %s", td.giveString, comparator.String())
 		}
 	}
 }

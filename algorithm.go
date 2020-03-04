@@ -9,9 +9,9 @@ import (
 )
 
 /*
-Algorithm shows an algorithm for identifying the license.
+Comparator shows an algorithm for identifying the license.
 */
-type Algorithm interface {
+type Comparator interface {
 	Prepare(db *Database) error
 	Parse(reader io.Reader, licenseName string) (*License, error)
 	Compare(license1, license2 *License) float64
@@ -19,10 +19,10 @@ type Algorithm interface {
 }
 
 /*
-CreateAlgorithm create an instance of Algorithm.
+CreateComparator create an instance of Algorithm.
 Available values are [1-9]gram, and tfidf.
 */
-func CreateAlgorithm(name string) (Algorithm, error) {
+func CreateComparator(name string) (Comparator, error) {
 	lowerName := strings.ToLower(name)
 	if strings.HasSuffix(lowerName, "gram") {
 		nString := strings.Replace(lowerName, "gram", "", -1)
