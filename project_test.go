@@ -14,7 +14,7 @@ func TestIsLicenseFile(t *testing.T) {
 	}
 
 	for _, td := range testdata {
-		if isLicenseFile(td.giveName) != td.wontFlag {
+		if IsLicenseFile(td.giveName) != td.wontFlag {
 			t.Errorf("isLicenseFile(%s) wont %v, but %v", td.giveName, td.wontFlag, !td.wontFlag)
 		}
 	}
@@ -29,10 +29,12 @@ func TestFindLicenseFile(t *testing.T) {
 		{"testdata/project2", []string{"license.txt"}},
 		{"testdata/project3", []string{"license", "subproject/license"}},
 		{"testdata/project4", []string{}},
+		{"testdata/project3.jar", []string{"project3/license", "project3/subproject/license"}},
 	}
 
 	for _, td := range testdata {
-		project := NewBasicProject(td.basePath)
+		project, _ := NewProject(td.basePath)
+		defer project.Close()
 		if len(project.LicenseIDs()) != len(td.licensePaths) {
 			t.Errorf("%s: length of license path did not match, wont %d, got %d", td.basePath, len(td.licensePaths), len(project.LicenseIDs()))
 		}

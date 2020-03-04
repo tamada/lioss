@@ -62,7 +62,8 @@ func identifyLicense(identifier *lioss.Identifier, project lioss.Project, id str
 }
 
 func performEach(identifier *lioss.Identifier, arg string, opts *options) {
-	project := lioss.NewBasicProject(arg)
+	project := lioss.NewDirProject(arg)
+	defer project.Close()
 	for _, id := range project.LicenseIDs() {
 		results, err := identifyLicense(identifier, project, id)
 		if err != nil {
