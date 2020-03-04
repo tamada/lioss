@@ -21,6 +21,13 @@ func NewNGram(n int) *NGram {
 	return ngram
 }
 
+/*
+Prepare of NGram do nothing.
+*/
+func (ngram *NGram) Prepare(db *Database) error {
+	return nil
+}
+
 func (ngram *NGram) String() string {
 	return fmt.Sprintf("%dgram", ngram.nValue)
 }

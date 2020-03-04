@@ -15,7 +15,7 @@ func TestRun(t *testing.T) {
 	if err != nil {
 		t.Errorf("load failed: %s", err.Error())
 	}
-	if len(db.Data) != 10 {
+	if len(db.Data) != 11 {
 		t.Errorf("database did not fully outputed")
 	}
 }

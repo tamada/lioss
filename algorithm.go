@@ -12,6 +12,7 @@ import (
 Algorithm shows an algorithm for identifying the license.
 */
 type Algorithm interface {
+	Prepare(db *Database) error
 	Parse(reader io.Reader, licenseName string) (*License, error)
 	Compare(license1, license2 *License) float64
 	String() string

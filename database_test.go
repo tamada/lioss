@@ -10,12 +10,12 @@ func TestLoadDatabase(t *testing.T) {
 	if err != nil {
 		t.Errorf("error on LoadDatabase: %s", err.Error())
 	}
-	if len(db.Data) != 10 {
-		t.Errorf("size of loaded database did not match, wont %d, got %d", 10, len(db.Data))
+	if len(db.Data) != 11 {
+		t.Errorf("size of loaded database did not match, wont %d, got %d", 11, len(db.Data))
 	}
 	entries := db.Entries("5gram")
-	if len(entries) != 20 {
-		t.Errorf("size of 5gram entries did not match, wont %d, got %d", 20, len(entries))
+	if len(entries) != 23 {
+		t.Errorf("size of 5gram entries did not match, wont %d, got %d", 23, len(entries))
 	}
 }
 
@@ -87,8 +87,8 @@ func TestPutLicenseTo5GramWithNotContainedLicense(t *testing.T) {
 		t.Errorf("put license found (2gram/NYSL).")
 	}
 	items := db.Entries("5gram")
-	if len(items) != 21 {
-		t.Errorf("size of license did not match (unknown), wont 21, got %d", len(items))
+	if len(items) != 24 {
+		t.Errorf("size of license did not match (unknown), wont 24, got %d", len(items))
 	}
 	item := db.Entry("5gram", "NYSL")
 	if item == nil || len(item.Frequencies) != 4 {
@@ -107,8 +107,8 @@ func TestReplaceLicenseData(t *testing.T) {
 		t.Errorf("put license did not found (5gram/GPLv3.0).")
 	}
 	items := db.Entries("5gram")
-	if len(items) != 20 {
-		t.Errorf("size of license did not match (unknown), wont 20, got %d", len(items))
+	if len(items) != 23 {
+		t.Errorf("size of license did not match (unknown), wont 23, got %d", len(items))
 	}
 	item := db.Entry("5gram", "GPLv3.0")
 	if item == nil || len(item.Frequencies) != 4 {

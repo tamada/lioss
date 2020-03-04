@@ -18,11 +18,18 @@ func NewWordFreq() *WordFreq {
 	return new(WordFreq)
 }
 
-func (ngram *WordFreq) String() string {
+func (wfreq *WordFreq) String() string {
 	return "wordfreq"
 }
 
-func preprocess(str string) string {
+/*
+Prepare of WordFreq do nothing.
+*/
+func (wfreq *WordFreq) Prepare(db *Database) error {
+	return nil
+}
+
+func preprocessForWordFreq(str string) string {
 	str = strings.ReplaceAll(str, ".", "")
 	str = strings.ReplaceAll(str, ",", "")
 	str = strings.ReplaceAll(str, ";", "")
@@ -38,7 +45,9 @@ func preprocess(str string) string {
 	return strings.ToLower(str)
 }
 
-func buildLicense(licenseName string, words []string) (*License, error) {
+func BuildWordFreqLicense(licenseName string, document string) (*License, error) {
+	document = preprocessForWordFreq(document)
+	words := strings.Split(document, " ")
 	freq := map[string]int{}
 	for _, word := range words {
 		count, ok := freq[word]
@@ -53,18 +62,17 @@ func buildLicense(licenseName string, words []string) (*License, error) {
 /*
 Parse parses given data and create an instance of License by n-gram.
 */
-func (ngram *WordFreq) Parse(reader io.Reader, licenseName string) (*License, error) {
+func (wfreq *WordFreq) Parse(reader io.Reader, licenseName string) (*License, error) {
 	result, err := readFully(reader)
 	if err != nil {
 		return nil, err
 	}
-	result = preprocess(result)
-	return buildLicense(licenseName, strings.Split(result, " "))
+	return BuildWordFreqLicense(licenseName, result)
 }
 
 /*
 Compare computes similarity between given two licenses.
 */
-func (ngram *WordFreq) Compare(license1, license2 *License) float64 {
+func (wfreq *WordFreq) Compare(license1, license2 *License) float64 {
 	return license1.Similarity(license2)
 }

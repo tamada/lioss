@@ -27,6 +27,14 @@ func extractKeys(license1, license2 *License) map[string]int {
 	return keys
 }
 
+func (license *License) total() int {
+	sum := 0
+	for _, count := range license.Frequencies {
+		sum += count
+	}
+	return sum
+}
+
 /*
 Similarity calculates the similarity between license and other by cosine similarity.
 */

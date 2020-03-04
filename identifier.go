@@ -34,6 +34,7 @@ func NewIdentifier(algorithmName string, threshold float64, db *Database) (*Iden
 	}
 	identifier.Algorithm = algorithm
 	identifier.Database = db
+	algorithm.Prepare(db)
 	return identifier, nil
 }
 

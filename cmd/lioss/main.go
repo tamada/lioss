@@ -96,7 +96,7 @@ func buildFlagSet() (*flag.FlagSet, *options) {
 	var flags = flag.NewFlagSet("lioss", flag.ContinueOnError)
 	flags.Usage = func() { printHelp("lioss") }
 	flags.BoolVarP(&opts.helpFlag, "help", "h", false, "print this message")
-	flags.StringVarP(&opts.dbpath, "dbpath", "d", "liossdb.json", "specifies database path")
+	flags.StringVarP(&opts.dbpath, "dbpath", "d", "testdata/liossdb.json", "specifies database path")
 	flags.StringVarP(&opts.algorithm, "algorithm", "a", "5gram", "specifies algorithm")
 	flags.Float64VarP(&opts.threshold, "threshold", "t", 0.75, "specifies threshold")
 	return flags, opts
