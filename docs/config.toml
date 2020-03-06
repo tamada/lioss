@@ -1,0 +1,35 @@
+baseURL = "https://tamada.github.io/lioss"
+languageCode = "en-us"
+title = "Lioss: License Identifier for OSS"
+theme = "cayman-hugo-theme"
+enableEmoji = true
+
+pygmentsCodefences = true
+pygmentsStyle = "pygments"
+
+[params]
+    project_name = "lioss"
+    project_tagline = "Identifying OSS license name from LICENSE file."
+    dateFormat = "2006-01-02"
+
+    footer = "[![GitHub](https://img.shields.io/badge/GitHub-tamada/lioss-blueviolet.svg?logo=github)](https://github.com/tamada/lioss). Made with [Hugo](https://gohugo.io/). Theme by [Cayman](https://github.com/zwbetz-gh/cayman-hugo-theme). Deployed to [GitHub Pages](https://pages.github.com/)."
+
+    katex = true
+
+[menu]
+    [[menu.nav]]
+        name = "Home"
+        url = "/"
+        weight = 1
+    [[menu.nav]]
+        name = "Usage"
+        url = "/usage/"
+        weight = 2
+    [[menu.nav]]
+        name = "Install"
+        url = "/install/"
+        weight = 3
+    [[menu.nav]]
+        name = "About"
+        url = "/about/"
+        weight = 10
