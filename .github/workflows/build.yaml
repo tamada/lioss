@@ -24,5 +24,6 @@ jobs:
             - name: coveralls
               uses: coverallsapp/github-action@v1.0.1
               with:
-                  - github_token: ${{ secrets.github_token }}
+                  github_token: ${{ secrets.github_token }}
+                  path-to-lcov: coverage.lcov
               if: "matrix.os == 'ubuntu-latest'"
