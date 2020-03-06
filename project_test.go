@@ -16,7 +16,7 @@ func TestRemoveBasePath(t *testing.T) {
 	}
 	for _, td := range testdata {
 		gotResult := removeBasePath(td.giveBasePath, td.givePath)
-		if gotResult != td.wontResult {
+		if !IsSamePath(gotResult, td.wontResult) {
 			t.Errorf("result of removeBasePath(%s, %s) did not match, wont %s, got %s", td.giveBasePath, td.givePath, td.wontResult, gotResult)
 		}
 	}
