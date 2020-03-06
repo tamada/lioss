@@ -79,13 +79,45 @@ func findLicenseFileInDir(project *DirProject) {
 	})
 }
 
-func removeBasePath(basePath, path string) string {
-	newPath := path
-	if filepath.HasPrefix(path, basePath) {
-		relPath, err := filepath.Rel(basePath, path)
-		if err == nil {
-			newPath = relPath
+func min(slice1, slice2 []string) int {
+	length1 := len(slice1)
+	length2 := len(slice2)
+	if length1 < length2 {
+		return length1
+	}
+	return length2
+}
+
+func reverse(slice []string) []string {
+	results := []string{}
+	for i := len(slice) - 1; i >= 0; i-- {
+		results = append(results, slice[i])
+	}
+	return results
+}
+
+func filepathToSlice(originalPath string) []string {
+	results := []string{}
+	path := originalPath
+	for path != "." {
+		base := filepath.Base(path)
+		path = filepath.Dir(path)
+		results = append(results, base)
+	}
+	return reverse(results)
+}
+
+func removeBasePath(basePath, targetPath string) string {
+	bases := filepathToSlice(basePath)
+	paths := filepathToSlice(targetPath)
+	length := min(bases, paths)
+	index := length
+
+	for i := 0; i < length; i++ {
+		if bases[i] != paths[i] {
+			index = i
+			break
 		}
 	}
-	return newPath
+	return filepath.Join(paths[index:]...)
 }

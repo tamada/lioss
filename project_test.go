@@ -2,6 +2,26 @@ package lioss
 
 import "testing"
 
+func TestRemoveBasePath(t *testing.T) {
+	testdata := []struct {
+		giveBasePath string
+		givePath     string
+		wontResult   string
+	}{
+		{"./testdata/project1", "./testdata/project1/LICENSE", "LICENSE"},
+		{"./testdata/project1", "testdata/project1/LICENSE", "LICENSE"},
+		{"testdata/project1", "./testdata/project1/LICENSE", "LICENSE"},
+		{"testdata/project3", "testdata/project3/subproject/license", "subproject/license"},
+		{"testdata/project3/subproject", "testdata/project2", "project2"},
+	}
+	for _, td := range testdata {
+		gotResult := removeBasePath(td.giveBasePath, td.givePath)
+		if gotResult != td.wontResult {
+			t.Errorf("result of removeBasePath(%s, %s) did not match, wont %s, got %s", td.giveBasePath, td.givePath, td.wontResult, gotResult)
+		}
+	}
+}
+
 func TestIsLicenseFile(t *testing.T) {
 	testdata := []struct {
 		giveName string
