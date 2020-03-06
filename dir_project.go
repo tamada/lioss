@@ -4,7 +4,6 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"strings"
 )
 
 /*
@@ -61,8 +60,6 @@ func findLicenseFile(project *DirProject) {
 	}
 	if stats.IsDir() {
 		findLicenseFileInDir(project)
-	} else {
-		project.licensePaths = append(project.licensePaths, "")
 	}
 }
 
@@ -84,11 +81,11 @@ func findLicenseFileInDir(project *DirProject) {
 
 func removeBasePath(basePath, path string) string {
 	newPath := path
-	if strings.HasPrefix(path, basePath) {
-		newPath = strings.Replace(path, basePath, "", -1)
-	}
-	if strings.HasPrefix(newPath, "/") {
-		newPath = newPath[1:]
+	if filepath.HasPrefix(path, basePath) {
+		relPath, err := filepath.Rel(basePath, path)
+		if err == nil {
+			newPath = relPath
+		}
 	}
 	return newPath
 }
