@@ -6,11 +6,12 @@ on:
 jobs:
     build:
         runs-on: ${{ matrix.os }}
-        matrix:
-            os:
-                - ubuntu-latest
-                - macOS-latest
-                - windows-latest
+        strategy:
+            matrix:
+                os:
+                    - ubuntu-latest
+                    - macOS-latest
+                    - windows-latest
         steps:
             - name: build
               run: make
