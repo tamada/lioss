@@ -18,6 +18,16 @@ type Comparator interface {
 	String() string
 }
 
+func createNGramComparator(name string) (Comparator, error) {
+	lowerName := strings.ToLower(name)
+	nString := strings.Replace(lowerName, "gram", "", -1)
+	value, err := strconv.Atoi(nString)
+	if err != nil {
+		return nil, fmt.Errorf("%s: invalid algorithm name, %s", name, err.Error())
+	}
+	return NewNGram(value), nil
+}
+
 /*
 CreateComparator create an instance of Algorithm.
 Available values are [1-9]gram, and tfidf.
@@ -25,12 +35,7 @@ Available values are [1-9]gram, and tfidf.
 func CreateComparator(name string) (Comparator, error) {
 	lowerName := strings.ToLower(name)
 	if strings.HasSuffix(lowerName, "gram") {
-		nString := strings.Replace(lowerName, "gram", "", -1)
-		value, err := strconv.Atoi(nString)
-		if err != nil {
-			return nil, fmt.Errorf("%s: invalid algorithm name, %s", name, err.Error())
-		}
-		return NewNGram(value), nil
+		return createNGramComparator(name)
 	} else if lowerName == "wordfreq" {
 		return NewWordFreq(), nil
 	} else if lowerName == "tfidf" {
