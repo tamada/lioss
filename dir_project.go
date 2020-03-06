@@ -107,6 +107,23 @@ func filepathToSlice(originalPath string) []string {
 	return reverse(results)
 }
 
+/*
+IsSamePath tests given two paths are the same.
+*/
+func IsSamePath(path1, path2 string) bool {
+	slice1 := filepathToSlice(path1)
+	slice2 := filepathToSlice(path2)
+	if len(slice1) != len(slice2) {
+		return false
+	}
+	for i := range slice1 {
+		if slice1[i] != slice2[i] {
+			return false
+		}
+	}
+	return true
+}
+
 func removeBasePath(basePath, targetPath string) string {
 	bases := filepathToSlice(basePath)
 	paths := filepathToSlice(targetPath)

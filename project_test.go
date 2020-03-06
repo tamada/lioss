@@ -59,7 +59,7 @@ func TestFindLicenseFile(t *testing.T) {
 			t.Errorf("%s: length of license path did not match, wont %d, got %d", td.basePath, len(td.licensePaths), len(project.LicenseIDs()))
 		}
 		for i, id := range project.LicenseIDs() {
-			if td.licensePaths[i] != id {
+			if !IsSamePath(td.licensePaths[i], id) {
 				t.Errorf("license did not match: wont %s, got %s", td.licensePaths[i], id)
 			}
 			file, err := project.LicenseFile(id)
