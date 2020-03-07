@@ -14,6 +14,7 @@ type Tfidf struct {
 
 type document struct {
 	name  string
+	inDB  bool
 	words map[string]*value
 }
 
@@ -48,10 +49,11 @@ func (doc *document) contains(word string) bool {
 }
 
 type value struct {
-	word  string
-	count int
-	tf    float64
-	idf   float64
+	word   string
+	count  int
+	tf     float64
+	idf    float64
+	tmpIdf float64
 }
 
 func (val *value) tfidf() float64 {
@@ -80,8 +82,12 @@ func (tfidf *Tfidf) countDocument(word string) int {
 }
 
 func calculateTfidf(tfidf *Tfidf, word string, count, total int) *value {
+	documentCount := tfidf.countDocument(word)
+	if documentCount == 0 {
+		return nil
+	}
 	value := &value{word: word, count: count, tf: float64(count) / float64(total)}
-	value.idf = math.Log(float64(len(tfidf.data))/float64(tfidf.countDocument(word))) + float64(1)
+	value.idf = math.Log(float64(len(tfidf.data))/float64(documentCount)) + float64(1)
 	return value
 }
 
@@ -96,7 +102,7 @@ func calculateAllOfTfidf(tfidf *Tfidf) {
 }
 
 func updateLicense(tfidf *Tfidf, license *License) {
-	doc := &document{name: license.Name, words: map[string]*value{}}
+	doc := &document{name: license.Name, words: map[string]*value{}, inDB: true}
 	for word, count := range license.Frequencies {
 		doc.words[word] = &value{word: word, count: count}
 	}
@@ -160,10 +166,13 @@ func findDocument(tfidf *Tfidf, license *License) *document {
 	if ok {
 		return doc
 	}
-	doc = &document{name: license.Name, words: map[string]*value{}}
+	doc = &document{name: license.Name, words: map[string]*value{}, inDB: false}
 	total := license.total()
 	for word, count := range license.Frequencies {
-		doc.words[word] = calculateTfidf(tfidf, word, count, total)
+		value := calculateTfidf(tfidf, word, count, total)
+		if value != nil {
+			doc.words[word] = value
+		}
 	}
 	return doc
 }
