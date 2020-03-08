@@ -1,6 +1,0 @@
-[submodule "docs/themes/dot"]
-	path = site/themes/dot
-	url = https://github.com/themefisher/dot.git
-[submodule "docs/themes/cayman-hugo-theme"]
-	path = site/themes/cayman-hugo-theme
-	url = https://github.com/zwbetz-gh/cayman-hugo-theme.git
