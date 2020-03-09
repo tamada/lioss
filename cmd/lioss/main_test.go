@@ -38,7 +38,7 @@ func Example_main() {
 func Example_printHelp() {
 	goMain([]string{"lioss", "--help"})
 	// Output:
-	// lioss version 1.0.0-beta
+	// lioss version 0.9.0
 	// lioss [OPTIONS] <PROJECTS...>
 	// OPTIONS
 	//         --dbpath <DBPATH>          specifying database path.

@@ -1,6 +1,6 @@
 GO := go
 NAME := lioss
-VERSION := 1.0.0-beta
+VERSION := 0.9.0
 DIST := $(NAME)-$(VERSION)
 
 all: test build
@@ -10,7 +10,7 @@ setup:
 
 update_version:
 	@for i in README.md site/content/_index.md; do\
-		sed -e 's!Version-[0-9.]*-yellowgreen!Version-${VERSION}-yellowgreen!g' -e 's!tag/v[0-9.]*!tag/v${VERSION}!g' $$i > a ; mv a $$i; \
+		sed -e 's!Version-[0-9.]-yellowgreen!Version-${VERSION}-yellowgreen!g' -e 's!tag/v[0-9.]*!tag/v${VERSION}!g' $$i > a ; mv a $$i; \
 	done
 	@sed 's/const VERSION = .*/const VERSION = "${VERSION}"/g' cmd/lioss/main.go > a ; mv a cmd/lioss/main.go
 	@echo "Replace version to \"${VERSION}\""
