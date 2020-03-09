@@ -63,13 +63,14 @@ func identifyLicense(identifier *lioss.Identifier, project lioss.Project, id str
 func performEach(identifier *lioss.Identifier, arg string, opts *options) {
 	project, err := lioss.NewProject(arg)
 	if err != nil {
+		fmt.Printf("%s\n", err.Error())
 		return
 	}
 	defer project.Close()
 	for _, id := range project.LicenseIDs() {
 		results, err := identifyLicense(identifier, project, id)
 		if err != nil {
-			fmt.Printf("%s/%s: %s", project.BasePath(), id, err.Error())
+			fmt.Printf("%s/%s: %s\n", project.BasePath(), id, err.Error())
 			continue
 		}
 		printResult(project, id, results)
@@ -105,19 +106,19 @@ func buildFlagSet() (*flag.FlagSet, *options) {
 	return flags, opts
 }
 
-func parseOptions(args []string) (*options, error) {
+func parseOptions(args []string) (*options, int, error) {
 	flags, opts := buildFlagSet()
 	if err := flags.Parse(args); err != nil {
-		return nil, err
+		return nil, 1, err
 	}
 	opts.args = flags.Args()[1:]
 	if opts.isHelpFlag() {
-		return opts, fmt.Errorf("%s", helpMessage(args[0]))
+		return opts, 0, fmt.Errorf("%s", helpMessage(args[0]))
 	}
 	if err := validateOptions(opts); err != nil {
-		return opts, err
+		return opts, 2, err
 	}
-	return opts, nil
+	return opts, 0, nil
 }
 
 func (opts *options) isHelpFlag() bool {
@@ -125,10 +126,10 @@ func (opts *options) isHelpFlag() bool {
 }
 
 func goMain(args []string) int {
-	opts, err := parseOptions(args)
+	opts, status, err := parseOptions(args)
 	if err != nil {
 		fmt.Println(err.Error())
-		return 0
+		return status
 	}
 	return perform(opts)
 }

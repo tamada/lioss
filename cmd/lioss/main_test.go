@@ -4,20 +4,24 @@ import "testing"
 
 func TestInvalidOptions(t *testing.T) {
 	testdata := []struct {
-		args      []string
-		errorFlag bool
-		message   string
+		args       []string
+		errorFlag  bool
+		wontStatus int
+		message    string
 	}{
-		{[]string{"lioss"}, true, "no arguments"},
-		{[]string{"lioss", "-a", "unknown"}, true, "unknown: unknown algorithm"},
-		{[]string{"lioss", "-t", "2.0"}, true, "2.000000: threshold must be 0.0 to 1.0"},
-		{[]string{"lioss", "--dbpath", "no/such/file", "../../LICENSE"}, true, "no/such/file: file not found"},
+		{[]string{"lioss"}, true, 2, "no arguments"},
+		{[]string{"lioss", "-a", "unknown"}, true, 2, "unknown: unknown algorithm"},
+		{[]string{"lioss", "-t", "2.0"}, true, 2, "2.000000: threshold must be 0.0 to 1.0"},
+		{[]string{"lioss", "--dbpath", "no/such/file", "../../LICENSE"}, true, 2, "no/such/file: file not found"},
 	}
 
 	for _, td := range testdata {
-		_, err := parseOptions(td.args)
+		_, gotStatus, err := parseOptions(td.args)
 		if (err != nil) != td.errorFlag {
 			t.Errorf("result of parseOptions(%v) did not match, wont error: %v", td.args, td.errorFlag)
+		}
+		if gotStatus != td.wontStatus {
+			t.Errorf("status code of parseOptions(%v) did not match, wont %d, got %d", td.args, td.wontStatus, gotStatus)
 		}
 		if err != nil && err.Error() != td.message {
 			t.Errorf("error message of parseOptions(%v) did not match, wont %s, got %s", td.args, td.message, err.Error())
@@ -45,14 +49,28 @@ func TestContains(t *testing.T) {
 	}
 }
 
-func Example_main() {
-	goMain([]string{"lioss", "--dbpath", "../../testdata/liossdb.json", "--algorithm", "6gram", "../../testdata/project3.jar", "../../testdata/project4"})
+func Example_invalidDBPath() {
+	goMain([]string{"lioss", "--dbpath", "../../testdata/invalid.json", "../../LICENSE"})
+	// Output:
+	// ../../testdata/invalid.json: unexpected end of JSON input
+}
+
+func Example_invalidCLIOptions() {
+	goMain([]string{"lioss", "--unknown"})
+	// Output:
+	// unknown flag: --unknown
+
+}
+
+func Example_lioss() {
+	goMain([]string{"lioss", "--dbpath", "../../testdata/liossdb.json", "--algorithm", "6gram", "../../testdata/project3.jar", "../../testdata/project4", "main.go"})
 	// Output:
 	// ../../testdata/project3.jar/project3/license
 	// 	Apache-License-2.0 (1.0000)
 	// ../../testdata/project3.jar/project3/subproject/license
 	// 	BSD (1.0000)
 	// ../../testdata/project4: license file not found
+	// main.go: unknown project format
 }
 
 func Example_printHelp() {
