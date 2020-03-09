@@ -6,6 +6,24 @@ import (
 	"testing"
 )
 
+func TestNewIdentifier(t *testing.T) {
+	testdata := []struct {
+		algorithm   string
+		threshold   float64
+		successFlag bool
+	}{
+		{"5gram", 0.75, true},
+		{"unknown", 0.75, false},
+	}
+	db, _ := LoadDatabase("testdata/liossdb.json")
+	for _, td := range testdata {
+		_, err := NewIdentifier(td.algorithm, td.threshold, db)
+		if (err == nil) != td.successFlag {
+			t.Errorf("NewIdentifier(%s, %f) did not match, wont %v", td.algorithm, td.threshold, td.successFlag)
+		}
+	}
+}
+
 func TestIdentifier(t *testing.T) {
 	testdata := []struct {
 		algorithm   string

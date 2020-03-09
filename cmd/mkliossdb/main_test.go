@@ -20,6 +20,26 @@ func TestRun(t *testing.T) {
 	}
 }
 
+func TestIsHelpFlag(t *testing.T) {
+	testdata := []struct {
+		args         []string
+		wontHelpFlag bool
+	}{
+		{[]string{"mkliossdb", "-h"}, true},
+		{[]string{"mkliossdb"}, true},
+		{[]string{"mkliossdb", "../../data"}, false},
+	}
+	for _, td := range testdata {
+		opts, err := parseOptions(td.args)
+		if err != nil {
+			t.Errorf("parseOptions(%v) parse error: %s", td.args, err.Error())
+		}
+		if opts.isHelpFlag() != td.wontHelpFlag {
+			t.Errorf("opts.isHelpFlag() of parseOptions(%v) did not match, wont %v", td.args, td.wontHelpFlag)
+		}
+	}
+}
+
 func Example_pritHelp() {
 	goMain([]string{})
 	// Output:
