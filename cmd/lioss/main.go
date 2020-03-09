@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	flag "github.com/spf13/pflag"
 	"github.com/tamada/lioss"
@@ -12,7 +11,10 @@ import (
 /*
 VERSION shows the version of the lioss.
 */
-const VERSION = "1.0.0"
+const VERSION = "0.9.0"
+
+const defaultDBPath = "testdata/liossdb.json"
+const dbpathEnvName = "LIOSS_DBPATH"
 
 type options struct {
 	helpFlag  bool
@@ -22,8 +24,8 @@ type options struct {
 	args      []string
 }
 
-func printHelp(appName string) {
-	fmt.Printf(`%s version %s
+func helpMessage(appName string) string {
+	return fmt.Sprintf(`%s version %s
 %s [OPTIONS] <PROJECTS...>
 OPTIONS
         --dbpath <DBPATH>          specifying database path.
@@ -64,13 +66,14 @@ func identifyLicense(identifier *lioss.Identifier, project lioss.Project, id str
 func performEach(identifier *lioss.Identifier, arg string, opts *options) {
 	project, err := lioss.NewProject(arg)
 	if err != nil {
+		fmt.Printf("%s\n", err.Error())
 		return
 	}
 	defer project.Close()
 	for _, id := range project.LicenseIDs() {
 		results, err := identifyLicense(identifier, project, id)
 		if err != nil {
-			fmt.Printf("%s/%s: %s", project.BasePath(), id, err.Error())
+			fmt.Printf("%s/%s: %s\n", project.BasePath(), id, err.Error())
 			continue
 		}
 		printResult(project, id, results)
@@ -78,6 +81,15 @@ func performEach(identifier *lioss.Identifier, arg string, opts *options) {
 	if len(project.LicenseIDs()) == 0 {
 		fmt.Printf("%s: license file not found\n", project.BasePath())
 	}
+}
+
+func databasePath(dbpath string) string {
+	if dbpath == defaultDBPath || dbpath == "" {
+		if envValue := os.Getenv(dbpathEnvName); envValue != "" {
+			return envValue
+		}
+	}
+	return dbpath
 }
 
 func perform(opts *options) int {
@@ -98,66 +110,39 @@ func perform(opts *options) int {
 func buildFlagSet() (*flag.FlagSet, *options) {
 	var opts = new(options)
 	var flags = flag.NewFlagSet("lioss", flag.ContinueOnError)
-	flags.Usage = func() { printHelp("lioss") }
+	flags.Usage = func() { fmt.Println(helpMessage("lioss")) }
 	flags.BoolVarP(&opts.helpFlag, "help", "h", false, "print this message")
-	flags.StringVarP(&opts.dbpath, "dbpath", "d", "testdata/liossdb.json", "specifies database path")
+	flags.StringVarP(&opts.dbpath, "dbpath", "d", defaultDBPath, "specifies database path")
 	flags.StringVarP(&opts.algorithm, "algorithm", "a", "5gram", "specifies algorithm")
 	flags.Float64VarP(&opts.threshold, "threshold", "t", 0.75, "specifies threshold")
 	return flags, opts
 }
 
-func existsFile(filename string) bool {
-	_, err := os.Stat(filename)
-	return err == nil
-}
-
-func contains(word string, set []string) bool {
-	for _, item := range set {
-		if word == item {
-			return true
-		}
-	}
-	return false
-}
-
-func validateOptions(opts *options) error {
-	if !contains(opts.algorithm, []string{"tfidf", "wordfreq"}) && !strings.HasSuffix(opts.algorithm, "gram") {
-		return fmt.Errorf("%s: unknown algorithm", opts.algorithm)
-	}
-	if opts.threshold < 0.0 || opts.threshold > 1.0 {
-		return fmt.Errorf("%f: threshold must be 0.0 to 1.0", opts.threshold)
-	}
-	if !existsFile(opts.dbpath) {
-		return fmt.Errorf("%s: file not found", opts.dbpath)
-	}
-	return nil
-}
-
-func parseOptions(args []string) (*options, error) {
+func parseOptions(args []string) (*options, int, error) {
 	flags, opts := buildFlagSet()
 	if err := flags.Parse(args); err != nil {
-		return nil, err
-	}
-	if err := validateOptions(opts); err != nil {
-		return opts, err
+		return nil, 1, err
 	}
 	opts.args = flags.Args()[1:]
-	return opts, nil
+	if opts.isHelpFlag() {
+		return opts, 0, fmt.Errorf("%s", helpMessage(args[0]))
+	}
+	opts.dbpath = databasePath(opts.dbpath)
+	if err := validateOptions(opts); err != nil {
+		return opts, 2, err
+	}
+	return opts, 0, nil
 }
 
 func (opts *options) isHelpFlag() bool {
-	return opts.helpFlag || len(opts.args) == 0
+	return opts.helpFlag
 }
 
 func goMain(args []string) int {
-	opts, err := parseOptions(args)
+	opts, status, err := parseOptions(args)
 	if err != nil {
 		fmt.Println(err.Error())
-		return 1
-	}
-	if opts.isHelpFlag() {
-		printHelp(args[0])
-		return 0
+		return status
 	}
 	return perform(opts)
 }

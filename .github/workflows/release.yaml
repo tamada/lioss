@@ -1,0 +1,26 @@
+name: release
+on:
+    push:
+        tags:
+            - "v[0-9]+.[0-9]+.[0-9]+(-.*)?"
+jobs:
+    release:
+        runs-on: ubuntu-latest
+        steps:
+            - name: setup go
+              uses: actions/setup-go@v1
+              with:
+                  go-version: 1.14
+            - name: checkout
+              uses: actions/checkout@v1
+            - name: create_dist
+              run: make dist
+            - name: Create Release
+              uses: actions/create-release@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  tag_name: ${{ github.ref }}
+                  release_name: Release ${{ github.ref }}
+                  draft: false
+                  prerelease: false

@@ -80,8 +80,12 @@ func (tfidf *Tfidf) countDocument(word string) int {
 }
 
 func calculateTfidf(tfidf *Tfidf, word string, count, total int) *value {
+	documentCount := tfidf.countDocument(word)
+	if documentCount == 0 {
+		return nil
+	}
 	value := &value{word: word, count: count, tf: float64(count) / float64(total)}
-	value.idf = math.Log(float64(len(tfidf.data))/float64(tfidf.countDocument(word))) + float64(1)
+	value.idf = math.Log(float64(len(tfidf.data))/float64(documentCount)) + float64(1)
 	return value
 }
 
@@ -163,7 +167,10 @@ func findDocument(tfidf *Tfidf, license *License) *document {
 	doc = &document{name: license.Name, words: map[string]*value{}}
 	total := license.total()
 	for word, count := range license.Frequencies {
-		doc.words[word] = calculateTfidf(tfidf, word, count, total)
+		value := calculateTfidf(tfidf, word, count, total)
+		if value != nil {
+			doc.words[word] = value
+		}
 	}
 	return doc
 }

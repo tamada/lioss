@@ -49,20 +49,20 @@ func LoadDatabase(path string) (*Database, error) {
 		return nil, err
 	}
 	defer reader.Close()
-	return Load(reader)
+	return Load(reader, path)
 }
 
 /*
 Load reads database from given reader.
 */
-func Load(reader io.Reader) (*Database, error) {
+func Load(reader io.Reader, name string) (*Database, error) {
 	data, err := ioutil.ReadAll(reader)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%s: %s", name, err.Error())
 	}
 	db := NewDatabase()
 	if err := json.Unmarshal(data, &db); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%s: %s", name, err.Error())
 	}
 	return db, nil
 }

@@ -32,7 +32,7 @@ func TestWriteLoad(t *testing.T) {
 	db.Put("1gram", license)
 	buffer := bytes.NewBuffer([]byte{})
 	db.Write(buffer)
-	db2, _ := Load(buffer)
+	db2, _ := Load(buffer, "memory")
 	if len(db2.Data) != 1 {
 		t.Errorf("db write/load error, wont len(db2.Data) == %d, got %d", 1, len(db2.Data))
 	}

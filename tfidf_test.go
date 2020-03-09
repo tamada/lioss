@@ -1,9 +1,65 @@
 package lioss
 
 import (
+	"io/ioutil"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
+
+func readAllLicenses(tfidf Comparator, fromDir string) []*License {
+	licenses := []*License{}
+	files, _ := ioutil.ReadDir(fromDir)
+	for _, file := range files {
+		path := filepath.Join(fromDir, file.Name())
+		reader, _ := os.Open(path)
+		defer reader.Close()
+		license, _ := tfidf.Parse(reader, file.Name())
+		licenses = append(licenses, license)
+	}
+	return licenses
+}
+
+func CreateDB(tfidf Comparator, fromDir, toPath string) *Database {
+	licenses := readAllLicenses(tfidf, fromDir)
+	db := NewDatabase()
+	db.Data = map[string][]*License{}
+	db.Data["tfidf"] = licenses
+	writer, _ := os.OpenFile(toPath, os.O_CREATE|os.O_WRONLY, 0644)
+	defer writer.Close()
+	db.Write(writer)
+	return db
+}
+
+func createLicenseFromFile(tfidf Comparator, path string) *License {
+	reader, _ := os.Open(path)
+	defer reader.Close()
+	license, _ := tfidf.Parse(reader, "")
+	return license
+}
+
+func TestCompare(t *testing.T) {
+	tfidf := NewTfidf()
+	db := CreateDB(tfidf, "data", "tfidf.json")
+	defer os.Remove("tfidf.json")
+	tfidf.Prepare(db)
+	testdata := []struct {
+		license        string
+		path           string
+		wontSimilarity float64
+	}{
+		{"MIT", "data/MIT", 0.99},
+		{"WTFPL", "data/WTFPL", 0.95},
+		{"WTFPL", "LICENSE", 0.9},
+	}
+	for _, td := range testdata {
+		gotSimilarity := tfidf.Compare(&License{Name: td.license}, createLicenseFromFile(tfidf, td.path))
+		if gotSimilarity < td.wontSimilarity {
+			t.Errorf("tfidf.Compare(%s, %s) is less than %f, was %f", td.license, td.path, td.wontSimilarity, gotSimilarity)
+		}
+	}
+}
 
 func TestStoreTfidfData(t *testing.T) {
 	testdata := []struct {

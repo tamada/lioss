@@ -31,6 +31,7 @@ func TestIsLicenseFile(t *testing.T) {
 		{"license.txt", true},
 		{"License.html", true},
 		{"LicenseAnalyzer.java", false},
+		{"SomeLicense", false},
 	}
 
 	for _, td := range testdata {
@@ -50,6 +51,7 @@ func TestFindLicenseFile(t *testing.T) {
 		{"testdata/project3", []string{"license", "subproject/license"}},
 		{"testdata/project4", []string{}},
 		{"testdata/project3.jar", []string{"project3/license", "project3/subproject/license"}},
+		{"LICENSE", []string{"LICENSE"}},
 	}
 
 	for _, td := range testdata {
