@@ -12,6 +12,7 @@ update_version:
 	@for i in README.md site/content/_index.md; do\
 		sed -e 's!Version-[0-9.]-yellowgreen!Version-${VERSION}-yellowgreen!g' -e 's!tag/v[0-9.]*!tag/v${VERSION}!g' $$i > a ; mv a $$i; \
 	done
+	@sed 's/ARG version=".*"/ARG version="${VERSION}"/g' Dockerfile > a ; mv a Dockerfile
 	@sed 's/const VERSION = .*/const VERSION = "${VERSION}"/g' cmd/lioss/main.go > a ; mv a cmd/lioss/main.go
 	@echo "Replace version to \"${VERSION}\""
 
@@ -32,21 +33,21 @@ build: test
 	$(GO) build -o mkliossdb -v cmd/mkliossdb/main.go
 
 define _createDist
-	mkdir -p dist/$(1)_$(2)/$(DIST)
-	GOOS=$1 GOARCH=$2 go build -o dist/$(1)_$(2)/$(DIST)/lioss cmd/lioss/main.go
-	GOOS=$1 GOARCH=$2 go build -o dist/$(1)_$(2)/$(DIST)/mkliossdb cmd/mkliossdb/main.go
+	mkdir -p dist/$(1)_$(2)/$(DIST)/testdata
+	GOOS=$1 GOARCH=$2 go build -o dist/$(1)_$(2)/$(DIST)/lioss$(3) cmd/lioss/main.go
+	GOOS=$1 GOARCH=$2 go build -o dist/$(1)_$(2)/$(DIST)/mkliossdb$(3) cmd/mkliossdb/main.go
 	cp -r README.md LICENSE dist/$(1)_$(2)/$(DIST)
-	cp testdata/liossdb.json dist/$(1)_$(2)/$(DIST)
+	cp testdata/liossdb.json dist/$(1)_$(2)/$(DIST)/testdata
 	tar cfz dist/$(DIST)_$(1)_$(2).tar.gz -C dist/$(1)_$(2) $(DIST)
 endef
 
 dist:
-	@$(call _createDist,darwin,386)
-	@$(call _createDist,darwin,amd64)
-	@$(call _createDist,windows,amd64)
-	@$(call _createDist,windows,386)
-	@$(call _createDist,linux,amd64)
-	@$(call _createDist,linux,386)
+	@$(call _createDist,darwin,386,)
+	@$(call _createDist,darwin,amd64,)
+	@$(call _createDist,windows,amd64,.exe)
+	@$(call _createDist,windows,386,exe)
+	@$(call _createDist,linux,amd64,)
+	@$(call _createDist,linux,386,)
 
 clean:
 	$(GO) clean

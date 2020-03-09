@@ -25,6 +25,26 @@ func TestInvalidOptions(t *testing.T) {
 	}
 }
 
+func TestContains(t *testing.T) {
+	testdata := []struct {
+		item     string
+		set      []string
+		wontFlag bool
+	}{
+		{"a", []string{"a", "b", "c"}, true},
+		{"b", []string{"a", "b", "c"}, true},
+		{"c", []string{"a", "b", "c"}, true},
+		{"d", []string{"a", "b", "c"}, false},
+		{"abc", []string{"a", "b", "c"}, false},
+	}
+	for _, td := range testdata {
+		gotFlag := contains(td.item, td.set)
+		if gotFlag != td.wontFlag {
+			t.Errorf("contains(%s, %v), wont %v, got %v", td.item, td.set, td.wontFlag, gotFlag)
+		}
+	}
+}
+
 func Example_main() {
 	goMain([]string{"lioss", "--dbpath", "../../testdata/liossdb.json", "--algorithm", "6gram", "../../testdata/project3.jar", "../../testdata/project4"})
 	// Output:

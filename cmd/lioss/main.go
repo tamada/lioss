@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	flag "github.com/spf13/pflag"
 	"github.com/tamada/lioss"
@@ -104,36 +103,6 @@ func buildFlagSet() (*flag.FlagSet, *options) {
 	flags.StringVarP(&opts.algorithm, "algorithm", "a", "5gram", "specifies algorithm")
 	flags.Float64VarP(&opts.threshold, "threshold", "t", 0.75, "specifies threshold")
 	return flags, opts
-}
-
-func existsFile(filename string) bool {
-	_, err := os.Stat(filename)
-	return err == nil
-}
-
-func contains(word string, set []string) bool {
-	for _, item := range set {
-		if word == item {
-			return true
-		}
-	}
-	return false
-}
-
-func validateOptions(opts *options) error {
-	if !contains(opts.algorithm, []string{"tfidf", "wordfreq"}) && !strings.HasSuffix(opts.algorithm, "gram") {
-		return fmt.Errorf("%s: unknown algorithm", opts.algorithm)
-	}
-	if opts.threshold < 0.0 || opts.threshold > 1.0 {
-		return fmt.Errorf("%f: threshold must be 0.0 to 1.0", opts.threshold)
-	}
-	if len(opts.args) == 0 {
-		return fmt.Errorf("no arguments")
-	}
-	if !existsFile(opts.dbpath) {
-		return fmt.Errorf("%s: file not found", opts.dbpath)
-	}
-	return nil
 }
 
 func parseOptions(args []string) (*options, error) {
