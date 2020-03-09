@@ -93,7 +93,7 @@ func databasePath(dbpath string) string {
 }
 
 func perform(opts *options) int {
-	db, err := lioss.LoadDatabase(databasePath(opts.dbpath))
+	db, err := lioss.LoadDatabase(opts.dbpath)
 	if err != nil {
 		return printErrors(err, 1)
 	}
@@ -127,6 +127,7 @@ func parseOptions(args []string) (*options, int, error) {
 	if opts.isHelpFlag() {
 		return opts, 0, fmt.Errorf("%s", helpMessage(args[0]))
 	}
+	opts.dbpath = databasePath(opts.dbpath)
 	if err := validateOptions(opts); err != nil {
 		return opts, 2, err
 	}
