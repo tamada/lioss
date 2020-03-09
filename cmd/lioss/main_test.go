@@ -1,6 +1,33 @@
 package main
 
-import "testing"
+import (
+	"os"
+	"testing"
+)
+
+func TestDatabasePath(t *testing.T) {
+	testdata := []struct {
+		envPath  string
+		givePath string
+		wontPath string
+	}{
+		{"", "testdata/liossdb.json", "testdata/liossdb.json"},
+		{"envpath", "testdata/liossdb.json", "envpath"},
+		{"envpath", "", "envpath"},
+		{"envpath", "argspath", "argspath"},
+	}
+
+	for _, td := range testdata {
+		if td.envPath != "" {
+			os.Setenv(dbpathEnvName, td.envPath)
+			defer os.Unsetenv(dbpathEnvName)
+		}
+		gotPath := databasePath(td.givePath)
+		if gotPath != td.wontPath {
+			t.Errorf("databasePath(%s) did not match, wont %s, got %s", td.givePath, td.wontPath, gotPath)
+		}
+	}
+}
 
 func TestInvalidOptions(t *testing.T) {
 	testdata := []struct {

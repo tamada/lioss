@@ -33,11 +33,11 @@ build: test
 	$(GO) build -o mkliossdb -v cmd/mkliossdb/main.go
 
 define _createDist
-	mkdir -p dist/$(1)_$(2)/$(DIST)/testdata
+	mkdir -p dist/$(1)_$(2)/$(DIST)
 	GOOS=$1 GOARCH=$2 go build -o dist/$(1)_$(2)/$(DIST)/lioss$(3) cmd/lioss/main.go cmd/lioss/validator.go
 	GOOS=$1 GOARCH=$2 go build -o dist/$(1)_$(2)/$(DIST)/mkliossdb$(3) cmd/mkliossdb/main.go
 	cp -r README.md LICENSE dist/$(1)_$(2)/$(DIST)
-	cp testdata/liossdb.json dist/$(1)_$(2)/$(DIST)/testdata
+	cp testdata/liossdb.json dist/$(1)_$(2)/$(DIST)
 	tar cfz dist/$(DIST)_$(1)_$(2).tar.gz -C dist/$(1)_$(2) $(DIST)
 endef
 

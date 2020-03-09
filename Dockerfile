@@ -15,7 +15,8 @@ RUN    adduser -D lioss \
     && ln -s /opt/lioss/lioss /usr/local/bin/lioss      \
     && ln -s /opt/lioss/mkliossdb /usr/local/bin/mkliossdb
 
-ENV HOME="/home/lioss"
+ENV HOME="/home/lioss" \
+    LIOSS_DBPATH="/opt/lioss/liossdb.json"
 
 WORKDIR /home/lioss
 USER    lioss

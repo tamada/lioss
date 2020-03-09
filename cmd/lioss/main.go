@@ -13,6 +13,9 @@ VERSION shows the version of the lioss.
 */
 const VERSION = "0.9.0"
 
+const defaultDBPath = "testdata/liossdb.json"
+const dbpathEnvName = "LIOSS_DBPATH"
+
 type options struct {
 	helpFlag  bool
 	dbpath    string
@@ -80,8 +83,17 @@ func performEach(identifier *lioss.Identifier, arg string, opts *options) {
 	}
 }
 
+func databasePath(dbpath string) string {
+	if dbpath == defaultDBPath || dbpath == "" {
+		if envValue := os.Getenv(dbpathEnvName); envValue != "" {
+			return envValue
+		}
+	}
+	return dbpath
+}
+
 func perform(opts *options) int {
-	db, err := lioss.LoadDatabase(opts.dbpath)
+	db, err := lioss.LoadDatabase(databasePath(opts.dbpath))
 	if err != nil {
 		return printErrors(err, 1)
 	}
@@ -100,7 +112,7 @@ func buildFlagSet() (*flag.FlagSet, *options) {
 	var flags = flag.NewFlagSet("lioss", flag.ContinueOnError)
 	flags.Usage = func() { fmt.Println(helpMessage("lioss")) }
 	flags.BoolVarP(&opts.helpFlag, "help", "h", false, "print this message")
-	flags.StringVarP(&opts.dbpath, "dbpath", "d", "testdata/liossdb.json", "specifies database path")
+	flags.StringVarP(&opts.dbpath, "dbpath", "d", defaultDBPath, "specifies database path")
 	flags.StringVarP(&opts.algorithm, "algorithm", "a", "5gram", "specifies algorithm")
 	flags.Float64VarP(&opts.threshold, "threshold", "t", 0.75, "specifies threshold")
 	return flags, opts
