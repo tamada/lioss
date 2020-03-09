@@ -21,7 +21,6 @@ func helpMessage() string {
 	return `mkliossdb [OPTIONS] <LICENSE...>
 OPTIONS
     -d, --dest <DEST>        specifies the destination file path. Default is 'liossdb.json'
-    -f, --format <FORMAT>    specifies format. Default is 'json'
     -h, --help               print this message.
 LICENSE
     specifies license files.`
@@ -32,8 +31,8 @@ func parseOptions(args []string) (*options, error) {
 	flags := flag.NewFlagSet("lioss", flag.ContinueOnError)
 	flags.Usage = func() { fmt.Println(helpMessage()) }
 	flags.BoolVarP(&opts.helpFlag, "help", "h", false, "print this message.")
+	flags.StringVarP(&opts.format, "format", "f", "json", "specifies the destination file format.")
 	flags.StringVarP(&opts.dest, "dest", "d", "liossdb.json", "specifies the destination file path.")
-	flags.StringVarP(&opts.format, "format", "f", "json", "specifies the format.")
 	if err := flags.Parse(args); err != nil {
 		return nil, err
 	}

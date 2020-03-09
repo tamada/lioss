@@ -26,7 +26,6 @@ func Example_pritHelp() {
 	// mkliossdb [OPTIONS] <LICENSE...>
 	// OPTIONS
 	//     -d, --dest <DEST>        specifies the destination file path. Default is 'liossdb.json'
-	//     -f, --format <FORMAT>    specifies format. Default is 'json'
 	//     -h, --help               print this message.
 	// LICENSE
 	//     specifies license files.

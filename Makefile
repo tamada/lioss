@@ -1,6 +1,6 @@
 GO := go
 NAME := lioss
-VERSION := 1.0.0
+VERSION := 1.0.0-beta
 DIST := $(NAME)-$(VERSION)
 
 all: test build
@@ -15,7 +15,13 @@ update_version:
 	@sed 's/const VERSION = .*/const VERSION = "${VERSION}"/g' cmd/lioss/main.go > a ; mv a cmd/lioss/main.go
 	@echo "Replace version to \"${VERSION}\""
 
-www: 
+start:
+	make -C site start
+
+stop:
+	make -C site stop
+
+www:
 	make -C site build
 
 test: setup update_version

@@ -3,7 +3,7 @@
 [![codebeat badge](https://codebeat.co/badges/dc3481f5-852b-4537-a5f5-150e2bfa998c)](https://codebeat.co/projects/github-com-tamada-lioss-master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/tamada/lioss)](https://goreportcard.com/report/github.com/tamada/lioss)
 [![License](https://img.shields.io/badge/License-WTFPL-blue.svg)](https://github.com/tamada/lioss/blob/master/LICENSE)
-[![Version](https://img.shields.io/badge/Version-1.0.0-yellowgreen.svg)](https://github.com/tamada/lioss/releases/tag/v1.0.0)
+[![Version](https://img.shields.io/badge/Version-1.0.0-beta-yellowgreen.svg)](https://github.com/tamada/lioss/releases/tag/v1.0.0-beta-beta)
 
 # lioss
 
@@ -76,3 +76,7 @@ $ brew install lioss
 
 * [dmgerman/ninka](https://github.com/dmgerman/ninka)
     * Daniel M. German, Yuki Manabe and Katsuro Inoue. A sentence-matching method for automatic license identification of source code files. In 25nd IEEE/ACM International Conference on Automated Software Engineering (ASE 2010).
+    * This product identifies the license of each source file.
+      However, it does not work on my environment.
+* [pivotal/LicenseFinder](https://github.com/pivotal/LicenseFinder)
+    * This product finds dependencies from build file, and find license.

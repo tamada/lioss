@@ -52,6 +52,9 @@ func newFileProject(path string) (Project, error) {
 	if kind.MIME.Value == "application/zip" {
 		return &ZipProject{path: path}, nil
 	}
+	if IsLicenseFile(filepath.Base(path)) {
+		return &DirProject{baseDir: filepath.Dir(path), licensePaths: []string{filepath.Base(path)}}, nil
+	}
 	return nil, fmt.Errorf("%s: unknown project format", path)
 }
 

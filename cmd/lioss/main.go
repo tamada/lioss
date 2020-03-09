@@ -12,7 +12,7 @@ import (
 /*
 VERSION shows the version of the lioss.
 */
-const VERSION = "1.0.0"
+const VERSION = "1.0.0-beta"
 
 type options struct {
 	helpFlag  bool
@@ -22,8 +22,8 @@ type options struct {
 	args      []string
 }
 
-func printHelp(appName string) {
-	fmt.Printf(`%s version %s
+func helpMessage(appName string) string {
+	return fmt.Sprintf(`%s version %s
 %s [OPTIONS] <PROJECTS...>
 OPTIONS
         --dbpath <DBPATH>          specifying database path.
@@ -98,7 +98,7 @@ func perform(opts *options) int {
 func buildFlagSet() (*flag.FlagSet, *options) {
 	var opts = new(options)
 	var flags = flag.NewFlagSet("lioss", flag.ContinueOnError)
-	flags.Usage = func() { printHelp("lioss") }
+	flags.Usage = func() { fmt.Println(helpMessage("lioss")) }
 	flags.BoolVarP(&opts.helpFlag, "help", "h", false, "print this message")
 	flags.StringVarP(&opts.dbpath, "dbpath", "d", "testdata/liossdb.json", "specifies database path")
 	flags.StringVarP(&opts.algorithm, "algorithm", "a", "5gram", "specifies algorithm")
@@ -127,6 +127,9 @@ func validateOptions(opts *options) error {
 	if opts.threshold < 0.0 || opts.threshold > 1.0 {
 		return fmt.Errorf("%f: threshold must be 0.0 to 1.0", opts.threshold)
 	}
+	if len(opts.args) == 0 {
+		return fmt.Errorf("no arguments")
+	}
 	if !existsFile(opts.dbpath) {
 		return fmt.Errorf("%s: file not found", opts.dbpath)
 	}
@@ -138,25 +141,24 @@ func parseOptions(args []string) (*options, error) {
 	if err := flags.Parse(args); err != nil {
 		return nil, err
 	}
+	opts.args = flags.Args()[1:]
+	if opts.isHelpFlag() {
+		return opts, fmt.Errorf("%s", helpMessage(args[0]))
+	}
 	if err := validateOptions(opts); err != nil {
 		return opts, err
 	}
-	opts.args = flags.Args()[1:]
 	return opts, nil
 }
 
 func (opts *options) isHelpFlag() bool {
-	return opts.helpFlag || len(opts.args) == 0
+	return opts.helpFlag
 }
 
 func goMain(args []string) int {
 	opts, err := parseOptions(args)
 	if err != nil {
 		fmt.Println(err.Error())
-		return 1
-	}
-	if opts.isHelpFlag() {
-		printHelp(args[0])
 		return 0
 	}
 	return perform(opts)
