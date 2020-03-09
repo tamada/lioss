@@ -29,19 +29,19 @@ test: setup update_version
 	$(GO) test -covermode=count -coverprofile=coverage.out $$(go list ./...)
 
 build: test
-	$(GO) build -o lioss -v cmd/lioss/main.go
+	$(GO) build -o lioss -v cmd/lioss/main.go cmd/lioss/validator.go
 	$(GO) build -o mkliossdb -v cmd/mkliossdb/main.go
 
 define _createDist
 	mkdir -p dist/$(1)_$(2)/$(DIST)/testdata
-	GOOS=$1 GOARCH=$2 go build -o dist/$(1)_$(2)/$(DIST)/lioss$(3) cmd/lioss/main.go
+	GOOS=$1 GOARCH=$2 go build -o dist/$(1)_$(2)/$(DIST)/lioss$(3) cmd/lioss/main.go cmd/lioss/validator.go
 	GOOS=$1 GOARCH=$2 go build -o dist/$(1)_$(2)/$(DIST)/mkliossdb$(3) cmd/mkliossdb/main.go
 	cp -r README.md LICENSE dist/$(1)_$(2)/$(DIST)
 	cp testdata/liossdb.json dist/$(1)_$(2)/$(DIST)/testdata
 	tar cfz dist/$(DIST)_$(1)_$(2).tar.gz -C dist/$(1)_$(2) $(DIST)
 endef
 
-dist:
+dist: build
 	@$(call _createDist,darwin,386,)
 	@$(call _createDist,darwin,amd64,)
 	@$(call _createDist,windows,amd64,.exe)
