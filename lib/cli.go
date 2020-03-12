@@ -1,7 +1,10 @@
 package lib
 
 import (
+	"compress/gzip"
+	"io"
 	"os"
+	"strings"
 
 	"github.com/tamada/lioss"
 )
@@ -14,5 +17,13 @@ func OutputLiossDB(dest string, dbData map[string][]*lioss.License) error {
 		return err
 	}
 	defer writer.Close()
-	return db.Write(writer)
+	newWriter := wrap(writer, dest)
+	return db.Write(newWriter)
+}
+
+func wrap(writer io.Writer, dest string) io.Writer {
+	if strings.HasSuffix(dest, ".gz") {
+		return gzip.NewWriter(writer)
+	}
+	return writer
 }

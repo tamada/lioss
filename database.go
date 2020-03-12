@@ -1,11 +1,13 @@
 package lioss
 
 import (
+	"compress/gzip"
 	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
+	"strings"
 )
 
 /*
@@ -49,7 +51,18 @@ func LoadDatabase(path string) (*Database, error) {
 		return nil, err
 	}
 	defer reader.Close()
-	return Load(reader, path)
+	newReader, err := wrapReader(reader, path)
+	if err != nil {
+		return nil, err
+	}
+	return Load(newReader, path)
+}
+
+func wrapReader(reader io.Reader, from string) (io.Reader, error) {
+	if strings.HasSuffix(from, ".gz") {
+		return gzip.NewReader(reader)
+	}
+	return reader, nil
 }
 
 /*

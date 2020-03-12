@@ -28,9 +28,10 @@ www:
 test: setup update_version
 	$(GO) test -covermode=count -coverprofile=coverage.out $$(go list ./...)
 
-build: test
+build: 
 	$(GO) build -o lioss -v cmd/lioss/main.go cmd/lioss/validator.go
 	$(GO) build -o mkliossdb -v cmd/mkliossdb/main.go
+	$(GO) build -o spdx2liossdb -v cmd/spdx2liossdb/main.go
 
 define _createDist
 	mkdir -p dist/$(1)_$(2)/$(DIST)
