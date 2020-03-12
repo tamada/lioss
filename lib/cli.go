@@ -9,6 +9,9 @@ import (
 	"github.com/tamada/lioss"
 )
 
+/*
+OutputLiossDB outputs given dbData to file specified in dest.
+*/
 func OutputLiossDB(dest string, dbData map[string][]*lioss.License) error {
 	db := lioss.NewDatabase()
 	db.Data = dbData
@@ -17,11 +20,11 @@ func OutputLiossDB(dest string, dbData map[string][]*lioss.License) error {
 		return err
 	}
 	defer writer.Close()
-	newWriter := wrap(writer, dest)
+	newWriter := wrapWriter(writer, dest)
 	return db.Write(newWriter)
 }
 
-func wrap(writer io.Writer, dest string) io.Writer {
+func wrapWriter(writer io.Writer, dest string) io.Writer {
 	if strings.HasSuffix(dest, ".gz") {
 		return gzip.NewWriter(writer)
 	}

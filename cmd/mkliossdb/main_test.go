@@ -39,7 +39,7 @@ func TestOutputError(t *testing.T) {
 }
 
 func TestRun(t *testing.T) {
-	goMain([]string{"mkliossdb", "-d", "../../hoge.json", "../../data/BSD"})
+	goMain([]string{"mkliossdb", "-d", "../../hoge.json", "../../data/misc/BSD"})
 	defer os.Remove("../../hoge.json")
 
 	db, err := lioss.LoadDatabase("../../hoge.json")

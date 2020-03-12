@@ -9,6 +9,9 @@ import (
 	"gopkg.in/xmlpath.v1"
 )
 
+/*
+LicenseMeta shows meta information of license of SPDX.
+*/
 type LicenseMeta struct {
 	Names       *Names
 	OsiApproved bool
@@ -16,6 +19,9 @@ type LicenseMeta struct {
 	Urls        []string
 }
 
+/*
+Names shows names of license (short and full name)
+*/
 type Names struct {
 	ShortName string
 	FullName  string
@@ -36,6 +42,9 @@ func createMeta(root *xmlpath.Node) *LicenseMeta {
 	return meta
 }
 
+/*
+ReadSPDX reads license data from SPDX xml file and returns meta information of license and lisense terms.
+*/
 func ReadSPDX(path string) (*LicenseMeta, string, error) {
 	reader, err := os.Open(path)
 	if err != nil {
@@ -47,7 +56,9 @@ func ReadSPDX(path string) (*LicenseMeta, string, error) {
 		return nil, "", err
 	}
 	meta := createMeta(root)
-	return meta, stripHTML(findString(root, "/SPDXLicenseCollection/license/text")), nil
+	data := stripHTML(findString(root, "/SPDXLicenseCollection/license/text"))
+
+	return meta, Normalize([]byte(data)), nil
 }
 
 func stringSlice(root *xmlpath.Node, xpath string) []string {
@@ -76,4 +87,17 @@ func findString(root *xmlpath.Node, xpath string) string {
 
 func stripHTML(text string) string {
 	return striphtmltags.StripTags(text)
+}
+
+/*
+Normalize normalizes given string (remove return code, tab, and adjacent spaces)
+*/
+func Normalize(dataArray []byte) string {
+	data := strings.ReplaceAll(string(dataArray), "\r", " ")
+	data = strings.ReplaceAll(data, "\n", " ")
+	data = strings.ReplaceAll(data, "\t", " ")
+	for strings.Index(data, "  ") >= 0 {
+		data = strings.ReplaceAll(data, "  ", " ")
+	}
+	return strings.TrimSpace(data)
 }
