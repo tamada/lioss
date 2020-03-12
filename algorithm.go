@@ -9,6 +9,11 @@ import (
 )
 
 /*
+AvailableAlgorithms contains the names of available algorithm for comparing licenses.
+*/
+var AvailableAlgorithms = []string{"1gram", "2gram", "3gram", "4gram", "5gram", "6gram", "7gram", "8gram", "9gram", "wordfreq", "tfidf"}
+
+/*
 Comparator shows an algorithm for identifying the license.
 */
 type Comparator interface {

@@ -36,6 +36,7 @@ define _createDist
 	mkdir -p dist/$(1)_$(2)/$(DIST)
 	GOOS=$1 GOARCH=$2 go build -o dist/$(1)_$(2)/$(DIST)/lioss$(3) cmd/lioss/main.go cmd/lioss/validator.go
 	GOOS=$1 GOARCH=$2 go build -o dist/$(1)_$(2)/$(DIST)/mkliossdb$(3) cmd/mkliossdb/main.go
+	GOOS=$1 GOARCH=$2 go build -o dist/$(1)_$(2)/$(DIST)/spdx2liossdb$(3) cmd/spdx2liossdb/main.go
 	cp -r README.md LICENSE dist/$(1)_$(2)/$(DIST)
 	cp testdata/liossdb.json dist/$(1)_$(2)/$(DIST)
 	tar cfz dist/$(DIST)_$(1)_$(2).tar.gz -C dist/$(1)_$(2) $(DIST)

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/tamada/lioss"
+	"github.com/tamada/lioss/lib"
 )
 
 func TestPerformEach(t *testing.T) {
@@ -31,7 +32,7 @@ func TestParseOptionFail(t *testing.T) {
 }
 
 func TestOutputError(t *testing.T) {
-	err := output(&options{dest: "not/exist/dir/hoge.json"}, map[string][]*lioss.License{})
+	err := lib.OutputLiossDB("not/exist/dir/hoge.json", map[string][]*lioss.License{})
 	if err == nil {
 		t.Errorf("dabase write should fail, because not exist dir")
 	}

@@ -1,6 +1,7 @@
 liossdb.json
 lioss
 mkliossdb
+sbdx2liossdb
 ### https://raw.github.com/github/gitignore/e2e54ce6be90a3ca9c1da57031dc70bf62ed7921/Go.gitignore
 
 # Binaries for programs and plugins
