@@ -20,9 +20,9 @@ func TestLicenseSimilarity(t *testing.T) {
 		path2      string
 		similarity float64
 	}{
-		{"5gram", "data/WTFPL", "data/WTFPL", 1.0},
-		{"5gram", "data/BSD-3-Clause", "data/BSD-4-Clause", 0.9385},
-		{"wordfreq", "data/WTFPL", "data/WTFPL", 1.0},
+		{"5gram", "data/misc/WTFPL", "data/misc/WTFPL", 1.0},
+		{"5gram", "data/misc/BSD-3-Clause", "data/misc/BSD-4-Clause", 0.9385},
+		{"wordfreq", "data/misc/WTFPL", "data/misc/WTFPL", 1.0},
 	}
 	for _, td := range testdata {
 		comparator, _ := CreateComparator(td.comparator)

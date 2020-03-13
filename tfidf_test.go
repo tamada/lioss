@@ -41,7 +41,7 @@ func createLicenseFromFile(tfidf Comparator, path string) *License {
 
 func TestCompare(t *testing.T) {
 	tfidf := NewTfidf()
-	db := CreateDB(tfidf, "data", "tfidf.json")
+	db := CreateDB(tfidf, "data/misc", "tfidf.json")
 	defer os.Remove("tfidf.json")
 	tfidf.Prepare(db)
 	testdata := []struct {
@@ -49,8 +49,8 @@ func TestCompare(t *testing.T) {
 		path           string
 		wontSimilarity float64
 	}{
-		{"MIT", "data/MIT", 0.99},
-		{"WTFPL", "data/WTFPL", 0.95},
+		{"MIT", "data/misc/MIT", 0.99},
+		{"WTFPL", "data/misc/WTFPL", 0.95},
 		{"WTFPL", "LICENSE", 0.9},
 	}
 	for _, td := range testdata {

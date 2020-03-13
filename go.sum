@@ -1,4 +1,9 @@
+github.com/denisbrodbeck/striphtmltags v1.9.2 h1:oE5faQvhgwRke9VOPSZGmwlpiyBLDIykwzO2CQT+pB0=
+github.com/denisbrodbeck/striphtmltags v6.6.6+incompatible h1:w4i4bsyWhAAqwUd9D/1NBi98citfaqCOI/8K3ZCh7KY=
+github.com/denisbrodbeck/striphtmltags v6.6.6+incompatible/go.mod h1:wex3txg8OlzJKhtozM75/Ucy+jKUq73hqzl7XAcNeOY=
 github.com/h2non/filetype v1.0.12 h1:yHCsIe0y2cvbDARtJhGBTD2ecvqMSTvlIcph9En/Zao=
 github.com/h2non/filetype v1.0.12/go.mod h1:319b3zT68BvV+WRj7cwy856M2ehB3HqNOt6sy1HndBY=
 github.com/spf13/pflag v1.0.5 h1:iy+VFUOCP1a+8yFto/drg2CJ5u0yRoB7fZw3DKv/JXA=
 github.com/spf13/pflag v1.0.5/go.mod h1:McXfInJRrz4CZXVZOBLb0bTZqETkiAhM9Iw0y3An2Bg=
+gopkg.in/xmlpath.v1 v1.0.0-20140413065638-a146725ea6e7 h1:zibSPXbkfB1Dwl76rJgLa68xcdHu42qmFTe6vAnU4wA=
+gopkg.in/xmlpath.v1 v1.0.0-20140413065638-a146725ea6e7/go.mod h1:wo0SW5T6XqIKCCAge330Cd5sm+7VI6v85OrQHIk50KM=

@@ -6,7 +6,14 @@ import (
 	"io/ioutil"
 	"strconv"
 	"strings"
+
+	"github.com/tamada/lioss/lib"
 )
+
+/*
+AvailableAlgorithms contains the names of available algorithm for comparing licenses.
+*/
+var AvailableAlgorithms = []string{"1gram", "2gram", "3gram", "4gram", "5gram", "6gram", "7gram", "8gram", "9gram", "wordfreq", "tfidf"}
 
 /*
 Comparator shows an algorithm for identifying the license.
@@ -44,20 +51,10 @@ func CreateComparator(name string) (Comparator, error) {
 	return nil, fmt.Errorf("%s: unknown algorithm", lowerName)
 }
 
-func normalize(dataArray []byte) string {
-	data := strings.ReplaceAll(string(dataArray), "\r", " ")
-	data = strings.ReplaceAll(data, "\n", " ")
-	data = strings.ReplaceAll(data, "\t", " ")
-	for strings.Index(data, "  ") >= 0 {
-		data = strings.ReplaceAll(data, "  ", " ")
-	}
-	return strings.TrimSpace(data)
-}
-
 func readFully(reader io.Reader) (string, error) {
 	result, err := ioutil.ReadAll(reader)
 	if err != nil {
 		return "", err
 	}
-	return normalize(result), nil
+	return lib.Normalize(result), nil
 }

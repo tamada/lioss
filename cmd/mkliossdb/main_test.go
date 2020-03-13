@@ -31,14 +31,14 @@ func TestParseOptionFail(t *testing.T) {
 }
 
 func TestOutputError(t *testing.T) {
-	err := output(&options{dest: "not/exist/dir/hoge.json"}, map[string][]*lioss.License{})
+	err := lioss.OutputLiossDB("not/exist/dir/hoge.json", map[string][]*lioss.License{})
 	if err == nil {
 		t.Errorf("dabase write should fail, because not exist dir")
 	}
 }
 
 func TestRun(t *testing.T) {
-	goMain([]string{"mkliossdb", "-d", "../../hoge.json", "../../data/BSD"})
+	goMain([]string{"mkliossdb", "-d", "../../hoge.json", "../../data/misc/BSD"})
 	defer os.Remove("../../hoge.json")
 
 	db, err := lioss.LoadDatabase("../../hoge.json")
@@ -94,7 +94,7 @@ func TestUtility(t *testing.T) {
 		{giveDest: "target", giveFormat: "xml", wontDest: "target.xml"},
 	}
 	for _, td := range testdata {
-		opts := &options{dest: td.giveDest, format: td.giveFormat}
+		opts := &mkliossdbOptions{dest: td.giveDest, format: td.giveFormat}
 		dest := opts.destination()
 		if dest != td.wontDest {
 			t.Errorf("destination did not match, wont %s, got %s", td.wontDest, dest)

@@ -43,17 +43,22 @@ func (ngram *NGram) Parse(reader io.Reader, licenseName string) (*License, error
 	return ngram.buildNGram(result, licenseName)
 }
 
+func ngramFrequency(freq map[string]int, ngram string) int {
+	value, ok := freq[ngram]
+	if !ok {
+		value = 0
+	}
+	return value
+}
+
 func (ngram *NGram) buildNGram(result, licenseName string) (*License, error) {
 	freq := map[string]int{}
 	len := len(result) - ngram.nValue + 1
 	data := []byte(result)
 	for i := 0; i < len; i++ {
-		ngram := string(data[i : i+ngram.nValue])
-		value, ok := freq[ngram]
-		if !ok {
-			value = 0
-		}
-		freq[ngram] = value + 1
+		ngramKey := string(data[i : i+ngram.nValue])
+		value := ngramFrequency(freq, ngramKey)
+		freq[ngramKey] = value + 1
 	}
 	return newLicense(licenseName, freq), nil
 }

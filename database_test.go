@@ -6,16 +6,26 @@ import (
 )
 
 func TestLoadDatabase(t *testing.T) {
-	db, err := LoadDatabase("testdata/liossdb.json")
-	if err != nil {
-		t.Errorf("error on LoadDatabase: %s", err.Error())
+	testdata := []struct {
+		givePath      string
+		wontDataSize  int
+		wontEntrySize int
+	}{
+		{"testdata/liossdb.json", 11, 23},
+		{"testdata/liossdb.json.gz", 11, 23},
 	}
-	if len(db.Data) != 11 {
-		t.Errorf("size of loaded database did not match, wont %d, got %d", 11, len(db.Data))
-	}
-	entries := db.Entries("5gram")
-	if len(entries) != 23 {
-		t.Errorf("size of 5gram entries did not match, wont %d, got %d", 23, len(entries))
+	for _, td := range testdata {
+		db, err := LoadDatabase(td.givePath)
+		if err != nil {
+			t.Errorf("error on LoadDatabase of %s: %s", td.givePath, err.Error())
+		}
+		if len(db.Data) != td.wontDataSize {
+			t.Errorf("size of loaded database did not match, wont %d, got %d", td.wontDataSize, len(db.Data))
+		}
+		entries := db.Entries("5gram")
+		if len(entries) != td.wontEntrySize {
+			t.Errorf("size of 5gram entries did not match, wont %d, got %d", td.wontEntrySize, len(entries))
+		}
 	}
 }
 
