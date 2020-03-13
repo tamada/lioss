@@ -94,7 +94,7 @@ func TestUtility(t *testing.T) {
 		{giveDest: "target", giveFormat: "xml", wontDest: "target.xml"},
 	}
 	for _, td := range testdata {
-		opts := &options{dest: td.giveDest, format: td.giveFormat}
+		opts := &mkliossdbOptions{dest: td.giveDest, format: td.giveFormat}
 		dest := opts.destination()
 		if dest != td.wontDest {
 			t.Errorf("destination did not match, wont %s, got %s", td.wontDest, dest)

@@ -26,18 +26,18 @@ ARGUMENT
 
 type cliOptions struct {
 	dest        string
-	runtimeOpts *options
+	runtimeOpts *runtimeOptions
 	helpFlag    bool
 	target      string
 }
 
-type options struct {
+type runtimeOptions struct {
 	verbose            bool
 	includeOsiApproved bool
 	excludeDeprecated  bool
 }
 
-func isIgnoreLicense(opts *options, meta *lib.LicenseMeta) bool {
+func isIgnoreLicense(opts *runtimeOptions, meta *lib.LicenseMeta) bool {
 	if opts.includeOsiApproved && !meta.OsiApproved {
 		return true
 	}
@@ -47,7 +47,7 @@ func isIgnoreLicense(opts *options, meta *lib.LicenseMeta) bool {
 	return false
 }
 
-func readLicense(algo lioss.Comparator, path string, opts *options) (*lioss.License, error) {
+func readLicense(algo lioss.Comparator, path string, opts *runtimeOptions) (*lioss.License, error) {
 	meta, licenseData, err := lib.ReadSPDX(path)
 	if err != nil {
 		return nil, err
@@ -68,7 +68,7 @@ func appendLicensesIfNeeded(licenses []*lioss.License, license *lioss.License, e
 	return licenses
 }
 
-func readLicenses(algo lioss.Comparator, target string, opts *options, infoList []os.FileInfo) []*lioss.License {
+func readLicenses(algo lioss.Comparator, target string, opts *runtimeOptions, infoList []os.FileInfo) []*lioss.License {
 	licenses := []*lioss.License{}
 	for _, info := range infoList {
 		if !info.IsDir() {
@@ -79,7 +79,7 @@ func readLicenses(algo lioss.Comparator, target string, opts *options, infoList 
 	return licenses
 }
 
-func performEachAlgorithm(algo lioss.Comparator, target string, opts *options) ([]*lioss.License, error) {
+func performEachAlgorithm(algo lioss.Comparator, target string, opts *runtimeOptions) ([]*lioss.License, error) {
 	infoList, err := ioutil.ReadDir(target)
 	if err != nil {
 		return nil, err
@@ -88,7 +88,7 @@ func performEachAlgorithm(algo lioss.Comparator, target string, opts *options) (
 	return licenses, nil
 }
 
-func performEach(algoName, target string, opts *options) ([]*lioss.License, error) {
+func performEach(algoName, target string, opts *runtimeOptions) ([]*lioss.License, error) {
 	algo, err := lioss.CreateComparator(algoName)
 	if err != nil {
 		return nil, err
@@ -99,7 +99,7 @@ func performEach(algoName, target string, opts *options) ([]*lioss.License, erro
 	return performEachAlgorithm(algo, target, opts)
 }
 
-func perform(dest, target string, opts *options) error {
+func perform(dest, target string, opts *runtimeOptions) error {
 	results := map[string][]*lioss.License{}
 	for _, algoName := range lioss.AvailableAlgorithms {
 		licenses, err := performEach(algoName, target, opts)
@@ -113,7 +113,7 @@ func perform(dest, target string, opts *options) error {
 
 func buildFlagSet(args []string) (*flag.FlagSet, *cliOptions) {
 	opts := new(cliOptions)
-	opts.runtimeOpts = new(options)
+	opts.runtimeOpts = new(runtimeOptions)
 	flags := flag.NewFlagSet("spdx2liossdb", flag.ContinueOnError)
 	flags.Usage = func() { fmt.Println(helpMessage(args[0])) }
 	flags.BoolVarP(&opts.helpFlag, "help", "h", false, "print this message")

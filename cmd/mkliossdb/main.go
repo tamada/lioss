@@ -10,7 +10,7 @@ import (
 	"github.com/tamada/lioss"
 )
 
-type options struct {
+type mkliossdbOptions struct {
 	dest     string
 	format   string
 	helpFlag bool
@@ -26,8 +26,8 @@ LICENSE
     specifies license files.`
 }
 
-func buildFlagSet() (*flag.FlagSet, *options) {
-	opts := new(options)
+func buildFlagSet() (*flag.FlagSet, *mkliossdbOptions) {
+	opts := new(mkliossdbOptions)
 	flags := flag.NewFlagSet("mkliossdb", flag.ContinueOnError)
 	flags.Usage = func() { fmt.Println(helpMessage()) }
 	flags.BoolVarP(&opts.helpFlag, "help", "h", false, "print this message.")
@@ -36,7 +36,7 @@ func buildFlagSet() (*flag.FlagSet, *options) {
 	return flags, opts
 }
 
-func parseOptions(args []string) (*options, error) {
+func parseOptions(args []string) (*mkliossdbOptions, error) {
 	flags, opts := buildFlagSet()
 	if err := flags.Parse(args); err != nil {
 		return nil, err
@@ -47,7 +47,7 @@ func parseOptions(args []string) (*options, error) {
 	return opts, nil
 }
 
-func (opts *options) destination() string {
+func (opts *mkliossdbOptions) destination() string {
 	if strings.HasSuffix(opts.dest, "."+opts.format) {
 		return opts.dest
 	}
@@ -58,7 +58,7 @@ func (opts *options) destination() string {
 	return opts.dest[0:index] + "." + opts.format
 }
 
-func (opts *options) isHelpFlag() bool {
+func (opts *mkliossdbOptions) isHelpFlag() bool {
 	return opts.helpFlag || len(opts.args) == 0
 }
 
@@ -89,7 +89,7 @@ func performEach(args []string, comparator string) ([]*lioss.License, error) {
 	return licenses, nil
 }
 
-func buildLicenses(opts *options) map[string][]*lioss.License {
+func buildLicenses(opts *mkliossdbOptions) map[string][]*lioss.License {
 	results := map[string][]*lioss.License{}
 	for _, algorithm := range lioss.AvailableAlgorithms {
 		licenses, err := performEach(opts.args, algorithm)
@@ -102,7 +102,7 @@ func buildLicenses(opts *options) map[string][]*lioss.License {
 	return results
 }
 
-func perform(opts *options) int {
+func perform(opts *mkliossdbOptions) int {
 	results := buildLicenses(opts)
 	err := lioss.OutputLiossDB(opts.destination(), results)
 	if err != nil {

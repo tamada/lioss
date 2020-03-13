@@ -16,7 +16,7 @@ const VERSION = "0.9.0"
 const defaultDBPath = "testdata/liossdb.json"
 const dbpathEnvName = "LIOSS_DBPATH"
 
-type options struct {
+type liossOptions struct {
 	helpFlag  bool
 	dbpath    string
 	algorithm string
@@ -74,7 +74,7 @@ func printResults(identifier *lioss.Identifier, project lioss.Project) {
 	}
 }
 
-func performEach(identifier *lioss.Identifier, arg string, opts *options) {
+func performEach(identifier *lioss.Identifier, arg string, opts *liossOptions) {
 	project, err := lioss.NewProject(arg)
 	if err != nil {
 		fmt.Printf("%s\n", err.Error())
@@ -96,7 +96,7 @@ func databasePath(dbpath string) string {
 	return dbpath
 }
 
-func perform(opts *options) int {
+func perform(opts *liossOptions) int {
 	db, err := lioss.LoadDatabase(opts.dbpath)
 	if err != nil {
 		return printErrors(err, 1)
@@ -111,8 +111,8 @@ func perform(opts *options) int {
 	return 0
 }
 
-func buildFlagSet() (*flag.FlagSet, *options) {
-	var opts = new(options)
+func buildFlagSet() (*flag.FlagSet, *liossOptions) {
+	var opts = new(liossOptions)
 	var flags = flag.NewFlagSet("lioss", flag.ContinueOnError)
 	flags.Usage = func() { fmt.Println(helpMessage("lioss")) }
 	flags.BoolVarP(&opts.helpFlag, "help", "h", false, "print this message")
@@ -122,7 +122,7 @@ func buildFlagSet() (*flag.FlagSet, *options) {
 	return flags, opts
 }
 
-func parseOptions(args []string) (*options, int, error) {
+func parseOptions(args []string) (*liossOptions, int, error) {
 	flags, opts := buildFlagSet()
 	if err := flags.Parse(args); err != nil {
 		return nil, 1, err
@@ -138,7 +138,7 @@ func parseOptions(args []string) (*options, int, error) {
 	return opts, 0, nil
 }
 
-func (opts *options) isHelpFlag() bool {
+func (opts *liossOptions) isHelpFlag() bool {
 	return opts.helpFlag
 }
 

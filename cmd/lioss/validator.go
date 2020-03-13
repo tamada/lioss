@@ -41,7 +41,7 @@ func isValidDBPath(dbpath string) bool {
 	return existsFile(dbpath)
 }
 
-func validateOptions(opts *options) error {
+func validateOptions(opts *liossOptions) error {
 	if !isValidAlgorithm(opts.algorithm) {
 		return fmt.Errorf("%s: unknown algorithm", opts.algorithm)
 	}
