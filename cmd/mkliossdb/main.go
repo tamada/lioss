@@ -84,7 +84,7 @@ func performEach(args []string, comparator string) ([]*lioss.License, error) {
 	return licenses, nil
 }
 
-func perform(opts *options) int {
+func buildLicenses(opts *options) map[string][]*lioss.License {
 	results := map[string][]*lioss.License{}
 	for _, algorithm := range lioss.AvailableAlgorithms {
 		licenses, err := performEach(opts.args, algorithm)
@@ -94,6 +94,11 @@ func perform(opts *options) int {
 		}
 		results[algorithm] = licenses
 	}
+	return results
+}
+
+func perform(opts *options) int {
+	results := buildLicenses(opts)
 	err := lioss.OutputLiossDB(opts.destination(), results)
 	if err != nil {
 		fmt.Println(err.Error())

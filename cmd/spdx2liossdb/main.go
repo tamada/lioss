@@ -61,13 +61,20 @@ func readLicense(algo lioss.Comparator, path string, opts *options) (*lioss.Lice
 	return algo.Parse(strings.NewReader(licenseData), meta.Names.ShortName)
 }
 
-func appendLicensesIfNeeded(licenses []*lioss.License, algo lioss.Comparator, path string, opts *options) []*lioss.License {
-	license, err := readLicense(algo, path, opts)
-	if err != nil {
-		return licenses
-	}
-	if license != nil {
+func appendLicensesIfNeeded(licenses []*lioss.License, license *lioss.License, err error) []*lioss.License {
+	if err == nil && license != nil {
 		licenses = append(licenses, license)
+	}
+	return licenses
+}
+
+func readLicenses(algo lioss.Comparator, target string, opts *options, infoList []os.FileInfo) []*lioss.License {
+	licenses := []*lioss.License{}
+	for _, info := range infoList {
+		if !info.IsDir() {
+			license, err := readLicense(algo, filepath.Join(target, info.Name()), opts)
+			licenses = appendLicensesIfNeeded(licenses, license, err)
+		}
 	}
 	return licenses
 }
@@ -77,12 +84,7 @@ func performEachAlgorithm(algo lioss.Comparator, target string, opts *options) (
 	if err != nil {
 		return nil, err
 	}
-	licenses := []*lioss.License{}
-	for _, info := range infoList {
-		if !info.IsDir() {
-			licenses = appendLicensesIfNeeded(licenses, algo, filepath.Join(target, info.Name()), opts)
-		}
-	}
+	licenses := readLicenses(algo, target, opts, infoList)
 	return licenses, nil
 }
 
