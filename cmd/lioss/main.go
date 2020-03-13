@@ -21,7 +21,6 @@ type liossOptions struct {
 	dbpath    string
 	algorithm string
 	threshold float64
-	args      []string
 }
 
 func helpMessage(appName string) string {
@@ -96,7 +95,7 @@ func databasePath(dbpath string) string {
 	return dbpath
 }
 
-func perform(opts *liossOptions) int {
+func perform(args []string, opts *liossOptions) int {
 	db, err := lioss.LoadDatabase(opts.dbpath)
 	if err != nil {
 		return printErrors(err, 1)
@@ -105,7 +104,7 @@ func perform(opts *liossOptions) int {
 	if err != nil {
 		return printErrors(err, 2)
 	}
-	for _, arg := range opts.args {
+	for _, arg := range args {
 		performEach(identifier, arg, opts)
 	}
 	return 0
@@ -122,20 +121,18 @@ func buildFlagSet() (*flag.FlagSet, *liossOptions) {
 	return flags, opts
 }
 
-func parseOptions(args []string) (*liossOptions, int, error) {
-	flags, opts := buildFlagSet()
+func parseOptions(args []string, flags *flag.FlagSet, opts *liossOptions) (int, error) {
 	if err := flags.Parse(args); err != nil {
-		return nil, 1, err
+		return 1, err
 	}
-	opts.args = flags.Args()[1:]
 	if opts.isHelpFlag() {
-		return opts, 0, fmt.Errorf("%s", helpMessage(args[0]))
+		return 0, fmt.Errorf("%s", helpMessage(args[0]))
 	}
 	opts.dbpath = databasePath(opts.dbpath)
-	if err := validateOptions(opts); err != nil {
-		return opts, 2, err
+	if err := validateOptions(opts, flags.Args()[1:]); err != nil {
+		return 2, err
 	}
-	return opts, 0, nil
+	return 0, nil
 }
 
 func (opts *liossOptions) isHelpFlag() bool {
@@ -143,12 +140,13 @@ func (opts *liossOptions) isHelpFlag() bool {
 }
 
 func goMain(args []string) int {
-	opts, status, err := parseOptions(args)
+	flags, opts := buildFlagSet()
+	status, err := parseOptions(args, flags, opts)
 	if err != nil {
 		fmt.Println(err.Error())
 		return status
 	}
-	return perform(opts)
+	return perform(flags.Args()[1:], opts)
 }
 
 func main() {

@@ -41,14 +41,14 @@ func isValidDBPath(dbpath string) bool {
 	return existsFile(dbpath)
 }
 
-func validateOptions(opts *liossOptions) error {
+func validateOptions(opts *liossOptions, args []string) error {
 	if !isValidAlgorithm(opts.algorithm) {
 		return fmt.Errorf("%s: unknown algorithm", opts.algorithm)
 	}
 	if !isValidThreshold(opts.threshold) {
 		return fmt.Errorf("%f: threshold must be 0.0 to 1.0", opts.threshold)
 	}
-	if !isValidArgs(opts.args) {
+	if !isValidArgs(args) {
 		return fmt.Errorf("no arguments")
 	}
 	if !isValidDBPath(opts.dbpath) {

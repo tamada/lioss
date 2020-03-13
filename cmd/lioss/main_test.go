@@ -43,7 +43,8 @@ func TestInvalidOptions(t *testing.T) {
 	}
 
 	for _, td := range testdata {
-		_, gotStatus, err := parseOptions(td.args)
+		flags, opts := buildFlagSet()
+		gotStatus, err := parseOptions(td.args, flags, opts)
 		if (err != nil) != td.errorFlag {
 			t.Errorf("result of parseOptions(%v) did not match, wont error: %v", td.args, td.errorFlag)
 		}
