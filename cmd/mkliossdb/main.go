@@ -26,13 +26,18 @@ LICENSE
     specifies license files.`
 }
 
-func parseOptions(args []string) (*options, error) {
+func buildFlagSet() (*flag.FlagSet, *options) {
 	opts := new(options)
 	flags := flag.NewFlagSet("mkliossdb", flag.ContinueOnError)
 	flags.Usage = func() { fmt.Println(helpMessage()) }
 	flags.BoolVarP(&opts.helpFlag, "help", "h", false, "print this message.")
 	flags.StringVarP(&opts.format, "format", "f", "json", "specifies the destination file format.")
 	flags.StringVarP(&opts.dest, "dest", "d", "liossdb.json", "specifies the destination file path.")
+	return flags, opts
+}
+
+func parseOptions(args []string) (*options, error) {
+	flags, opts := buildFlagSet()
 	if err := flags.Parse(args); err != nil {
 		return nil, err
 	}

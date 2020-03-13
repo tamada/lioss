@@ -63,13 +63,7 @@ func identifyLicense(identifier *lioss.Identifier, project lioss.Project, id str
 	return identifier.Identify(license)
 }
 
-func performEach(identifier *lioss.Identifier, arg string, opts *options) {
-	project, err := lioss.NewProject(arg)
-	if err != nil {
-		fmt.Printf("%s\n", err.Error())
-		return
-	}
-	defer project.Close()
+func printResults(identifier *lioss.Identifier, project lioss.Project) {
 	for _, id := range project.LicenseIDs() {
 		results, err := identifyLicense(identifier, project, id)
 		if err != nil {
@@ -78,6 +72,16 @@ func performEach(identifier *lioss.Identifier, arg string, opts *options) {
 		}
 		printResult(project, id, results)
 	}
+}
+
+func performEach(identifier *lioss.Identifier, arg string, opts *options) {
+	project, err := lioss.NewProject(arg)
+	if err != nil {
+		fmt.Printf("%s\n", err.Error())
+		return
+	}
+	defer project.Close()
+	printResults(identifier, project)
 	if len(project.LicenseIDs()) == 0 {
 		fmt.Printf("%s: license file not found\n", project.BasePath())
 	}
