@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"strconv"
 	"strings"
+
+	"github.com/tamada/lioss/lib"
 )
 
 /*
@@ -49,20 +51,10 @@ func CreateComparator(name string) (Comparator, error) {
 	return nil, fmt.Errorf("%s: unknown algorithm", lowerName)
 }
 
-func normalize(dataArray []byte) string {
-	data := strings.ReplaceAll(string(dataArray), "\r", " ")
-	data = strings.ReplaceAll(data, "\n", " ")
-	data = strings.ReplaceAll(data, "\t", " ")
-	for strings.Index(data, "  ") >= 0 {
-		data = strings.ReplaceAll(data, "  ", " ")
-	}
-	return strings.TrimSpace(data)
-}
-
 func readFully(reader io.Reader) (string, error) {
 	result, err := ioutil.ReadAll(reader)
 	if err != nil {
 		return "", err
 	}
-	return normalize(result), nil
+	return lib.Normalize(result), nil
 }

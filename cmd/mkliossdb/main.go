@@ -8,7 +8,6 @@ import (
 
 	flag "github.com/spf13/pflag"
 	"github.com/tamada/lioss"
-	"github.com/tamada/lioss/lib"
 )
 
 type options struct {
@@ -95,7 +94,7 @@ func perform(opts *options) int {
 		}
 		results[algorithm] = licenses
 	}
-	err := lib.OutputLiossDB(opts.destination(), results)
+	err := lioss.OutputLiossDB(opts.destination(), results)
 	if err != nil {
 		fmt.Println(err.Error())
 		return 2

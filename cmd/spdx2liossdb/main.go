@@ -61,6 +61,17 @@ func readLicense(algo lioss.Comparator, path string, opts *options) (*lioss.Lice
 	return algo.Parse(strings.NewReader(licenseData), meta.Names.ShortName)
 }
 
+func appendLicensesIfNeeded(licenses []*lioss.License, algo lioss.Comparator, path string, opts *options) []*lioss.License {
+	license, err := readLicense(algo, path, opts)
+	if err != nil {
+		return licenses
+	}
+	if license != nil {
+		licenses = append(licenses, license)
+	}
+	return licenses
+}
+
 func performEachAlgorithm(algo lioss.Comparator, target string, opts *options) ([]*lioss.License, error) {
 	infoList, err := ioutil.ReadDir(target)
 	if err != nil {
@@ -69,13 +80,7 @@ func performEachAlgorithm(algo lioss.Comparator, target string, opts *options) (
 	licenses := []*lioss.License{}
 	for _, info := range infoList {
 		if !info.IsDir() {
-			license, err := readLicense(algo, filepath.Join(target, info.Name()), opts)
-			if err != nil {
-				return nil, err
-			}
-			if license != nil {
-				licenses = append(licenses, license)
-			}
+			licenses = appendLicensesIfNeeded(licenses, algo, filepath.Join(target, info.Name()), opts)
 		}
 	}
 	return licenses, nil
@@ -101,7 +106,7 @@ func perform(dest, target string, opts *options) error {
 		}
 		results[algoName] = licenses
 	}
-	return lib.OutputLiossDB(dest, results)
+	return lioss.OutputLiossDB(dest, results)
 }
 
 func buildFlagSet(args []string) (*flag.FlagSet, *cliOptions) {
