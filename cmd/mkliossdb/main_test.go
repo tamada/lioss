@@ -31,17 +31,17 @@ func TestParseOptionFail(t *testing.T) {
 }
 
 func TestOutputError(t *testing.T) {
-	err := lioss.OutputLiossDB("not/exist/dir/hoge.json", map[string][]*lioss.License{})
+	err := lioss.OutputLiossDB("not/exist/dir/hoge.liossdb", map[string][]*lioss.License{})
 	if err == nil {
 		t.Errorf("dabase write should fail, because not exist dir")
 	}
 }
 
 func TestRun(t *testing.T) {
-	goMain([]string{"mkliossdb", "-d", "../../hoge.json", "../../data/misc/BSD"})
-	defer os.Remove("../../hoge.json")
+	goMain([]string{"mkliossdb", "-d", "../../hoge.liossdb", "../../data/misc/BSD"})
+	defer os.Remove("../../hoge.liossdb")
 
-	db, err := lioss.LoadDatabase("../../hoge.json")
+	db, err := lioss.LoadDatabase("../../hoge.liossdb")
 	if err != nil {
 		t.Errorf("load failed: %s", err.Error())
 	}
@@ -71,33 +71,12 @@ func TestIsHelpFlag(t *testing.T) {
 }
 
 func Example_pritHelp() {
-	goMain([]string{})
+	goMain([]string{"mkliossdb"})
 	// Output:
 	// mkliossdb [OPTIONS] <LICENSE...>
 	// OPTIONS
-	//     -d, --dest <DEST>        specifies the destination file path. Default is 'liossdb.json'
+	//     -d, --dest <DEST>        specifies the destination file path. Default is 'default.liossdb'
 	//     -h, --help               print this message.
 	// LICENSE
 	//     specifies license files.
-}
-
-func TestUtility(t *testing.T) {
-	testdata := []struct {
-		giveDest   string
-		giveFormat string
-		wontDest   string
-	}{
-		{giveDest: "target.xml", giveFormat: "json", wontDest: "target.json"},
-		{giveDest: "target.json", giveFormat: "json", wontDest: "target.json"},
-		{giveDest: "target.json.xml", giveFormat: "xml", wontDest: "target.json.xml"},
-		{giveDest: "target.", giveFormat: "xml", wontDest: "target.xml"},
-		{giveDest: "target", giveFormat: "xml", wontDest: "target.xml"},
-	}
-	for _, td := range testdata {
-		opts := &mkliossdbOptions{dest: td.giveDest, format: td.giveFormat}
-		dest := opts.destination()
-		if dest != td.wontDest {
-			t.Errorf("destination did not match, wont %s, got %s", td.wontDest, dest)
-		}
-	}
 }

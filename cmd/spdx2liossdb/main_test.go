@@ -28,10 +28,10 @@ func TestGeneratedDataSize(t *testing.T) {
 		dest     string
 		dataSize int
 	}{
-		{[]string{"spdx2liossdb", "--osi-approved", "--exclude-deprecated", "../../spdx/src"}, "osi.json", 112},
-		{[]string{"spdx2liossdb", "--osi-approved", "../../spdx/src"}, "osi_dep.json", 124},
-		{[]string{"spdx2liossdb", "--exclude-deprecated", "../../spdx/src"}, "dep.json", 381},
-		{[]string{"spdx2liossdb", "../../spdx/src"}, "all.json", 409},
+		{[]string{"spdx2liossdb", "--osi-approved", "--exclude-deprecated", "../../spdx/src"}, "osi.liossdb", 112},
+		{[]string{"spdx2liossdb", "--osi-approved", "../../spdx/src"}, "osi_dep.liossdb", 124},
+		{[]string{"spdx2liossdb", "--exclude-deprecated", "../../spdx/src"}, "dep.liossdb", 381},
+		{[]string{"spdx2liossdb", "../../spdx/src"}, "all.liossdb", 409},
 	}
 
 	wg := new(sync.WaitGroup)
@@ -75,10 +75,10 @@ func TestParseOptions(t *testing.T) {
 	}{
 		{[]string{}, true, false, false, false, false, "", ""},
 		{[]string{"--unknown-option"}, true, false, false, false, false, "", ""},
-		{[]string{"spdx/src"}, false, false, false, false, false, "spdx/src", "liossdb.json"},
+		{[]string{"spdx/src"}, false, false, false, false, false, "spdx/src", "default.liossdb"},
 		{[]string{"several", "arguments", "causes", "of", "error"}, true, false, false, false, false, "", ""},
-		{[]string{"-h"}, false, true, false, false, false, "", "liossdb.json"},
-		{[]string{"-v", "-d", "spdx.json", "spdx/src"}, false, false, false, false, true, "spdx/src", "spdx.json"},
+		{[]string{"-h"}, false, true, false, false, false, "", "default.liossdb"},
+		{[]string{"-v", "-d", "spdx.liossdb", "spdx/src"}, false, false, false, false, true, "spdx/src", "spdx.liossdb"},
 	}
 
 	for _, td := range testdata {

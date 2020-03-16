@@ -42,18 +42,40 @@ func (db *Database) Write(writer io.Writer) error {
 	return nil
 }
 
+func replaceExtension(fileName, newExt string) string {
+	index := strings.LastIndex(fileName, ".")
+	if index < 0 {
+		return fileName + "." + newExt
+	}
+	return fileName[0:index] + "." + newExt
+}
+
+func Destination(dest string) string {
+	if strings.HasSuffix(dest, ".liossdb") || strings.HasSuffix(dest, ".liossgz") {
+		return dest
+	}
+	if strings.HasSuffix(dest, ".liossdb.gz") {
+		return strings.ReplaceAll(dest, ".liossdb.gz", ".liossgz")
+	}
+	if strings.HasSuffix(dest, ".gz") {
+		return strings.ReplaceAll(dest, ".gz", ".liossgz")
+	}
+	return replaceExtension(dest, "liossdb")
+}
+
 /*
 OutputLiossDB outputs given dbData to file specified in dest.
 */
 func OutputLiossDB(dest string, dbData map[string][]*License) error {
 	db := NewDatabase()
 	db.Data = dbData
-	writer, err := os.OpenFile(dest, os.O_CREATE|os.O_WRONLY, 0644)
+	destFile := Destination(dest)
+	writer, err := os.OpenFile(destFile, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return err
 	}
 	defer writer.Close()
-	newWriter := wrapWriter(writer, dest)
+	newWriter := wrapWriter(writer, destFile)
 	return db.Write(newWriter)
 }
 
@@ -81,7 +103,7 @@ func LoadDatabase(path string) (*Database, error) {
 }
 
 func wrapReader(reader io.Reader, from string) (io.Reader, error) {
-	if strings.HasSuffix(from, ".gz") {
+	if strings.HasSuffix(from, ".liossgz") || strings.HasSuffix(from, ".gz") {
 		return gzip.NewReader(reader)
 	}
 	return reader, nil

@@ -120,7 +120,7 @@ func buildFlagSet(args []string) (*flag.FlagSet, *cliOptions) {
 	flags.BoolVar(&opts.runtimeOpts.excludeDeprecated, "exclude-deprecated", false, "exclude deprecated licenses")
 	flags.BoolVar(&opts.runtimeOpts.includeOsiApproved, "osi-approved", false, "includes only OSI approved licenses")
 	flags.BoolVarP(&opts.runtimeOpts.verbose, "verbose", "v", false, "verbose mode")
-	flags.StringVarP(&opts.dest, "dest", "d", "liossdb.json", "specifies destination of liossdb")
+	flags.StringVarP(&opts.dest, "dest", "d", "default.liossdb", "specifies destination of liossdb")
 	return flags, opts
 }
 

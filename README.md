@@ -11,12 +11,19 @@ License Identification tool for OSS project.
 
 ## Description
 
-OSSのプロジェクトにはライセンスが設定されている．
-そのライセンスには，行って良いこと，行っては行けないことが規定されている．
-そのライセンスに従って，開発者は開発を進めていく必要がある．
-一方で，OSSのライセンスのコンフリクトが問題になる場合がある．
-しかし，このコンフリクトを発見することは容易ではない．
-ライセンスごとのコンフリクトの検出が難しいこともあるものの，機械的にライセンスを特定することも困難であるためである．
+Generally, OSS projects have a license.
+The license grants permissions to users for using, modifying, and sharing the software.
+The users of the software must follow the terms shown in the license.
+
+On the other hand, today's software generally has some dependencies.
+Additionally, dependant software has some dependencies, too.
+Therefore, the dependant graph of the OSS becomes complex.
+
+In such a situation, it is a quite tough task for checking the conflicts among licenses.
+The first problem is to detect a conflict between two given licenses.
+The second problem is to identify the license of a project.
+`lioss` tries to solve the above second problem by identifying the license of the given project.
+
 
 SPDX が機械的なライセンスの特定に向けての整備を行っているが，全てのプロジェクトに浸透しているわけではない．
 そのため本プロジェクトでは，ライセンスファイルから，どのようなOSSのライセンスを定めているかを検出する．
@@ -39,22 +46,37 @@ OPTIONS
                                    Each algorithm has default value. Default value is 0.75.
     -h, --help                     print this message.
 PROJECTS
-    project directories, archive files contains LICENSE file, and/or LICENSE file.
+    project directories, archive files (jar, and zip) contains LICENSE file, and/or LICENSE file.
 ```
 
 ### `mkliossdb`
 
-Creates the database of lioss.
-If the database was exists, this command updates the database.
+Creates the database of lioss from License documents.
 
 ```
 mkliossdb [OPTIONS] <LICENSE...>
 OPTIONS
     -d, --dest <DEST>        specifies the destination file path. Default is 'liossdb.json'
-    -f, --format <FORMAT>    specifies format. Default is 'json'
     -h, --help               print this message.
 LICENSE
     specifies license files.
+```
+
+### `spdx2liossdb`
+
+Creates the database of lioss from SPDX xml files.
+
+```
+spdx2liossdb [OPTIONS] <ARGUMENT>
+OPTIONS
+    -d, --dest <DEST>           specifies destination.
+        --osi-approved          includes only OSI approved licenses.
+        --exclude-deprecated    excludes deprecated license.
+    -v, --verbose               verbose mode.
+    -h, --help                  print this message.
+ARGUMENT
+    the directory contains SPDX license xml files.
+    Typically, src directory of cloned https://github.com/spdx/license-list-XML.git 
 ```
 
 ## Install

@@ -11,7 +11,7 @@ func TestDatabasePath(t *testing.T) {
 		givePath string
 		wontPath string
 	}{
-		{"", "testdata/liossdb.json", "testdata/liossdb.json"},
+		{"", "testdata/test.liossdb", "testdata/test.liossdb"},
 		{"envpath", "testdata/liossdb.json", "envpath"},
 		{"envpath", "", "envpath"},
 		{"envpath", "argspath", "argspath"},
@@ -78,9 +78,9 @@ func TestContains(t *testing.T) {
 }
 
 func Example_invalidDBPath() {
-	goMain([]string{"lioss", "--dbpath", "../../testdata/invalid.json", "../../LICENSE"})
+	goMain([]string{"lioss", "--dbpath", "../../testdata/invalid.liossdb", "../../LICENSE"})
 	// Output:
-	// ../../testdata/invalid.json: unexpected end of JSON input
+	// ../../testdata/invalid.liossdb: unexpected end of JSON input
 }
 
 func Example_invalidCLIOptions() {
@@ -91,7 +91,7 @@ func Example_invalidCLIOptions() {
 }
 
 func Example_lioss() {
-	goMain([]string{"lioss", "--dbpath", "../../testdata/liossdb.json", "--algorithm", "6gram", "../../testdata/project3.jar", "../../testdata/project4", "main.go"})
+	goMain([]string{"lioss", "--dbpath", "../../testdata/test.liossdb", "--algorithm", "6gram", "../../testdata/project3.jar", "../../testdata/project4", "main.go"})
 	// Output:
 	// ../../testdata/project3.jar/project3/license
 	// 	Apache-License-2.0 (1.0000)

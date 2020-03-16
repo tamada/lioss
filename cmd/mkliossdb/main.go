@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	flag "github.com/spf13/pflag"
 	"github.com/tamada/lioss"
@@ -20,7 +19,7 @@ type mkliossdbOptions struct {
 func helpMessage() string {
 	return `mkliossdb [OPTIONS] <LICENSE...>
 OPTIONS
-    -d, --dest <DEST>        specifies the destination file path. Default is 'liossdb.json'
+    -d, --dest <DEST>        specifies the destination file path. Default is 'default.liossdb'
     -h, --help               print this message.
 LICENSE
     specifies license files.`
@@ -31,8 +30,7 @@ func buildFlagSet() (*flag.FlagSet, *mkliossdbOptions) {
 	flags := flag.NewFlagSet("mkliossdb", flag.ContinueOnError)
 	flags.Usage = func() { fmt.Println(helpMessage()) }
 	flags.BoolVarP(&opts.helpFlag, "help", "h", false, "print this message.")
-	flags.StringVarP(&opts.format, "format", "f", "json", "specifies the destination file format.")
-	flags.StringVarP(&opts.dest, "dest", "d", "liossdb.json", "specifies the destination file path.")
+	flags.StringVarP(&opts.dest, "dest", "d", "default.liossdb", "specifies the destination file path.")
 	return flags, opts
 }
 
@@ -45,17 +43,6 @@ func parseOptions(args []string) (*mkliossdbOptions, error) {
 		opts.args = flags.Args()[1:]
 	}
 	return opts, nil
-}
-
-func (opts *mkliossdbOptions) destination() string {
-	if strings.HasSuffix(opts.dest, "."+opts.format) {
-		return opts.dest
-	}
-	index := strings.LastIndex(opts.dest, ".")
-	if index < 0 {
-		return opts.dest + "." + opts.format
-	}
-	return opts.dest[0:index] + "." + opts.format
 }
 
 func (opts *mkliossdbOptions) isHelpFlag() bool {
@@ -104,7 +91,7 @@ func buildLicenses(opts *mkliossdbOptions) map[string][]*lioss.License {
 
 func perform(opts *mkliossdbOptions) int {
 	results := buildLicenses(opts)
-	err := lioss.OutputLiossDB(opts.destination(), results)
+	err := lioss.OutputLiossDB(lioss.Destination(opts.dest), results)
 	if err != nil {
 		fmt.Println(err.Error())
 		return 2

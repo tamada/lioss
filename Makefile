@@ -14,6 +14,7 @@ update_version:
 	done
 	@sed 's/ARG version=".*"/ARG version="${VERSION}"/g' Dockerfile > a ; mv a Dockerfile
 	@sed 's/const VERSION = .*/const VERSION = "${VERSION}"/g' cmd/lioss/main.go > a ; mv a cmd/lioss/main.go
+	@sed 's/lioss version .*/lioss version ${VERSION}/g' cmd/lioss/main_test.go > a ; mv a cmd/lioss/main_test.go
 	@echo "Replace version to \"${VERSION}\""
 
 start:
@@ -28,7 +29,7 @@ www:
 test: setup update_version
 	$(GO) test -covermode=count -coverprofile=coverage.out $$(go list ./...)
 
-build: 
+build:
 	$(GO) build -o lioss -v cmd/lioss/main.go cmd/lioss/validator.go
 	$(GO) build -o mkliossdb -v cmd/mkliossdb/main.go
 	$(GO) build -o spdx2liossdb -v cmd/spdx2liossdb/main.go

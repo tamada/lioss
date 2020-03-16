@@ -15,7 +15,7 @@ func TestNewIdentifier(t *testing.T) {
 		{"5gram", 0.75, true},
 		{"unknown", 0.75, false},
 	}
-	db, _ := LoadDatabase("testdata/liossdb.json")
+	db, _ := LoadDatabase("testdata/test.liossdb")
 	for _, td := range testdata {
 		_, err := NewIdentifier(td.algorithm, td.threshold, db)
 		if (err == nil) != td.successFlag {
@@ -34,7 +34,7 @@ func TestIdentifier(t *testing.T) {
 	}{
 		{"5gram", 0.75, "LICENSE", true, 1},
 	}
-	db, _ := LoadDatabase("testdata/liossdb.json")
+	db, _ := LoadDatabase("testdata/test.liossdb")
 	for _, td := range testdata {
 		identifier, _ := NewIdentifier(td.algorithm, td.threshold, db)
 		license, _ := identifier.ReadLicense(createLicenseFile(td.givePath))
