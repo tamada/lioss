@@ -12,20 +12,21 @@ func TestDatabasePath(t *testing.T) {
 		wontPath string
 	}{
 		{"", "testdata/test.liossdb", "testdata/test.liossdb"},
-		{"envpath", "testdata/liossdb.json", "envpath"},
+		{"envpath", "data/OSIApproved.liossgz", "envpath"},
 		{"envpath", "", "envpath"},
 		{"envpath", "argspath", "argspath"},
+		{"", "", ""},
 	}
 
 	for _, td := range testdata {
 		if td.envPath != "" {
 			os.Setenv(dbpathEnvName, td.envPath)
-			defer os.Unsetenv(dbpathEnvName)
 		}
 		gotPath := databasePath(td.givePath)
 		if gotPath != td.wontPath {
 			t.Errorf("databasePath(%s) did not match, wont %s, got %s", td.givePath, td.wontPath, gotPath)
 		}
+		os.Unsetenv(dbpathEnvName)
 	}
 }
 

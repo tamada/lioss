@@ -13,7 +13,7 @@ VERSION shows the version of the lioss.
 */
 const VERSION = "0.9.0"
 
-const defaultDBPath = "testdata/liossdb.json"
+const defaultDBPath = "data/OSIApproved.liossgz"
 const dbpathEnvName = "LIOSS_DBPATH"
 
 type liossOptions struct {
