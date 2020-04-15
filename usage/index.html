@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Hugo 0.69.0" />
+  <link rel="stylesheet" href="/lioss/css/normalize.css">
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+  
+  
+  
+  <link rel="stylesheet" href="/lioss/css/cayman.ea0e967413f3851071cc8ace3621bc4205fe8fa79b2abe3d7bf94ff2841f0d47.css">
+  <link rel="stylesheet" href="/lioss/style.css">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/harry.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/harry.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/harry.png">
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" integrity="sha384-yFRtMMDnQtDRO8rLpMIKrtPCD5jdktao2TV19YiZYWMDkUR5GQZR/NOVTdquEx1j" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.js" integrity="sha384-9Nhn55MVVN0/4OFx7EE5kpFBPsEMZxKTCnA+4fqDmg12eCTqGi6+BB2LjY8brQxJ" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script>
+
+  <title>Usage | Lioss: License Identifier for OSS</title>
+</head>
+
+<body>
+  <section class="page-header">
+  <h1 class="project-name">
+    lioss
+  </h1>
+  <h2 class="project-tagline">
+    Identifying OSS license name from LICENSE file.
+  </h2>
+  <nav>
+    
+    
+      
+      
+      
+      
+      <a href="/lioss/" class="btn">Home</a>
+    
+      
+      
+      
+      
+      <a href="/lioss/usage/" class="btn">Usage</a>
+    
+      
+      
+      
+      
+      <a href="/lioss/install/" class="btn">Install</a>
+    
+      
+      
+      
+      
+      <a href="/lioss/about/" class="btn">About</a>
+    
+  </nav>
+</section>
+
+  <section class="main-content">
+    
+  <h1>Usage</h1>
+  <h2 id="lioss"><code>lioss</code></h2>
+<p><code>lioss</code> identifies license names of specified project directories, zip file and/or LICENSE files.</p>
+<div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">lioss version 1.0.0
+lioss <span style="color:#666">[</span>OPTIONS<span style="color:#666">]</span> &lt;PROJECTS...&gt;
+OPTIONS
+        --dbpath &lt;DBPATH&gt;          specifying database path.
+    -a, --algorithm &lt;ALGORITHM&gt;    specifies algorithm. Default is 5gram.
+                                   Available values are: kgram, wordfreq, and tfidf.
+    -t, --threshold &lt;THRESHOLD&gt;    specifies threshold of the similarities of license files.
+                                   Each algorithm has default value. Default value is 0.75.
+    -h, --help                     print this message.
+PROJECTS
+    project directories, and/or archive files contains LICENSE file.
+</code></pre></div><h3 id="example">Example</h3>
+<div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ lioss LICENSE    <span style="color:#408080;font-style:italic"># run on the lioss directory.</span>
+LICENSE
+	WTFPL <span style="color:#666">(</span>0.9285<span style="color:#666">)</span>
+$ lioss --algorithm 9gram testdata   <span style="color:#408080;font-style:italic"># run lioss for identifying project licenses in testdata directory.</span>
+testdata/project1/LICENSE
+	WTFPL <span style="color:#666">(</span>0.9403<span style="color:#666">)</span>
+testdata/project3/license
+	Apache-License-2.0 <span style="color:#666">(</span>1.0000<span style="color:#666">)</span>
+testdata/project2/license.txt
+	GPLv3.0 <span style="color:#666">(</span>1.0000<span style="color:#666">)</span>
+	AGPLv3.0 <span style="color:#666">(</span>0.9694<span style="color:#666">)</span>
+testdata/project3/subproject/license
+	BSD <span style="color:#666">(</span>1.0000<span style="color:#666">)</span>
+</code></pre></div><h2 id="mkliossdb"><code>mkliossdb</code></h2>
+<p><code>mkliossdb</code> creates database for <code>lioss</code> from given LICENSE data.
+The resultant database is written to <code>liossdb.json</code> in json format as default.</p>
+<p>Supported algorithm is <code>kgram</code> (k=1, &hellip;, 9), <code>wordfreq</code> and <code>tfidf</code>.</p>
+<div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">mkliossdb <span style="color:#666">[</span>OPTIONS<span style="color:#666">]</span> &lt;LICENSE...&gt;
+OPTIONS
+    -d, --dest &lt;DEST&gt;        specifies the destination file path. Default is <span style="color:#ba2121">&#39;liossdb.json&#39;</span>
+    -h, --help               print this message.
+LICENSE
+    specifies license files.
+</code></pre></div>
+
+    <footer class="site-footer">
+  <span class="site-footer-credits">
+    <a href="https://github.com/tamada/lioss"><img src="https://img.shields.io/badge/GitHub-tamada/lioss-blueviolet.svg?logo=github" alt="GitHub"></a>. Made with <a href="https://gohugo.io/">Hugo</a>. Theme by <a href="https://github.com/zwbetz-gh/cayman-hugo-theme">Cayman</a>. Deployed to <a href="https://pages.github.com/">GitHub Pages</a>.
+  </span>
+</footer>
+
+  </section>
+  
+  
+  <script>
+  window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+  ga('create', 'UA-62401730-13', 'auto');
+  ga('send', 'pageview');
+  </script>
+  <script async src='https://www.google-analytics.com/analytics.js'></script>
+  
+
+</body>
+</html>
