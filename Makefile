@@ -29,6 +29,7 @@ www:
 test: setup update_version
 	$(GO) test -covermode=count -coverprofile=coverage.out $$(go list ./...)
 
+
 build:
 	$(GO) build -o lioss -v cmd/lioss/main.go cmd/lioss/validator.go
 	$(GO) build -o mkliossdb -v cmd/mkliossdb/main.go

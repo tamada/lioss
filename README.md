@@ -76,7 +76,7 @@ OPTIONS
     -h, --help                  print this message.
 ARGUMENT
     the directory contains SPDX license xml files.
-    Typically, src directory of cloned https://github.com/spdx/license-list-XML.git 
+    Typically, src directory of cloned https://github.com/spdx/license-list-XML.git
 ```
 
 ## Install
@@ -102,3 +102,5 @@ $ brew install lioss
       However, it does not work on my environment.
 * [pivotal/LicenseFinder](https://github.com/pivotal/LicenseFinder)
     * This product finds dependencies from build file, and find license.
+* [SPDX](https://spdx.org) (Software Package Data Exchange).
+    * 
