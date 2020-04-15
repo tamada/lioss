@@ -1,5 +1,5 @@
 [submodule "site/themes/cayman-hugo-theme"]
-	path = site/themes/cayman-hugo-theme
+	path = docs/themes/cayman-hugo-theme
 	url = https://github.com/zwbetz-gh/cayman-hugo-theme.git
 [submodule "spdx"]
 	path = spdx
