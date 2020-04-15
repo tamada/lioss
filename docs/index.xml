@@ -30,7 +30,7 @@
       <guid>https://tamada.github.io/lioss/install/</guid>
       <description>🍺 Homebrew lioss is distributed via Homebrew on macOS platform.
 brew install tamada/brew/lioss Go lang We can install lioss using go get command. Type below command, then lioss and mkliossdb are installed into ~/go/bin directory.
-go get github.com/tamada/lioss 🛠 Build from source If you would build from source, you should clone repository from GitHub and compile source codes, like below.
+go get github.com/tamada/lioss 🛠️ Build from source If you would build from source, you should clone repository from GitHub and compile source codes, like below.
 git clone https://github.com/tamada/lioss.git cd lioss make </description>
     </item>
     
