@@ -38,19 +38,19 @@ func (license *License) total() int {
 /*
 Similarity calculates the similarity between license and other by cosine similarity.
 */
-func (license *License) Similarity(other *License) float64 {
+func (license *License) similarity(other *License) float64 {
 	keys := extractKeys(license, other)
 	sum := 0
 	for key := range keys {
 		sum += (license.Frequencies[key] * other.Frequencies[key])
 	}
-	return float64(sum) / (license.Magnitude() * other.Magnitude())
+	return float64(sum) / (license.magnitude() * other.magnitude())
 }
 
 /*
 Magnitude calculates the length of license.
 */
-func (license *License) Magnitude() float64 {
+func (license *License) magnitude() float64 {
 	sum := 0
 	for _, value := range license.Frequencies {
 		sum += value * value

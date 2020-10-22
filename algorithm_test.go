@@ -16,7 +16,7 @@ func TestCreateComparator(t *testing.T) {
 		{"tfidf", true},
 	}
 	for _, td := range testdata {
-		comparator, err := CreateComparator(td.giveString)
+		comparator, err := NewAlgorithm(td.giveString)
 		if (err == nil) != td.successFlag {
 			t.Errorf("Invalid result in CreateComparator, wont %v", td.successFlag)
 		}

@@ -6,26 +6,26 @@ import (
 )
 
 /*
-WordFreq is an implementation type of Algorithm.
+wordFreq is an implementation type of Algorithm.
 */
-type WordFreq struct {
+type wordFreq struct {
 }
 
 /*
-NewWordFreq creates an instance of wordfreq.
+newWordFreq creates an instance of wordfreq.
 */
-func NewWordFreq() *WordFreq {
-	return new(WordFreq)
+func newWordFreq() *wordFreq {
+	return new(wordFreq)
 }
 
-func (wfreq *WordFreq) String() string {
+func (wfreq *wordFreq) String() string {
 	return "wordfreq"
 }
 
 /*
 Prepare of WordFreq do nothing.
 */
-func (wfreq *WordFreq) Prepare(db *Database) error {
+func (wfreq *wordFreq) Prepare(db *Database) error {
 	return nil
 }
 
@@ -42,7 +42,7 @@ func preprocessForWordFreq(str string) string {
 /*
 BuildWordFreqLicense creates an instance of License by wordfreq algorithm.
 */
-func BuildWordFreqLicense(licenseName string, document string) (*License, error) {
+func buildWordFreqLicense(licenseName string, document string) (*License, error) {
 	document = preprocessForWordFreq(document)
 	words := strings.Split(document, " ")
 	freq := map[string]int{}
@@ -59,17 +59,17 @@ func BuildWordFreqLicense(licenseName string, document string) (*License, error)
 /*
 Parse parses given data and create an instance of License by n-gram.
 */
-func (wfreq *WordFreq) Parse(reader io.Reader, licenseName string) (*License, error) {
+func (wfreq *wordFreq) Parse(reader io.Reader, licenseName string) (*License, error) {
 	result, err := readFully(reader)
 	if err != nil {
 		return nil, err
 	}
-	return BuildWordFreqLicense(licenseName, result)
+	return buildWordFreqLicense(licenseName, result)
 }
 
 /*
 Compare computes similarity between given two licenses.
 */
-func (wfreq *WordFreq) Compare(license1, license2 *License) float64 {
-	return license1.Similarity(license2)
+func (wfreq *wordFreq) Compare(license1, license2 *License) float64 {
+	return license1.similarity(license2)
 }

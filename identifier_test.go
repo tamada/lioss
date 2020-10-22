@@ -6,6 +6,11 @@ import (
 	"testing"
 )
 
+func Example() {
+	
+
+}
+
 func TestNewIdentifier(t *testing.T) {
 	testdata := []struct {
 		algorithm   string
@@ -51,5 +56,5 @@ func TestIdentifier(t *testing.T) {
 func createLicenseFile(path string) LicenseFile {
 	name := filepath.Base(path)
 	file, _ := os.Open(path)
-	return &BasicLicenseFile{id: name, reader: file}
+	return &basicLicenseFile{id: name, reader: file}
 }

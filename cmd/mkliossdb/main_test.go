@@ -15,8 +15,9 @@ func TestPerformEach(t *testing.T) {
 		{[]string{}, "unknown-comparator-algorithm"},
 		{[]string{"not/exist/file"}, "1gram"},
 	}
+	db := lioss.NewDatabase()
 	for _, td := range testdata {
-		_, err := performEach(td.args, td.comparator)
+		err := performEach(db, td.args, td.comparator)
 		if err == nil {
 			t.Errorf("performEach(%v, %s) should fail", td.args, td.comparator)
 		}
@@ -31,7 +32,8 @@ func TestParseOptionFail(t *testing.T) {
 }
 
 func TestOutputError(t *testing.T) {
-	err := lioss.OutputLiossDB("not/exist/dir/hoge.liossdb", map[string][]*lioss.License{})
+	db := lioss.NewDatabase()
+	err := db.WriteTo("not/exist/dir/hoge.liossdb")
 	if err == nil {
 		t.Errorf("dabase write should fail, because not exist dir")
 	}
@@ -73,7 +75,7 @@ func TestIsHelpFlag(t *testing.T) {
 func Example_pritHelp() {
 	goMain([]string{"mkliossdb"})
 	// Output:
-	// mkliossdb [OPTIONS] <LICENSE...>
+	// mkliossdb [OPTIONS] <LICENSEs...>
 	// OPTIONS
 	//     -d, --dest <DEST>        specifies the destination file path. Default is 'default.liossdb'
 	//     -h, --help               print this message.

@@ -25,7 +25,7 @@ func TestLicenseSimilarity(t *testing.T) {
 		{"wordfreq", "data/misc/WTFPL", "data/misc/WTFPL", 1.0},
 	}
 	for _, td := range testdata {
-		comparator, _ := CreateComparator(td.comparator)
+		comparator, _ := NewAlgorithm(td.comparator)
 		license1, _ := comparator.Parse(readAll(td.path1), "license1")
 		license2, _ := comparator.Parse(readAll(td.path2), "license2")
 		similarity := comparator.Compare(license1, license2)

@@ -47,7 +47,7 @@ func isIgnoreLicense(opts *runtimeOptions, meta *lib.LicenseMeta) bool {
 	return false
 }
 
-func readLicense(algo lioss.Comparator, path string, opts *runtimeOptions) (*lioss.License, error) {
+func readLicense(algo lioss.Algorithm, path string, opts *runtimeOptions) (*lioss.License, error) {
 	meta, licenseData, err := lib.ReadSPDX(path)
 	if err != nil {
 		return nil, err
@@ -68,7 +68,7 @@ func appendLicensesIfNeeded(licenses []*lioss.License, license *lioss.License, e
 	return licenses
 }
 
-func readLicenses(algo lioss.Comparator, target string, opts *runtimeOptions, infoList []os.FileInfo) []*lioss.License {
+func readLicenses(algo lioss.Algorithm, target string, opts *runtimeOptions, infoList []os.FileInfo) []*lioss.License {
 	licenses := []*lioss.License{}
 	for _, info := range infoList {
 		if !info.IsDir() {
@@ -79,36 +79,38 @@ func readLicenses(algo lioss.Comparator, target string, opts *runtimeOptions, in
 	return licenses
 }
 
-func performEachAlgorithm(algo lioss.Comparator, target string, opts *runtimeOptions) ([]*lioss.License, error) {
+func performEachAlgorithm(db *lioss.Database, algo lioss.Algorithm, target string, opts *runtimeOptions) error {
 	infoList, err := ioutil.ReadDir(target)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	licenses := readLicenses(algo, target, opts, infoList)
-	return licenses, nil
+	for _, license := range licenses {
+		db.Put(algo.String(), license)
+	}
+	return nil
 }
 
-func performEach(algoName, target string, opts *runtimeOptions) ([]*lioss.License, error) {
-	algo, err := lioss.CreateComparator(algoName)
+func performEach(db *lioss.Database, algorithmName, target string, opts *runtimeOptions) error {
+	algo, err := lioss.NewAlgorithm(algorithmName)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if opts.verbose {
-		fmt.Printf("%s\n", algoName)
+		fmt.Println(algorithmName)
 	}
-	return performEachAlgorithm(algo, target, opts)
+	return performEachAlgorithm(db, algo, target, opts)
 }
 
 func perform(dest, target string, opts *runtimeOptions) error {
-	results := map[string][]*lioss.License{}
-	for _, algoName := range lioss.AvailableAlgorithms {
-		licenses, err := performEach(algoName, target, opts)
+	db := lioss.NewDatabase()
+	for _, algorithmName := range lioss.AvailableAlgorithms {
+		err := performEach(db, algorithmName, target, opts)
 		if err != nil {
 			return err
 		}
-		results[algoName] = licenses
 	}
-	return lioss.OutputLiossDB(dest, results)
+	return db.WriteTo(dest)
 }
 
 func buildFlagSet(args []string) (*flag.FlagSet, *cliOptions) {

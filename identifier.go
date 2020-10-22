@@ -10,7 +10,7 @@ Identifier is to identify the license.
 */
 type Identifier struct {
 	Threshold  float64
-	Comparator Comparator
+	Comparator Algorithm
 	Database   *Database
 }
 
@@ -23,12 +23,13 @@ type Result struct {
 }
 
 /*
-NewIdentifier creates an instance of Identifier.
+NewIdentifier creates an instance of Identifier with the given arguments.
+The range of threshold must be from 0.0 to 1.0.
 */
-func NewIdentifier(comparatorName string, threshold float64, db *Database) (*Identifier, error) {
+func NewIdentifier(algorithmName string, threshold float64, db *Database) (*Identifier, error) {
 	identifier := new(Identifier)
 	identifier.Threshold = threshold
-	algorithm, err := CreateComparator(comparatorName)
+	algorithm, err := NewAlgorithm(algorithmName)
 	if err != nil {
 		return nil, err
 	}

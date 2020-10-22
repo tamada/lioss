@@ -24,6 +24,18 @@ func NewDatabase() *Database {
 	return &Database{Data: map[string][]*License{}}
 }
 
+/*WriteTo writes data in the the receiver database into the given file.*/
+func (db *Database) WriteTo(destFile string) error {
+	dest := destination(destFile)
+	writer, err := os.OpenFile(dest, os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	defer writer.Close()
+	newWriter := wrapWriter(writer, destFile)
+	return db.Write(newWriter)
+}
+
 /*
 Write writes database to given writer.
 */
@@ -50,7 +62,7 @@ func replaceExtension(fileName, newExt string) string {
 	return fileName[0:index] + "." + newExt
 }
 
-func Destination(dest string) string {
+func destination(dest string) string {
 	if strings.HasSuffix(dest, ".liossdb") || strings.HasSuffix(dest, ".liossgz") {
 		return dest
 	}
@@ -63,24 +75,8 @@ func Destination(dest string) string {
 	return replaceExtension(dest, "liossdb")
 }
 
-/*
-OutputLiossDB outputs given dbData to file specified in dest.
-*/
-func OutputLiossDB(dest string, dbData map[string][]*License) error {
-	db := NewDatabase()
-	db.Data = dbData
-	destFile := Destination(dest)
-	writer, err := os.OpenFile(destFile, os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		return err
-	}
-	defer writer.Close()
-	newWriter := wrapWriter(writer, destFile)
-	return db.Write(newWriter)
-}
-
 func wrapWriter(writer io.Writer, dest string) io.Writer {
-	if strings.HasSuffix(dest, ".gz") {
+	if strings.HasSuffix(dest, ".gz") || strings.HasSuffix(dest, ".liossgz") {
 		return gzip.NewWriter(writer)
 	}
 	return writer

@@ -18,7 +18,7 @@ func TestExtension(t *testing.T) {
 		{"file.json", "file.liossdb"},
 	}
 	for _, td := range testdata {
-		gotString := Destination(td.giveString)
+		gotString := destination(td.giveString)
 		if gotString != td.wontString {
 			t.Errorf("result of normalizeDestination(%s) did not match, wont %s, got %s", td.giveString, td.wontString, gotString)
 		}

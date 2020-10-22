@@ -7,15 +7,15 @@ import (
 )
 
 /*
-DirProject is an instance of Project.
+dirProject is an instance of Project.
 */
-type DirProject struct {
+type dirProject struct {
 	baseDir      string
 	licensePaths []string
 }
 
-func newDirProject(baseDir string) *DirProject {
-	project := &DirProject{baseDir: baseDir, licensePaths: []string{}}
+func newDirProject(baseDir string) *dirProject {
+	project := &dirProject{baseDir: baseDir, licensePaths: []string{}}
 	findLicenseFile(project)
 	return project
 }
@@ -23,37 +23,37 @@ func newDirProject(baseDir string) *DirProject {
 /*
 Close closes project.
 */
-func (project *DirProject) Close() error {
+func (project *dirProject) Close() error {
 	return nil
 }
 
 /*
 BasePath returns the path of the project.
 */
-func (project *DirProject) BasePath() string {
+func (project *dirProject) BasePath() string {
 	return project.baseDir
 }
 
 /*
 LicenseIDs returns ids containing the project for LicenseFile method.
 */
-func (project *DirProject) LicenseIDs() []string {
+func (project *dirProject) LicenseIDs() []string {
 	return project.licensePaths
 }
 
 /*
 LicenseFile finds the license file path from project.
 */
-func (project *DirProject) LicenseFile(licenseID string) (LicenseFile, error) {
+func (project *dirProject) LicenseFile(licenseID string) (LicenseFile, error) {
 	path := filepath.Join(project.BasePath(), licenseID)
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
-	return &BasicLicenseFile{id: licenseID, reader: file}, nil
+	return &basicLicenseFile{id: licenseID, reader: file}, nil
 }
 
-func findLicenseFile(project *DirProject) {
+func findLicenseFile(project *dirProject) {
 	stats, err := os.Stat(project.BasePath())
 	if err != nil {
 		return
@@ -63,12 +63,12 @@ func findLicenseFile(project *DirProject) {
 	}
 }
 
-func findLicenseFileInDir(project *DirProject) {
+func findLicenseFileInDir(project *dirProject) {
 	filepath.Walk(project.baseDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		if !info.IsDir() && IsLicenseFile(path) {
+		if !info.IsDir() && isLicenseFile(path) {
 			path = removeBasePath(project.baseDir, path)
 			project.licensePaths = append(project.licensePaths, path)
 		}
@@ -110,7 +110,7 @@ func filepathToSlice(originalPath string) []string {
 /*
 IsSamePath tests given two paths are the same.
 */
-func IsSamePath(path1, path2 string) bool {
+func isSamePath(path1, path2 string) bool {
 	slice1 := filepathToSlice(path1)
 	slice2 := filepathToSlice(path2)
 	if len(slice1) != len(slice2) {

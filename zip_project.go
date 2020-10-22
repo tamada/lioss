@@ -6,9 +6,9 @@ import (
 )
 
 /*
-ZipProject shows an project formatted in zip file.
+zipProject shows an project formatted in zip file.
 */
-type ZipProject struct {
+type zipProject struct {
 	path       string
 	readCloser *zip.ReadCloser
 }
@@ -16,7 +16,7 @@ type ZipProject struct {
 /*
 Close closes project.
 */
-func (zp *ZipProject) Close() error {
+func (zp *zipProject) Close() error {
 	if zp.readCloser != nil {
 		return zp.readCloser.Close()
 	}
@@ -26,14 +26,14 @@ func (zp *ZipProject) Close() error {
 /*
 BasePath returns the path of the project.
 */
-func (zp *ZipProject) BasePath() string {
+func (zp *zipProject) BasePath() string {
 	return zp.path
 }
 
-func readFileNames(zp *ZipProject) []string {
+func readFileNames(zp *zipProject) []string {
 	results := []string{}
 	for _, file := range zp.readCloser.Reader.File {
-		if IsLicenseFile(file.FileHeader.Name) {
+		if isLicenseFile(file.FileHeader.Name) {
 			results = append(results, file.FileHeader.Name)
 		}
 	}
@@ -43,7 +43,7 @@ func readFileNames(zp *ZipProject) []string {
 /*
 LicenseIDs returns ids containing the project for LicenseFile method.
 */
-func (zp *ZipProject) LicenseIDs() []string {
+func (zp *zipProject) LicenseIDs() []string {
 	if zp.readCloser == nil {
 		reader, err := zip.OpenReader(zp.BasePath())
 		if err != nil {
@@ -57,11 +57,11 @@ func (zp *ZipProject) LicenseIDs() []string {
 /*
 LicenseFile finds the license file path from project.
 */
-func (zp *ZipProject) LicenseFile(licenseID string) (LicenseFile, error) {
+func (zp *zipProject) LicenseFile(licenseID string) (LicenseFile, error) {
 	for _, file := range zp.readCloser.Reader.File {
 		if file.FileHeader.Name == licenseID {
 			reader, err := file.Open()
-			return &BasicLicenseFile{id: licenseID, reader: reader}, err
+			return &basicLicenseFile{id: licenseID, reader: reader}, err
 		}
 	}
 	return nil, fmt.Errorf("%s: not found", licenseID)
