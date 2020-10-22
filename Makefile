@@ -9,7 +9,7 @@ setup:
 	git submodule update --init
 
 update_version:
-	@for i in README.md site/content/_index.md; do\
+	@for i in README.md ; do\
 		sed -e 's!Version-[0-9.]-yellowgreen!Version-${VERSION}-yellowgreen!g' -e 's!tag/v[0-9.]*!tag/v${VERSION}!g' $$i > a ; mv a $$i; \
 	done
 	@sed 's/ARG version=".*"/ARG version="${VERSION}"/g' Dockerfile > a ; mv a Dockerfile
