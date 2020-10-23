@@ -12,7 +12,7 @@ func TestDatabasePath(t *testing.T) {
 		wontPath string
 	}{
 		{"", "testdata/test.liossdb", "testdata/test.liossdb"},
-		{"envpath", "data/OSIApproved.liossgz", "envpath"},
+		{"envpath", "data/SPDX-ALL.liossgz", "envpath"},
 		{"envpath", "", "envpath"},
 		{"envpath", "argspath", "argspath"},
 		{"", "", ""},

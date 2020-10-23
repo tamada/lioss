@@ -43,7 +43,7 @@ func TestRun(t *testing.T) {
 	goMain([]string{"mkliossdb", "-d", "../../hoge.liossdb", "../../data/misc/BSD"})
 	defer os.Remove("../../hoge.liossdb")
 
-	db, err := lioss.LoadDatabase("../../hoge.liossdb")
+	db, err := lioss.ReadDatabase("../../hoge.liossdb")
 	if err != nil {
 		t.Errorf("load failed: %s", err.Error())
 	}

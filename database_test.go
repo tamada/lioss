@@ -27,6 +27,28 @@ func TestExtension(t *testing.T) {
 
 func TestLoadDatabase(t *testing.T) {
 	testdata := []struct {
+		dbTypes           DatabaseType
+		wontLicenseSize   int
+		wontAlgorithmSize int
+	}{
+		{BASE_DATABASE, 269, 11},
+		{OSI_APPROVED_DATABASE, 393, 11},
+		{DEPRECATED_DATABASE, 297, 11},
+		{WHOLE_DATABASE, 409, 11},
+	}
+	for _, td := range testdata {
+		db, _ := LoadDatabase(td.dbTypes)
+		if db.AlgorithmCount() != td.wontAlgorithmSize {
+			t.Errorf("%s: algorithm count did not match: wont %d, got %d", td.dbTypes, td.wontAlgorithmSize, db.AlgorithmCount())
+		}
+		if db.LicenseCount() != td.wontLicenseSize {
+			t.Errorf("%s: license count did not match, wont %d, got %d", td.dbTypes, td.wontLicenseSize, db.LicenseCount())
+		}
+	}
+}
+
+func TestReadDatabase(t *testing.T) {
+	testdata := []struct {
 		givePath      string
 		wontDataSize  int
 		wontEntrySize int
@@ -35,7 +57,7 @@ func TestLoadDatabase(t *testing.T) {
 		{"testdata/test.liossgz", 11, 23},
 	}
 	for _, td := range testdata {
-		db, err := LoadDatabase(td.givePath)
+		db, err := ReadDatabase(td.givePath)
 		if err != nil {
 			t.Errorf("error on LoadDatabase of %s: %s", td.givePath, err.Error())
 		}
@@ -50,7 +72,7 @@ func TestLoadDatabase(t *testing.T) {
 }
 
 func TestLoadDatabaseFail(t *testing.T) {
-	_, err := LoadDatabase("testdata/notexistdb.liossdb")
+	_, err := ReadDatabase("testdata/notexistdb.liossdb")
 	if err == nil {
 		t.Errorf("successfully load not exist database .")
 	}
@@ -62,7 +84,7 @@ func TestWriteLoad(t *testing.T) {
 	db.Put("1gram", license)
 	buffer := bytes.NewBuffer([]byte{})
 	db.Write(buffer)
-	db2, _ := Load(buffer, "memory")
+	db2, _ := Read(buffer, "memory")
 	if len(db2.Data) != 1 {
 		t.Errorf("db write/load error, wont len(db2.Data) == %d, got %d", 1, len(db2.Data))
 	}
@@ -81,7 +103,7 @@ func TestContains(t *testing.T) {
 		{"10gram", "GPLv3.0", false},
 		{"2gram", "GPL", false},
 	}
-	db, _ := LoadDatabase("testdata/test.liossdb")
+	db, _ := ReadDatabase("testdata/test.liossdb")
 	for _, td := range testdata {
 		containsFlag := db.Contains(td.algorithmName, td.licenseName)
 		if containsFlag != td.wontFlag {
@@ -91,7 +113,7 @@ func TestContains(t *testing.T) {
 }
 
 func TestPutLicenseToNewAlgorithm(t *testing.T) {
-	db, _ := LoadDatabase("testdata/test.liossdb")
+	db, _ := ReadDatabase("testdata/test.liossdb")
 	license := newLicense("NYSL", map[string]int{"nirunari": 1, "yakunari": 1, "sukinishiro": 1, "license": 1})
 	db.Put("unknown", license)
 	if !db.Contains("unknown", "NYSL") {
@@ -107,7 +129,7 @@ func TestPutLicenseToNewAlgorithm(t *testing.T) {
 }
 
 func TestPutLicenseTo5GramWithNotContainedLicense(t *testing.T) {
-	db, _ := LoadDatabase("testdata/test.liossdb")
+	db, _ := ReadDatabase("testdata/test.liossdb")
 	license := newLicense("NYSL", map[string]int{"nirunari": 1, "yakunari": 1, "sukinishiro": 1, "license": 1})
 	db.Put("5gram", license)
 	if !db.Contains("5gram", "NYSL") {
@@ -130,7 +152,7 @@ func TestPutLicenseTo5GramWithNotContainedLicense(t *testing.T) {
 }
 
 func TestReplaceLicenseData(t *testing.T) {
-	db, _ := LoadDatabase("testdata/test.liossdb")
+	db, _ := ReadDatabase("testdata/test.liossdb")
 	license := newLicense("GPLv3.0", map[string]int{"nirunari": 1, "yakunari": 1, "sukinishiro": 1, "license": 1})
 	db.Put("5gram", license)
 	if !db.Contains("5gram", "GPLv3.0") {

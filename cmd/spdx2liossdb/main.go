@@ -15,11 +15,12 @@ import (
 func helpMessage(prog string) string {
 	return fmt.Sprintf(`%s [OPTIONS] <ARGUMENT>
 OPTIONS
-    -d, --dest <DEST>           specifies destination.
-        --osi-approved          includes only OSI approved licenses.
-        --exclude-deprecated    excludes deprecated license.
-    -v, --verbose               verbose mode.
-    -h, --help                  print this message.
+    -d, --dest <DEST>             specifies the destination.
+        --without-complement      excludes not OSI approved and not deprecated licenses.
+        --without-deprecated      excludes deprecated license.
+        --without-osi-approved    excludes OSI approved licenses.
+    -v, --verbose                 verbose mode.
+    -h, --help                    prints this message.
 ARGUMENT
     the directory contains SPDX license xml files.`, prog)
 }
@@ -33,16 +34,26 @@ type cliOptions struct {
 
 type runtimeOptions struct {
 	verbose            bool
-	includeOsiApproved bool
+	excludeOsiApproved bool
 	excludeDeprecated  bool
+	excludeComplement  bool
 }
 
 func isIgnoreLicense(opts *runtimeOptions, meta *lib.LicenseMeta) bool {
-	if opts.includeOsiApproved && !meta.OsiApproved {
+	if opts.excludeComplement && opts.excludeDeprecated && opts.excludeOsiApproved {
 		return true
-	}
-	if opts.excludeDeprecated && meta.Deprecated {
-		return true
+	} else if opts.excludeComplement && opts.excludeDeprecated {
+		return !meta.OsiApproved
+	} else if opts.excludeComplement && opts.excludeOsiApproved {
+		return !meta.Deprecated
+	} else if opts.excludeDeprecated && opts.excludeOsiApproved {
+		return meta.Deprecated || meta.OsiApproved
+	} else if opts.excludeComplement {
+		return !meta.Deprecated && !meta.OsiApproved
+	} else if opts.excludeDeprecated {
+		return meta.Deprecated
+	} else if opts.excludeOsiApproved {
+		return meta.OsiApproved
 	}
 	return false
 }
@@ -104,13 +115,18 @@ func performEach(db *lioss.Database, algorithmName, target string, opts *runtime
 
 func perform(dest, target string, opts *runtimeOptions) error {
 	db := lioss.NewDatabase()
+	size := 0
 	for _, algorithmName := range lioss.AvailableAlgorithms {
 		err := performEach(db, algorithmName, target, opts)
+		size = len(db.Data[algorithmName])
 		if err != nil {
 			return err
 		}
 	}
-	return db.WriteTo(dest)
+	fmt.Printf("parse %d licenses for %d algorithms, and write database to %s...", size, len(db.Data), dest)
+	err := db.WriteTo(dest)
+	fmt.Println(" done")
+	return err
 }
 
 func buildFlagSet(args []string) (*flag.FlagSet, *cliOptions) {
@@ -119,8 +135,9 @@ func buildFlagSet(args []string) (*flag.FlagSet, *cliOptions) {
 	flags := flag.NewFlagSet("spdx2liossdb", flag.ContinueOnError)
 	flags.Usage = func() { fmt.Println(helpMessage(args[0])) }
 	flags.BoolVarP(&opts.helpFlag, "help", "h", false, "print this message")
-	flags.BoolVar(&opts.runtimeOpts.excludeDeprecated, "exclude-deprecated", false, "exclude deprecated licenses")
-	flags.BoolVar(&opts.runtimeOpts.includeOsiApproved, "osi-approved", false, "includes only OSI approved licenses")
+	flags.BoolVar(&opts.runtimeOpts.excludeDeprecated, "without-deprecated", false, "exclude deprecated licenses")
+	flags.BoolVar(&opts.runtimeOpts.excludeOsiApproved, "without-osi-approved", false, "exclude OSI approved licenses")
+	flags.BoolVar(&opts.runtimeOpts.excludeComplement, "without-complement", false, "exclude not OSI approved and not deprecated licenses")
 	flags.BoolVarP(&opts.runtimeOpts.verbose, "verbose", "v", false, "verbose mode")
 	flags.StringVarP(&opts.dest, "dest", "d", "default.liossdb", "specifies destination of liossdb")
 	return flags, opts

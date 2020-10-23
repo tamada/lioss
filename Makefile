@@ -30,23 +30,27 @@ test: setup update_version
 	$(GO) test -covermode=count -coverprofile=coverage.out $$(go list ./...)
 
 
-build:
+build: test
 	$(GO) build -o lioss -v cmd/lioss/main.go cmd/lioss/validator.go
 	$(GO) build -o mkliossdb -v cmd/mkliossdb/main.go
 	$(GO) build -o spdx2liossdb -v cmd/spdx2liossdb/main.go
 
+createdb: build
+	./spdx2liossdb -d data/SPDX-ALL.liossgz                spdx/src
+	./spdx2liossdb -d data/SPDX-OSI-APPROVED.liossgz       spdx/src --osi-approved
+	./spdx2liossdb -d data/SPDX-EXCLUDE-DEPRECATED.liossgz spdx/src --exclude-deprecated
+
 define _createDist
-	mkdir -p dist/$(1)_$(2)/$(DIST)
+	mkdir -p dist/$(1)_$(2)/$(DIST)/data
 	GOOS=$1 GOARCH=$2 go build -o dist/$(1)_$(2)/$(DIST)/lioss$(3) cmd/lioss/main.go cmd/lioss/validator.go
 	GOOS=$1 GOARCH=$2 go build -o dist/$(1)_$(2)/$(DIST)/mkliossdb$(3) cmd/mkliossdb/main.go
 	GOOS=$1 GOARCH=$2 go build -o dist/$(1)_$(2)/$(DIST)/spdx2liossdb$(3) cmd/spdx2liossdb/main.go
 	cp -r README.md LICENSE dist/$(1)_$(2)/$(DIST)
-	cp testdata/liossdb.json dist/$(1)_$(2)/$(DIST)
+	cp data/*.liossgz dist/$(1)_$(2)/$(DIST)/data
 	tar cfz dist/$(DIST)_$(1)_$(2).tar.gz -C dist/$(1)_$(2) $(DIST)
 endef
 
-dist: build
-	@$(call _createDist,darwin,386,)
+dist: build createdb
 	@$(call _createDist,darwin,amd64,)
 	@$(call _createDist,windows,amd64,.exe)
 	@$(call _createDist,windows,386,.exe)

@@ -13,7 +13,7 @@ VERSION shows the version of the lioss.
 */
 const VERSION = "0.9.0"
 
-const defaultDBPath = "data/OSIApproved.liossgz"
+const defaultDBPath = "data/SPDX-ALL.liossgz"
 const dbpathEnvName = "LIOSS_DBPATH"
 
 type liossOptions struct {
@@ -96,7 +96,7 @@ func databasePath(dbpath string) string {
 }
 
 func perform(args []string, opts *liossOptions) int {
-	db, err := lioss.LoadDatabase(opts.dbpath)
+	db, err := lioss.ReadDatabase(opts.dbpath)
 	if err != nil {
 		return printErrors(err, 1)
 	}
