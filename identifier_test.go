@@ -1,13 +1,41 @@
 package lioss
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
 )
 
-func Example() {
-
+func Example_Identifier() {
+	db, err := LoadDatabase(OSI_APPROVED_DATABASE)
+	if err != nil {
+		return
+	}
+	identifier, err := NewIdentifier("9gram", 0.75, db)
+	if err != nil {
+		return
+	}
+	project, err := NewProject("testdata/project2")
+	if err != nil {
+		return
+	}
+	resultMap, err := identifier.Identify(project)
+	if err != nil {
+		return
+	}
+	for k, results := range resultMap {
+		fmt.Println(k)
+		for _, result := range results {
+			fmt.Printf("\t%s\n", result.String())
+		}
+	}
+	// Output:
+	// license.txt
+	// 	GPL-3.0-only (0.980265)
+	//	GPL-3.0-or-later (0.980265)
+	//	AGPL-3.0-only (0.965360)
+	//	AGPL-3.0-or-later (0.965360)
 }
 
 func TestNewIdentifier(t *testing.T) {
@@ -41,8 +69,8 @@ func TestIdentifier(t *testing.T) {
 	db, _ := ReadDatabase("testdata/test.liossdb")
 	for _, td := range testdata {
 		identifier, _ := NewIdentifier(td.algorithm, td.threshold, db)
-		license, _ := identifier.ReadLicense(createLicenseFile(td.givePath))
-		results, err := identifier.Identify(license)
+		license, _ := identifier.readLicense(createLicenseFile(td.givePath))
+		results, err := identifier.identify(license)
 		if (err == nil) != td.successFlag {
 			t.Errorf("the result of identify (%s, %s) did not match, wont %v", td.algorithm, td.givePath, td.successFlag)
 		}

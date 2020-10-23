@@ -39,6 +39,7 @@ func createMeta(root *xmlpath.Node) *LicenseMeta {
 	meta.Names = new(Names)
 	meta.Names.ShortName = findString(root, "/SPDXLicenseCollection/license/@licenseId")
 	meta.Names.FullName = findString(root, "/SPDXLicenseCollection/license/@name")
+	// fmt.Printf("\"%s\",\"%s\",%v,%v,%v\n", meta.Names.ShortName, meta.Names.FullName, meta.OsiApproved, meta.Deprecated, strings.Join(meta.Urls, ","))
 	return meta
 }
 
@@ -66,7 +67,7 @@ func stringSlice(root *xmlpath.Node, xpath string) []string {
 	results := []string{}
 	iter := path.Iter(root)
 	for iter.Next() {
-		results = append(results, iter.Node().String())
+		results = append(results, strings.TrimSpace(iter.Node().String()))
 	}
 	return results
 }
@@ -82,7 +83,7 @@ func isTrue(root *xmlpath.Node, xpath string) bool {
 func findString(root *xmlpath.Node, xpath string) string {
 	path := xmlpath.MustCompile(xpath)
 	str, _ := path.String(root)
-	return str
+	return strings.TrimSpace(str)
 }
 
 func stripHTML(text string) string {

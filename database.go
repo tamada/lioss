@@ -24,10 +24,11 @@ const DatabasePathEnvName = "LIOSS_DBPATH"
 type DatabaseType int
 
 const (
-	BASE_DATABASE         DatabaseType = 0
-	OSI_APPROVED_DATABASE DatabaseType = 1
-	DEPRECATED_DATABASE   DatabaseType = 2
-	WHOLE_DATABASE        DatabaseType = OSI_APPROVED_DATABASE | DEPRECATED_DATABASE
+	OSI_APPROVED_DATABASE      DatabaseType = 1
+	DEPRECATED_DATABASE        DatabaseType = 2
+	OSI_DEPRECATED_DATABASE    DatabaseType = 4
+	NONE_OSI_APPROVED_DATABASE DatabaseType = 8
+	WHOLE_DATABASE             DatabaseType = OSI_APPROVED_DATABASE | DEPRECATED_DATABASE | OSI_DEPRECATED_DATABASE | NONE_OSI_APPROVED_DATABASE
 )
 
 func (dt DatabaseType) IsType(dbType DatabaseType) bool {
@@ -36,10 +37,12 @@ func (dt DatabaseType) IsType(dbType DatabaseType) bool {
 
 func (dt DatabaseType) String() string {
 	switch dt {
-	case BASE_DATABASE:
-		return "BASE_DATABASE"
+	case OSI_DEPRECATED_DATABASE:
+		return "OSI_DEPRECATED_DATABASE"
 	case OSI_APPROVED_DATABASE:
 		return "OSI_APPROVED_DATABASE"
+	case NONE_OSI_APPROVED_DATABASE:
+		return "NONE_OSI_APPROVED_DATABASE"
 	case DEPRECATED_DATABASE:
 		return "DEPRECATED_DATABASE"
 	case WHOLE_DATABASE:
@@ -69,7 +72,8 @@ func LoadDatabase(databaseTypes DatabaseType) (*Database, error) {
 		dt   DatabaseType
 		path string
 	}{
-		{BASE_DATABASE, "Base.liossgz"},
+		{NONE_OSI_APPROVED_DATABASE, "NoneOSIApproved.liossgz"},
+		{OSI_DEPRECATED_DATABASE, "OSIDeprecated.liossgz"},
 		{OSI_APPROVED_DATABASE, "OSIApproved.liossgz"},
 		{DEPRECATED_DATABASE, "Deprecated.liossgz"},
 	}
@@ -77,6 +81,7 @@ func LoadDatabase(databaseTypes DatabaseType) (*Database, error) {
 		if databaseTypes.IsType(typeAndPath.dt) {
 			db2, err := ReadDatabase(filepath.Join(dir, typeAndPath.path))
 			if err != nil {
+				fmt.Printf("%s/%s: %s\n", dir, typeAndPath.path, err.Error())
 				continue
 			}
 			db = db.Merge(db2)
@@ -162,9 +167,11 @@ func (db *Database) WriteTo(destFile string) error {
 		return err
 	}
 	defer writer.Close()
+
 	newWriter := wrapWriter(writer, destFile)
 	err2 := db.Write(newWriter)
 	newWriter.Close() // gzip.Writer should call Close.
+	writer.Close()
 	return err2
 }
 
@@ -230,9 +237,18 @@ func ReadDatabase(path string) (*Database, error) {
 	return Read(newReader, path)
 }
 
+func updateHeader(header gzip.Header, name string) gzip.Header {
+	newName := strings.ReplaceAll(name, ".gz", "")
+	newName = strings.ReplaceAll(name, ".liossgz", ".liossdb")
+	header.Name = newName
+	return header
+}
+
 func wrapReader(reader io.Reader, from string) (io.Reader, error) {
 	if strings.HasSuffix(from, ".liossgz") || strings.HasSuffix(from, ".gz") {
-		return gzip.NewReader(reader)
+		gz, err := gzip.NewReader(reader)
+		gz.Header = updateHeader(gz.Header, from)
+		return gz, err
 	}
 	return reader, nil
 }

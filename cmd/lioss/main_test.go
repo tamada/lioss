@@ -1,34 +1,8 @@
 package main
 
 import (
-	"os"
 	"testing"
 )
-
-func TestDatabasePath(t *testing.T) {
-	testdata := []struct {
-		envPath  string
-		givePath string
-		wontPath string
-	}{
-		{"", "testdata/test.liossdb", "testdata/test.liossdb"},
-		{"envpath", "data/SPDX-ALL.liossgz", "envpath"},
-		{"envpath", "", "envpath"},
-		{"envpath", "argspath", "argspath"},
-		{"", "", ""},
-	}
-
-	for _, td := range testdata {
-		if td.envPath != "" {
-			os.Setenv(dbpathEnvName, td.envPath)
-		}
-		gotPath := databasePath(td.givePath)
-		if gotPath != td.wontPath {
-			t.Errorf("databasePath(%s) did not match, wont %s, got %s", td.givePath, td.wontPath, gotPath)
-		}
-		os.Unsetenv(dbpathEnvName)
-	}
-}
 
 func TestInvalidOptions(t *testing.T) {
 	testdata := []struct {
@@ -40,7 +14,8 @@ func TestInvalidOptions(t *testing.T) {
 		{[]string{"lioss"}, true, 2, "no arguments"},
 		{[]string{"lioss", "-a", "unknown"}, true, 2, "unknown: unknown algorithm"},
 		{[]string{"lioss", "-t", "2.0"}, true, 2, "2.000000: threshold must be 0.0 to 1.0"},
-		{[]string{"lioss", "--dbpath", "no/such/file", "../../LICENSE"}, true, 2, "no/such/file: file not found"},
+		{[]string{"lioss", "--database-path", "no/such/file", "../../LICENSE"}, true, 2, "no/such/file: file not found"},
+		{[]string{"lioss", "--database-type", "unknown", "../../LICENSE"}, true, 2, "unknown: invalid database type"},
 	}
 
 	for _, td := range testdata {
@@ -79,7 +54,7 @@ func TestContains(t *testing.T) {
 }
 
 func Example_invalidDBPath() {
-	goMain([]string{"lioss", "--dbpath", "../../testdata/invalid.liossdb", "../../LICENSE"})
+	goMain([]string{"lioss", "--database-path", "../../testdata/invalid.liossdb", "../../LICENSE"})
 	// Output:
 	// ../../testdata/invalid.liossdb: unexpected end of JSON input
 }
@@ -92,7 +67,7 @@ func Example_invalidCLIOptions() {
 }
 
 func Example_lioss() {
-	goMain([]string{"lioss", "--dbpath", "../../testdata/test.liossdb", "--algorithm", "6gram", "../../testdata/project3.jar", "../../testdata/project4", "main.go"})
+	goMain([]string{"lioss", "--database-path", "../../testdata/test.liossdb", "--algorithm", "6gram", "../../testdata/project3.jar", "../../testdata/project4", "main.go"})
 	// Output:
 	// ../../testdata/project3.jar/project3/license
 	// 	Apache-License-2.0 (1.0000)
@@ -105,15 +80,18 @@ func Example_lioss() {
 func Example_printHelp() {
 	goMain([]string{"lioss", "--help"})
 	// Output:
-	// lioss version 0.9.0
+	// lioss version 1.0.0
 	// lioss [OPTIONS] <PROJECTS...>
 	// OPTIONS
-	//         --dbpath <DBPATH>          specifying database path.
+	//         --database-path <PATH>     specifies the database path.
+	//                                    If specifying this option, database-type option is ignored.
+	//         --database-type <TYPE>     specifies the database type. Default is whole.
+	//                                    Available values are: base, osi, deprecated, and whole.
 	//     -a, --algorithm <ALGORITHM>    specifies algorithm. Default is 5gram.
 	//                                    Available values are: kgram, wordfreq, and tfidf.
 	//     -t, --threshold <THRESHOLD>    specifies threshold of the similarities of license files.
 	//                                    Each algorithm has default value. Default value is 0.75.
-	//     -h, --help                     print this message.
+	//     -h, --help                     prints this message.
 	// PROJECTS
 	//     project directories, and/or archive files contains LICENSE file.
 }

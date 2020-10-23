@@ -1,6 +1,6 @@
 GO := go
 NAME := lioss
-VERSION := 0.9.0
+VERSION := 1.0.0
 DIST := $(NAME)-$(VERSION)
 
 all: test build
@@ -36,9 +36,10 @@ build: test
 	$(GO) build -o spdx2liossdb -v cmd/spdx2liossdb/main.go
 
 createdb: build
-	./spdx2liossdb -d data/SPDX-ALL.liossgz                spdx/src
-	./spdx2liossdb -d data/SPDX-OSI-APPROVED.liossgz       spdx/src --osi-approved
-	./spdx2liossdb -d data/SPDX-EXCLUDE-DEPRECATED.liossgz spdx/src --exclude-deprecated
+	./spdx2liossdb -d data/NoneOSIApproved.liossgz spdx/src --without-deprecated   --without-osi-approved
+	./spdx2liossdb -d data/OSIDeprecated.liossgz   spdx/src --with-deprecated      --with-osi-approved
+	./spdx2liossdb -d data/OSIApproved.liossgz     spdx/src --without-deprecated   --with-osi-approved
+	./spdx2liossdb -d data/Deprecated.liossgz      spdx/src --with-deprecated      --without-osi-approved
 
 define _createDist
 	mkdir -p dist/$(1)_$(2)/$(DIST)/data

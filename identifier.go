@@ -6,7 +6,7 @@ import (
 )
 
 /*
-Identifier is to identify the license.
+Identifier is a type for identifying the license.
 */
 type Identifier struct {
 	Threshold  float64
@@ -15,11 +15,17 @@ type Identifier struct {
 }
 
 /*
-Result shows identified results.
+Result shows identified license and its probability.
 */
 type Result struct {
-	Name        string
+	/*Name shows the license name.*/
+	Name string
+	/*Probability represents the probability of the license, by range of 0.0 to 1.0.*/
 	Probability float64
+}
+
+func (result *Result) String() string {
+	return fmt.Sprintf("%s (%f)", result.Name, result.Probability)
 }
 
 /*
@@ -39,10 +45,32 @@ func NewIdentifier(algorithmName string, threshold float64, db *Database) (*Iden
 	return identifier, nil
 }
 
+/*Identify identifies the license of the given project. */
+func (identifier *Identifier) Identify(project Project) (map[LicenseFile][]*Result, error) {
+	ids := project.LicenseIDs()
+	resultMap := map[LicenseFile][]*Result{}
+	for _, id := range ids {
+		file, err := project.LicenseFile(id)
+		if err != nil {
+			return nil, err
+		}
+		license, err := identifier.readLicense(file)
+		if err != nil {
+			return nil, err
+		}
+		results, err := identifier.identify(license)
+		if err != nil {
+			return nil, err
+		}
+		resultMap[file] = results
+	}
+	return resultMap, nil
+}
+
 /*
 ReadLicense reads License from given LicenseFile.
 */
-func (identifier *Identifier) ReadLicense(file LicenseFile) (*License, error) {
+func (identifier *Identifier) readLicense(file LicenseFile) (*License, error) {
 	license, err := identifier.Comparator.Parse(file, file.ID())
 	defer file.Close()
 	if err != nil {
@@ -64,10 +92,7 @@ func filter(results []*Result, threshold float64) []*Result {
 	return filteredResults
 }
 
-/*
-Identify identifies the given license.
-*/
-func (identifier *Identifier) Identify(baseLicense *License) ([]*Result, error) {
+func (identifier *Identifier) identify(baseLicense *License) ([]*Result, error) {
 	licenses := identifier.Database.Entries(identifier.Comparator.String())
 	results := []*Result{}
 	for _, license := range licenses {

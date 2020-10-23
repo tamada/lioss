@@ -31,9 +31,10 @@ func TestLoadDatabase(t *testing.T) {
 		wontLicenseSize   int
 		wontAlgorithmSize int
 	}{
-		{BASE_DATABASE, 269, 11},
-		{OSI_APPROVED_DATABASE, 393, 11},
-		{DEPRECATED_DATABASE, 297, 11},
+		{NONE_OSI_APPROVED_DATABASE, 269, 11},
+		{OSI_APPROVED_DATABASE, 112, 11},
+		{OSI_DEPRECATED_DATABASE, 12, 11},
+		{DEPRECATED_DATABASE, 16, 11},
 		{WHOLE_DATABASE, 409, 11},
 	}
 	for _, td := range testdata {

@@ -17,6 +17,7 @@ type LicenseFile interface {
 	ID() string
 	Read(p []byte) (int, error)
 	Close() error
+	String() string
 }
 
 /*
@@ -91,14 +92,15 @@ func (blf *basicLicenseFile) Close() error {
 	return blf.reader.Close()
 }
 
+func (blf *basicLicenseFile) String() string {
+	return blf.ID()
+}
+
 func isContainOtherWord(fileName string) bool {
 	ext := filepath.Ext(fileName)
 	return len(fileName) > len(ext)+len("license")
 }
 
-/*
-IsLicenseFile confirms the given path is the license file.
-*/
 func isLicenseFile(path string) bool {
 	fileName := strings.ToLower(filepath.Base(path))
 	return strings.HasPrefix(fileName, "license") && !isContainOtherWord(fileName)

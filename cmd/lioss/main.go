@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+	"sort"
+	"strings"
 
 	flag "github.com/spf13/pflag"
 	"github.com/tamada/lioss"
@@ -11,14 +13,12 @@ import (
 /*
 VERSION shows the version of the lioss.
 */
-const VERSION = "0.9.0"
-
-const defaultDBPath = "data/SPDX-ALL.liossgz"
-const dbpathEnvName = "LIOSS_DBPATH"
+const VERSION = "1.0.0"
 
 type liossOptions struct {
 	helpFlag  bool
-	dbpath    string
+	dbtype    string
+	dbPath    string
 	algorithm string
 	threshold float64
 }
@@ -27,12 +27,15 @@ func helpMessage(appName string) string {
 	return fmt.Sprintf(`%s version %s
 %s [OPTIONS] <PROJECTS...>
 OPTIONS
-        --dbpath <DBPATH>          specifying database path.
+        --database-path <PATH>     specifies the database path.
+                                   If specifying this option, database-type option is ignored.
+        --database-type <TYPE>     specifies the database type. Default is whole.
+                                   Available values are: base, osi, deprecated, and whole.
     -a, --algorithm <ALGORITHM>    specifies algorithm. Default is 5gram.
                                    Available values are: kgram, wordfreq, and tfidf.
     -t, --threshold <THRESHOLD>    specifies threshold of the similarities of license files.
                                    Each algorithm has default value. Default value is 0.75.
-    -h, --help                     print this message.
+    -h, --help                     prints this message.
 PROJECTS
     project directories, and/or archive files contains LICENSE file.
 `, appName, VERSION, appName)
@@ -50,26 +53,26 @@ func printErrors(err error, status int) int {
 	return status
 }
 
-func identifyLicense(identifier *lioss.Identifier, project lioss.Project, id string) ([]*lioss.Result, error) {
-	file, err := project.LicenseFile(id)
-	if err != nil {
-		return nil, err
+func extractKeys(rm map[lioss.LicenseFile][]*lioss.Result) []lioss.LicenseFile {
+	slice := []lioss.LicenseFile{}
+	for k, _ := range rm {
+		slice = append(slice, k)
 	}
-	license, err := identifier.ReadLicense(file)
-	if err != nil {
-		return nil, err
-	}
-	return identifier.Identify(license)
+	sort.Slice(slice, func(i, j int) bool {
+		return slice[i].ID() < slice[j].ID()
+	})
+	return slice
 }
 
 func printResults(identifier *lioss.Identifier, project lioss.Project) {
-	for _, id := range project.LicenseIDs() {
-		results, err := identifyLicense(identifier, project, id)
-		if err != nil {
-			fmt.Printf("%s/%s: %s\n", project.BasePath(), id, err.Error())
-			continue
-		}
-		printResult(project, id, results)
+	resultMap, err := identifier.Identify(project)
+	if err != nil {
+		fmt.Printf(`%s: %s\n`, project.BasePath(), err.Error())
+		return
+	}
+	keys := extractKeys(resultMap)
+	for _, key := range keys {
+		printResult(project, key.ID(), resultMap[key])
 	}
 }
 
@@ -86,17 +89,30 @@ func performEach(identifier *lioss.Identifier, arg string, opts *liossOptions) {
 	}
 }
 
-func databasePath(dbpath string) string {
-	if dbpath == defaultDBPath || dbpath == "" {
-		if envValue := os.Getenv(dbpathEnvName); envValue != "" {
-			return envValue
-		}
+func dbType(opts *liossOptions) lioss.DatabaseType {
+	switch strings.ToLower(opts.dbtype) {
+	case "whole":
+		return lioss.WHOLE_DATABASE
+	case "osi":
+		return lioss.OSI_APPROVED_DATABASE
+	case "deprecated":
+		return lioss.DEPRECATED_DATABASE
+	case "non-osi":
+		return lioss.NONE_OSI_APPROVED_DATABASE
 	}
-	return dbpath
+	return -1
+}
+
+func loadDatabase(opts *liossOptions) (*lioss.Database, error) {
+	if opts.dbPath == "" {
+		return lioss.LoadDatabase(dbType(opts))
+	}
+	return lioss.ReadDatabase(opts.dbPath)
 }
 
 func perform(args []string, opts *liossOptions) int {
-	db, err := lioss.ReadDatabase(opts.dbpath)
+	db, err := loadDatabase(opts)
+
 	if err != nil {
 		return printErrors(err, 1)
 	}
@@ -115,8 +131,9 @@ func buildFlagSet() (*flag.FlagSet, *liossOptions) {
 	var flags = flag.NewFlagSet("lioss", flag.ContinueOnError)
 	flags.Usage = func() { fmt.Println(helpMessage("lioss")) }
 	flags.BoolVarP(&opts.helpFlag, "help", "h", false, "print this message")
-	flags.StringVarP(&opts.dbpath, "dbpath", "d", defaultDBPath, "specifies database path")
 	flags.StringVarP(&opts.algorithm, "algorithm", "a", "5gram", "specifies algorithm")
+	flags.StringVarP(&opts.dbtype, "database-type", "d", "whole", "specifies the database type")
+	flags.StringVarP(&opts.dbPath, "database-path", "p", "", "specifies the database path")
 	flags.Float64VarP(&opts.threshold, "threshold", "t", 0.75, "specifies threshold")
 	return flags, opts
 }
@@ -128,7 +145,6 @@ func parseOptions(args []string, flags *flag.FlagSet, opts *liossOptions) (int, 
 	if opts.isHelpFlag() {
 		return 0, fmt.Errorf("%s", helpMessage(args[0]))
 	}
-	opts.dbpath = databasePath(opts.dbpath)
 	if err := validateOptions(opts, flags.Args()[1:]); err != nil {
 		return 2, err
 	}

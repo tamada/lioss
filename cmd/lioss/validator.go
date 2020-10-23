@@ -32,13 +32,27 @@ func isValidArgs(args []string) bool {
 	return len(args) > 0
 }
 
+func isValidDBType(name string) bool {
+	validItems := []string{"whole", "osi", "deprecated", "base"}
+	lower := strings.ToLower(name)
+	for _, item := range validItems {
+		if item == lower {
+			return true
+		}
+	}
+	return false
+}
+
 func existsFile(filename string) bool {
 	_, err := os.Stat(filename)
 	return err == nil
 }
 
 func isValidDBPath(dbpath string) bool {
-	return existsFile(dbpath)
+	if dbpath != "" {
+		return existsFile(dbpath)
+	}
+	return true
 }
 
 func validateOptions(opts *liossOptions, args []string) error {
@@ -51,8 +65,11 @@ func validateOptions(opts *liossOptions, args []string) error {
 	if !isValidArgs(args) {
 		return fmt.Errorf("no arguments")
 	}
-	if !isValidDBPath(opts.dbpath) {
-		return fmt.Errorf("%s: file not found", opts.dbpath)
+	if !isValidDBPath(opts.dbPath) {
+		return fmt.Errorf("%s: file not found", opts.dbPath)
+	}
+	if !isValidDBType(opts.dbtype) {
+		return fmt.Errorf("%s: invalid database type", opts.dbtype)
 	}
 	return nil
 }

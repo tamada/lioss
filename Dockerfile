@@ -1,5 +1,5 @@
 FROM alpine:3.10.1
-ARG version="0.9.0"
+ARG version="1.0.0"
 LABEL maintainer="Haruaki Tamada" \
     lioss-version="${version}" \
     description="License Identifier for Open Source Software."
