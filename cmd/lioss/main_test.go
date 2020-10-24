@@ -2,6 +2,8 @@ package main
 
 import (
 	"testing"
+
+	"github.com/tamada/lioss"
 )
 
 func TestInvalidOptions(t *testing.T) {
@@ -12,6 +14,7 @@ func TestInvalidOptions(t *testing.T) {
 		message    string
 	}{
 		{[]string{"lioss"}, true, 2, "no arguments"},
+		{[]string{"lioss", "--algorithm", "tfidf"}, true, 2, "no arguments"},
 		{[]string{"lioss", "-a", "unknown"}, true, 2, "unknown: unknown algorithm"},
 		{[]string{"lioss", "-t", "2.0"}, true, 2, "2.000000: threshold must be 0.0 to 1.0"},
 		{[]string{"lioss", "--database-path", "no/such/file", "../../LICENSE"}, true, 2, "no/such/file: file not found"},
@@ -29,6 +32,26 @@ func TestInvalidOptions(t *testing.T) {
 		}
 		if err != nil && err.Error() != td.message {
 			t.Errorf("error message of parseOptions(%v) did not match, wont %s, got %s", td.args, td.message, err.Error())
+		}
+	}
+}
+
+func TestDatabaseType(t *testing.T) {
+	testdata := []struct {
+		types    string
+		wontType lioss.DatabaseType
+	}{
+		{"osi", lioss.OSI_APPROVED_DATABASE},
+		{"non-osi,osi", lioss.OSI_APPROVED_DATABASE | lioss.NONE_OSI_APPROVED_DATABASE},
+		{"deprecated,osi-deprecated,osi", lioss.OSI_APPROVED_DATABASE | lioss.DEPRECATED_DATABASE | lioss.OSI_DEPRECATED_DATABASE},
+		{"osi,non-osi,deprecated,osi-deprecated", lioss.WHOLE_DATABASE},
+		{"whole", lioss.WHOLE_DATABASE},
+	}
+	for _, td := range testdata {
+		opts := &liossOptions{dbtype: td.types}
+		gotType := dbTypes(opts)
+		if gotType != td.wontType {
+			t.Errorf("%s: result did not match, wont %s, got %s", td.types, td.wontType, gotType)
 		}
 	}
 }
@@ -63,7 +86,6 @@ func Example_invalidCLIOptions() {
 	goMain([]string{"lioss", "--unknown"})
 	// Output:
 	// unknown flag: --unknown
-
 }
 
 func Example_lioss() {

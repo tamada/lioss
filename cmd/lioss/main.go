@@ -89,8 +89,20 @@ func performEach(identifier *lioss.Identifier, arg string, opts *liossOptions) {
 	}
 }
 
-func dbType(opts *liossOptions) lioss.DatabaseType {
-	switch strings.ToLower(opts.dbtype) {
+func dbTypes(opts *liossOptions) lioss.DatabaseType {
+	typeSlice := strings.Split(opts.dbtype, ",")
+	var dbtype lioss.DatabaseType = 0
+	for _, item := range typeSlice {
+		t := dbType(item)
+		if t != -1 {
+			dbtype = dbtype | t
+		}
+	}
+	return dbtype
+}
+
+func dbType(typeString string) lioss.DatabaseType {
+	switch strings.ToLower(typeString) {
 	case "whole":
 		return lioss.WHOLE_DATABASE
 	case "osi":
@@ -107,7 +119,7 @@ func dbType(opts *liossOptions) lioss.DatabaseType {
 
 func loadDatabase(opts *liossOptions) (*lioss.Database, error) {
 	if opts.dbPath == "" {
-		return lioss.LoadDatabase(dbType(opts))
+		return lioss.LoadDatabase(dbTypes(opts))
 	}
 	return lioss.ReadDatabase(opts.dbPath)
 }
