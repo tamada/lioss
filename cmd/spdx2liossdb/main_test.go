@@ -94,7 +94,7 @@ func TestParseOptions(t *testing.T) {
 		if opts.helpFlag != td.wontHelp {
 			t.Errorf("parseOptions(%v) helpFlag did not match, wont %v", td.args, td.wontHelp)
 		}
-		if opts.runtimeOpts.verbose != td.wontVerbose {
+		if opts.runtimeOpts.verboseOpt != td.wontVerbose {
 			t.Errorf("parseOptions(%v) verbose flag did not match, wont %v", td.args, td.wontVerbose)
 		}
 		if opts.runtimeOpts.deprecated.without != td.wontExcludeDeprecated {

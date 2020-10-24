@@ -52,6 +52,11 @@ func (dt DatabaseType) String() string {
 	}
 }
 
+type dbTypeAndPath struct {
+	dbType DatabaseType
+	path   string
+}
+
 /*LoadDatabase loads the lioss database from system path.
 This function search the following directories.
 
@@ -67,27 +72,29 @@ func LoadDatabase(databaseTypes DatabaseType) (*Database, error) {
 	if err != nil {
 		return nil, err
 	}
-	db := NewDatabase()
-	dbTypeAndPaths := []struct {
-		dt   DatabaseType
-		path string
-	}{
+	dbTypeAndPaths := []dbTypeAndPath{
 		{NONE_OSI_APPROVED_DATABASE, "NoneOSIApproved.liossgz"},
 		{OSI_DEPRECATED_DATABASE, "OSIDeprecated.liossgz"},
 		{OSI_APPROVED_DATABASE, "OSIApproved.liossgz"},
 		{DEPRECATED_DATABASE, "Deprecated.liossgz"},
 	}
+	db := NewDatabase()
 	for _, typeAndPath := range dbTypeAndPaths {
-		if databaseTypes.IsType(typeAndPath.dt) {
-			db2, err := ReadDatabase(filepath.Join(dir, typeAndPath.path))
-			if err != nil {
-				fmt.Printf("%s/%s: %s\n", dir, typeAndPath.path, err.Error())
-				continue
-			}
-			db = db.Merge(db2)
-		}
+		db = loadAndMergeDB(db, dir, databaseTypes, typeAndPath)
 	}
 	return db, nil
+}
+
+func loadAndMergeDB(db *Database, dir string, dbTypes DatabaseType, tp dbTypeAndPath) *Database {
+	if dbTypes.IsType(tp.dbType) {
+		db2, err := ReadDatabase(filepath.Join(dir, tp.path))
+		if err != nil {
+			fmt.Printf("%s/%s: %s\n", dir, tp.path, err.Error())
+			return db
+		}
+		db = db.Merge(db2)
+	}
+	return db
 }
 
 func (db *Database) Merge(other *Database) *Database {

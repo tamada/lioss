@@ -50,21 +50,26 @@ func (identifier *Identifier) Identify(project Project) (map[LicenseFile][]*Resu
 	ids := project.LicenseIDs()
 	resultMap := map[LicenseFile][]*Result{}
 	for _, id := range ids {
-		file, err := project.LicenseFile(id)
+		file, results, err := identifier.identifyEach(project, id)
 		if err != nil {
-			return nil, err
-		}
-		license, err := identifier.readLicense(file)
-		if err != nil {
-			return nil, err
-		}
-		results, err := identifier.identify(license)
-		if err != nil {
-			return nil, err
+			return resultMap, err
 		}
 		resultMap[file] = results
 	}
 	return resultMap, nil
+}
+
+func (identifier *Identifier) identifyEach(project Project, id string) (LicenseFile, []*Result, error) {
+	file, err := project.LicenseFile(id)
+	if err != nil {
+		return file, nil, err
+	}
+	license, err := identifier.readLicense(file)
+	if err != nil {
+		return file, nil, err
+	}
+	results, err := identifier.identify(license)
+	return file, results, err
 }
 
 /*

@@ -43,9 +43,11 @@ func NewAlgorithm(name string) (Algorithm, error) {
 	lowerName := strings.ToLower(name)
 	if strings.HasSuffix(lowerName, "gram") {
 		return createNGramAlgorithm(name)
-	} else if lowerName == "wordfreq" {
+	}
+	switch lowerName {
+	case "wordfreq":
 		return newWordFreq(), nil
-	} else if lowerName == "tfidf" {
+	case "tfidf":
 		return newTfidf(), nil
 	}
 	return nil, fmt.Errorf("%s: unknown algorithm", lowerName)

@@ -16,31 +16,40 @@ func contains(word string, set []string) bool {
 	return false
 }
 
-func isValidAlgorithm(name string) bool {
-	if strings.HasSuffix(name, "gram") {
-		_, err := strconv.Atoi(strings.ReplaceAll(name, "gram", ""))
-		return err == nil
+func isValidAlgorithm(opts *liossOptions) error {
+	if strings.HasSuffix(opts.algorithm, "gram") {
+		_, err := strconv.Atoi(strings.ReplaceAll(opts.algorithm, "gram", ""))
+		return err
 	}
-	return contains(name, []string{"tfidf", "wordfreq"})
+	if !contains(opts.algorithm, []string{"tfidf", "wordfreq"}) {
+		fmt.Errorf("%s: unknown algorithm", opts.algorithm)
+	}
+	return nil
 }
 
-func isValidThreshold(threshold float64) bool {
-	return threshold >= 0.0 && threshold <= 1.0
+func isValidThreshold(opts *liossOptions) error {
+	if opts.threshold >= 0.0 && opts.threshold <= 1.0 {
+		return nil
+	}
+	return fmt.Errorf("%f: threshold must be 0.0 to 1.0", opts.threshold)
 }
 
-func isValidArgs(args []string) bool {
-	return len(args) > 0
+func isValidArgs(args []string) error {
+	if len(args) > 0 {
+		return nil
+	}
+	return fmt.Errorf("no arguments")
 }
 
-func isValidDBType(name string) bool {
+func isValidDBType(opts *liossOptions) error {
 	validItems := []string{"whole", "osi", "deprecated", "base"}
-	lower := strings.ToLower(name)
+	lower := strings.ToLower(opts.dbtype)
 	for _, item := range validItems {
 		if item == lower {
-			return true
+			return nil
 		}
 	}
-	return false
+	return fmt.Errorf("%s: invalid database type", opts.dbtype)
 }
 
 func existsFile(filename string) bool {
@@ -48,28 +57,21 @@ func existsFile(filename string) bool {
 	return err == nil
 }
 
-func isValidDBPath(dbpath string) bool {
-	if dbpath != "" {
-		return existsFile(dbpath)
+func isValidDBPath(opts *liossOptions) error {
+	if opts.dbPath != "" && !existsFile(opts.dbPath) {
+		return fmt.Errorf("%s: file not found", opts.dbPath)
 	}
-	return true
+	return nil
 }
 
 func validateOptions(opts *liossOptions, args []string) error {
-	if !isValidAlgorithm(opts.algorithm) {
-		return fmt.Errorf("%s: unknown algorithm", opts.algorithm)
+	validators := [](func(opts *liossOptions) error){
+		isValidAlgorithm, isValidThreshold, isValidDBPath, isValidDBType,
 	}
-	if !isValidThreshold(opts.threshold) {
-		return fmt.Errorf("%f: threshold must be 0.0 to 1.0", opts.threshold)
+	for _, validator := range validators {
+		if err := validator(opts); err != nil {
+			return err
+		}
 	}
-	if !isValidArgs(args) {
-		return fmt.Errorf("no arguments")
-	}
-	if !isValidDBPath(opts.dbPath) {
-		return fmt.Errorf("%s: file not found", opts.dbPath)
-	}
-	if !isValidDBType(opts.dbtype) {
-		return fmt.Errorf("%s: invalid database type", opts.dbtype)
-	}
-	return nil
+	return isValidArgs(args)
 }

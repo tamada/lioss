@@ -39,9 +39,21 @@ type withWithout struct {
 }
 
 type runtimeOptions struct {
-	verbose     bool
+	verboseOpt  bool
 	osiApproved *withWithout
 	deprecated  *withWithout
+}
+
+func (ro *runtimeOptions) verbose(message string) {
+	if ro.verboseOpt {
+		fmt.Println(message)
+	}
+}
+
+func (ro *runtimeOptions) verbosef(format string, v ...interface{}) {
+	if ro.verboseOpt {
+		fmt.Printf(format, v...)
+	}
 }
 
 func (ww *withWithout) is() bool {
@@ -66,11 +78,15 @@ func (ww *withWithout) validate() error {
 }
 
 func isTargetLicense(opts *runtimeOptions, meta *lib.LicenseMeta) bool {
-	if opts.deprecated.is() && opts.osiApproved.is() {
+	return isTargetLicenseImpl(opts.deprecated.is(), opts.osiApproved.is(), meta)
+}
+
+func isTargetLicenseImpl(deprecated, osiApproved bool, meta *lib.LicenseMeta) bool {
+	if deprecated && osiApproved {
 		return meta.Deprecated && meta.OsiApproved
-	} else if opts.deprecated.is() && !opts.osiApproved.is() {
+	} else if deprecated && !osiApproved {
 		return meta.Deprecated && !meta.OsiApproved
-	} else if !opts.deprecated.is() && opts.osiApproved.is() {
+	} else if !deprecated && osiApproved {
 		return !meta.Deprecated && meta.OsiApproved
 	}
 	return !meta.Deprecated && !meta.OsiApproved
@@ -84,9 +100,7 @@ func readLicense(algo lioss.Algorithm, path string, opts *runtimeOptions) (*lios
 	if !isTargetLicense(opts, meta) {
 		return nil, nil
 	}
-	if opts.verbose {
-		fmt.Printf("\t%s\n", meta.String())
-	}
+	opts.verbosef("\t%s\n", meta.String())
 	return algo.Parse(strings.NewReader(licenseData), meta.Names.ShortName)
 }
 
@@ -125,27 +139,33 @@ func performEach(db *lioss.Database, algorithmName, target string, opts *runtime
 	if err != nil {
 		return err
 	}
-	if opts.verbose {
-		fmt.Println(algorithmName)
-	}
+	opts.verbose(algorithmName)
 	return performEachAlgorithm(db, algo, target, opts)
+}
+
+func performImpl(db *lioss.Database, target string, opts *runtimeOptions) (int, error) {
+	size := 0
+	for _, algorithmName := range lioss.AvailableAlgorithms {
+		err := performEach(db, algorithmName, target, opts)
+		if err != nil {
+			return size, err
+		}
+		size = len(db.Data[algorithmName])
+	}
+	return size, nil
 }
 
 func perform(dest, target string, opts *runtimeOptions) error {
 	fmt.Printf("read SPDX licenses %s-osi-approved, and %s-deprecated\n", opts.osiApproved.String(), opts.deprecated.String())
 	db := lioss.NewDatabase()
-	size := 0
-	for _, algorithmName := range lioss.AvailableAlgorithms {
-		err := performEach(db, algorithmName, target, opts)
-		size = len(db.Data[algorithmName])
-		if err != nil {
-			return err
-		}
+	size, err := performImpl(db, target, opts)
+	if err != nil {
+		return err
 	}
 	fmt.Printf("parse %d licenses for %d algorithms, and write database to %s...", size, len(db.Data), dest)
-	err := db.WriteTo(dest)
+	err2 := db.WriteTo(dest)
 	fmt.Println(" done")
-	return err
+	return err2
 }
 
 func buildFlagSet(args []string) (*flag.FlagSet, *cliOptions) {
@@ -158,7 +178,7 @@ func buildFlagSet(args []string) (*flag.FlagSet, *cliOptions) {
 	flags.BoolVar(&opts.runtimeOpts.osiApproved.without, "without-osi-approved", false, "exclude OSI approved licenses")
 	flags.BoolVar(&opts.runtimeOpts.deprecated.with, "with-deprecated", false, "exclude deprecated licenses")
 	flags.BoolVar(&opts.runtimeOpts.osiApproved.with, "with-osi-approved", false, "exclude OSI approved licenses")
-	flags.BoolVarP(&opts.runtimeOpts.verbose, "verbose", "v", false, "verbose mode")
+	flags.BoolVarP(&opts.runtimeOpts.verboseOpt, "verbose", "v", false, "verbose mode")
 	flags.StringVarP(&opts.dest, "dest", "d", "default.liossdb", "specifies destination of liossdb")
 	return flags, opts
 }
