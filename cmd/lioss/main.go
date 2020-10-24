@@ -29,8 +29,8 @@ func helpMessage(appName string) string {
 OPTIONS
         --database-path <PATH>     specifies the database path.
                                    If specifying this option, database-type option is ignored.
-        --database-type <TYPE>     specifies the database type. Default is whole.
-                                   Available values are: base, osi, deprecated, and whole.
+        --database-type <TYPE>     specifies the database type. Default is osi.
+                                   Available values are: non-osi, osi, deprecated, osi-deprecated, and whole.
     -a, --algorithm <ALGORITHM>    specifies algorithm. Default is 5gram.
                                    Available values are: kgram, wordfreq, and tfidf.
     -t, --threshold <THRESHOLD>    specifies threshold of the similarities of license files.
@@ -99,6 +99,8 @@ func dbType(opts *liossOptions) lioss.DatabaseType {
 		return lioss.DEPRECATED_DATABASE
 	case "non-osi":
 		return lioss.NONE_OSI_APPROVED_DATABASE
+	case "osi-deprecated":
+		return lioss.OSI_DEPRECATED_DATABASE
 	}
 	return -1
 }

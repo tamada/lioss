@@ -22,7 +22,7 @@ func isValidAlgorithm(opts *liossOptions) error {
 		return err
 	}
 	if !contains(opts.algorithm, []string{"tfidf", "wordfreq"}) {
-		fmt.Errorf("%s: unknown algorithm", opts.algorithm)
+		return fmt.Errorf("%s: unknown algorithm", opts.algorithm)
 	}
 	return nil
 }
