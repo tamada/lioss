@@ -134,7 +134,7 @@ func buildFlagSet() (*flag.FlagSet, *liossOptions) {
 	flags.Usage = func() { fmt.Println(helpMessage("lioss")) }
 	flags.BoolVarP(&opts.helpFlag, "help", "h", false, "print this message")
 	flags.StringVarP(&opts.algorithm, "algorithm", "a", "5gram", "specifies algorithm")
-	flags.StringVarP(&opts.dbtype, "database-type", "d", "whole", "specifies the database type")
+	flags.StringVarP(&opts.dbtype, "database-type", "d", "osi", "specifies the database type")
 	flags.StringVarP(&opts.dbPath, "database-path", "p", "", "specifies the database path")
 	flags.Float64VarP(&opts.threshold, "threshold", "t", 0.75, "specifies threshold")
 	return flags, opts

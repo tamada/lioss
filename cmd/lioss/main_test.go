@@ -85,8 +85,8 @@ func Example_printHelp() {
 	// OPTIONS
 	//         --database-path <PATH>     specifies the database path.
 	//                                    If specifying this option, database-type option is ignored.
-	//         --database-type <TYPE>     specifies the database type. Default is whole.
-	//                                    Available values are: base, osi, deprecated, and whole.
+	//         --database-type <TYPE>     specifies the database type. Default is osi.
+	//                                    Available values are: non-osi, osi, deprecated, osi-deprecated, and whole.
 	//     -a, --algorithm <ALGORITHM>    specifies algorithm. Default is 5gram.
 	//                                    Available values are: kgram, wordfreq, and tfidf.
 	//     -t, --threshold <THRESHOLD>    specifies threshold of the similarities of license files.

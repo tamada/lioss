@@ -42,7 +42,7 @@ func isValidArgs(args []string) error {
 }
 
 func isValidDBType(opts *liossOptions) error {
-	validItems := []string{"whole", "osi", "deprecated", "base"}
+	validItems := []string{"whole", "osi", "deprecated", "non-osi", "osi-deprecated"}
 	lower := strings.ToLower(opts.dbtype)
 	for _, item := range validItems {
 		if item == lower {
