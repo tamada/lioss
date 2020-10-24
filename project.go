@@ -17,15 +17,20 @@ type LicenseFile interface {
 	ID() string
 	Read(p []byte) (int, error)
 	Close() error
+	String() string
 }
 
 /*
 Project shows project containing some licenses.
 */
 type Project interface {
+	/* BasePath returns the project path. */
 	BasePath() string
+	/* Close closes the project, and after call this method, this project is not available. */
 	Close() error
+	/* LicenseIDs returns the ids for licenses in the project. */
 	LicenseIDs() []string
+	/* LicenseFile returns the path of the License files in the project. */
 	LicenseFile(licenseID string) (LicenseFile, error)
 }
 
@@ -50,18 +55,18 @@ func newFileProject(path string) (Project, error) {
 		return nil, err
 	}
 	if kind.MIME.Value == "application/zip" {
-		return &ZipProject{path: path}, nil
+		return &zipProject{path: path}, nil
 	}
-	if IsLicenseFile(filepath.Base(path)) {
-		return &DirProject{baseDir: filepath.Dir(path), licensePaths: []string{filepath.Base(path)}}, nil
+	if isLicenseFile(filepath.Base(path)) {
+		return &dirProject{baseDir: filepath.Dir(path), licensePaths: []string{filepath.Base(path)}}, nil
 	}
 	return nil, fmt.Errorf("%s: unknown project format", path)
 }
 
 /*
-BasicLicenseFile is an instance of LicenseFile.
+basicLicenseFile is an instance of LicenseFile.
 */
-type BasicLicenseFile struct {
+type basicLicenseFile struct {
 	id     string
 	reader io.ReadCloser
 }
@@ -69,22 +74,26 @@ type BasicLicenseFile struct {
 /*
 ID returns id of blf.
 */
-func (blf *BasicLicenseFile) ID() string {
+func (blf *basicLicenseFile) ID() string {
 	return blf.id
 }
 
 /*
 Read reads data from license file of blf.
 */
-func (blf *BasicLicenseFile) Read(p []byte) (int, error) {
+func (blf *basicLicenseFile) Read(p []byte) (int, error) {
 	return blf.reader.Read(p)
 }
 
 /*
 Close closes the file.
 */
-func (blf *BasicLicenseFile) Close() error {
+func (blf *basicLicenseFile) Close() error {
 	return blf.reader.Close()
+}
+
+func (blf *basicLicenseFile) String() string {
+	return blf.ID()
 }
 
 func isContainOtherWord(fileName string) bool {
@@ -92,10 +101,7 @@ func isContainOtherWord(fileName string) bool {
 	return len(fileName) > len(ext)+len("license")
 }
 
-/*
-IsLicenseFile confirms the given path shows the license file.
-*/
-func IsLicenseFile(path string) bool {
+func isLicenseFile(path string) bool {
 	fileName := strings.ToLower(filepath.Base(path))
 	return strings.HasPrefix(fileName, "license") && !isContainOtherWord(fileName)
 }

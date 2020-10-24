@@ -16,7 +16,7 @@ func TestRemoveBasePath(t *testing.T) {
 	}
 	for _, td := range testdata {
 		gotResult := removeBasePath(td.giveBasePath, td.givePath)
-		if !IsSamePath(gotResult, td.wontResult) {
+		if !isSamePath(gotResult, td.wontResult) {
 			t.Errorf("result of removeBasePath(%s, %s) did not match, wont %s, got %s", td.giveBasePath, td.givePath, td.wontResult, gotResult)
 		}
 	}
@@ -35,7 +35,7 @@ func TestIsLicenseFile(t *testing.T) {
 	}
 
 	for _, td := range testdata {
-		if IsLicenseFile(td.giveName) != td.wontFlag {
+		if isLicenseFile(td.giveName) != td.wontFlag {
 			t.Errorf("isLicenseFile(%s) wont %v, but %v", td.giveName, td.wontFlag, !td.wontFlag)
 		}
 	}
@@ -61,7 +61,7 @@ func TestFindLicenseFile(t *testing.T) {
 			t.Errorf("%s: length of license path did not match, wont %d, got %d", td.basePath, len(td.licensePaths), len(project.LicenseIDs()))
 		}
 		for i, id := range project.LicenseIDs() {
-			if !IsSamePath(td.licensePaths[i], id) {
+			if !isSamePath(td.licensePaths[i], id) {
 				t.Errorf("license did not match: wont %s, got %s", td.licensePaths[i], id)
 			}
 			file, err := project.LicenseFile(id)

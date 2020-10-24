@@ -15,7 +15,7 @@ func TestNGram(t *testing.T) {
 		{givenData: "abracadabra", nValue: 3, results: map[string]int{"abr": 2, "bra": 2, "rac": 1, "aca": 1, "cad": 1, "ada": 1, "dab": 1}},
 	}
 	for _, td := range testdata {
-		ngram := NewNGram(td.nValue)
+		ngram := newNGram(td.nValue)
 		license, err := ngram.Parse(strings.NewReader(td.givenData), "unknown-license")
 		if err != nil {
 			t.Errorf("parse failed: %s", err.Error())

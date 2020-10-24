@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func readAllLicenses(tfidf Comparator, fromDir string) []*License {
+func readAllLicenses(tfidf Algorithm, fromDir string) []*License {
 	licenses := []*License{}
 	files, _ := ioutil.ReadDir(fromDir)
 	for _, file := range files {
@@ -21,7 +21,7 @@ func readAllLicenses(tfidf Comparator, fromDir string) []*License {
 	return licenses
 }
 
-func CreateDB(tfidf Comparator, fromDir, toPath string) *Database {
+func CreateDB(tfidf Algorithm, fromDir, toPath string) *Database {
 	licenses := readAllLicenses(tfidf, fromDir)
 	db := NewDatabase()
 	db.Data = map[string][]*License{}
@@ -32,7 +32,7 @@ func CreateDB(tfidf Comparator, fromDir, toPath string) *Database {
 	return db
 }
 
-func createLicenseFromFile(tfidf Comparator, path string) *License {
+func createLicenseFromFile(tfidf Algorithm, path string) *License {
 	reader, _ := os.Open(path)
 	defer reader.Close()
 	license, _ := tfidf.Parse(reader, "")
@@ -40,7 +40,7 @@ func createLicenseFromFile(tfidf Comparator, path string) *License {
 }
 
 func TestCompare(t *testing.T) {
-	tfidf := NewTfidf()
+	tfidf := newTfidf()
 	db := CreateDB(tfidf, "data/misc", "tfidf.json")
 	defer os.Remove("tfidf.json")
 	tfidf.Prepare(db)
@@ -72,7 +72,7 @@ I am fine, too!`, results: map[string]int{"today": 1, "is": 1, "fine": 2, "i": 1
 The quick onyx goblin jumps over the lazy dwarf.`, results: map[string]int{"the": 4, "quick": 2, "brown": 1, "fox": 1, "jumps": 2, "over": 2, "lazy": 2, "dog": 1, "onyx": 1, "goblin": 1, "dwarf": 1}},
 	}
 	for _, td := range testdata {
-		tfidf := NewTfidf()
+		tfidf := newTfidf()
 		license, err := tfidf.Parse(strings.NewReader(td.givenData), "unknown-license")
 		if err != nil {
 			t.Errorf("parse failed: %s", err.Error())

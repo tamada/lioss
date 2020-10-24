@@ -6,9 +6,9 @@ import (
 )
 
 /*
-Tfidf is an implementation type of Algorithm.
+tfidf is an implementation type of Algorithm.
 */
-type Tfidf struct {
+type tfidf struct {
 	data map[string]*document
 }
 
@@ -61,15 +61,15 @@ func (val *value) tfidf() float64 {
 /*
 NewTfidf creates an instance of Tfidf.
 */
-func NewTfidf() *Tfidf {
-	return &Tfidf{data: map[string]*document{}}
+func newTfidf() *tfidf {
+	return &tfidf{data: map[string]*document{}}
 }
 
-func (tfidf *Tfidf) String() string {
+func (tfidf *tfidf) String() string {
 	return "tfidf"
 }
 
-func (tfidf *Tfidf) countDocument(word string) int {
+func (tfidf *tfidf) countDocument(word string) int {
 	count := 0
 	for _, document := range tfidf.data {
 		if document.contains(word) {
@@ -79,7 +79,7 @@ func (tfidf *Tfidf) countDocument(word string) int {
 	return count
 }
 
-func calculateTfidf(tfidf *Tfidf, word string, count, total int) *value {
+func calculateTfidf(tfidf *tfidf, word string, count, total int) *value {
 	documentCount := tfidf.countDocument(word)
 	if documentCount == 0 {
 		return nil
@@ -89,7 +89,7 @@ func calculateTfidf(tfidf *Tfidf, word string, count, total int) *value {
 	return value
 }
 
-func calculateAllOfTfidf(tfidf *Tfidf) {
+func calculateAllOfTfidf(tfidf *tfidf) {
 	for _, document := range tfidf.data {
 		total := document.total()
 		for word, value := range document.words {
@@ -99,7 +99,7 @@ func calculateAllOfTfidf(tfidf *Tfidf) {
 	}
 }
 
-func updateLicense(tfidf *Tfidf, license *License) {
+func updateLicense(tfidf *tfidf, license *License) {
 	doc := &document{name: license.Name, words: map[string]*value{}}
 	for word, count := range license.Frequencies {
 		doc.words[word] = &value{word: word, count: count}
@@ -110,7 +110,7 @@ func updateLicense(tfidf *Tfidf, license *License) {
 /*
 Prepare of tfidf calculating tfidf of each document.
 */
-func (tfidf *Tfidf) Prepare(db *Database) error {
+func (tfidf *tfidf) Prepare(db *Database) error {
 	licenses := db.Entries("tfidf")
 	for _, license := range licenses {
 		updateLicense(tfidf, license)
@@ -122,12 +122,12 @@ func (tfidf *Tfidf) Prepare(db *Database) error {
 /*
 Parse parses given data and create an instance of License by tfidf.
 */
-func (tfidf *Tfidf) Parse(reader io.Reader, licenseName string) (*License, error) {
+func (tfidf *tfidf) Parse(reader io.Reader, licenseName string) (*License, error) {
 	result, err := readFully(reader)
 	if err != nil {
 		return nil, err
 	}
-	return BuildWordFreqLicense(licenseName, result)
+	return buildWordFreqLicense(licenseName, result)
 }
 
 func extractKeysFromDocument(doc1, doc2 *document) map[string]int {
@@ -153,13 +153,13 @@ func similarity(doc1, doc2 *document) float64 {
 /*
 Compare computes similarity between given two licenses.
 */
-func (tfidf *Tfidf) Compare(license1, license2 *License) float64 {
+func (tfidf *tfidf) Compare(license1, license2 *License) float64 {
 	doc1 := findDocument(tfidf, license1)
 	doc2 := findDocument(tfidf, license2)
 	return similarity(doc1, doc2)
 }
 
-func findDocument(tfidf *Tfidf, license *License) *document {
+func findDocument(tfidf *tfidf, license *License) *document {
 	doc, ok := tfidf.data[license.Name]
 	if ok {
 		return doc

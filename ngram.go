@@ -6,17 +6,17 @@ import (
 )
 
 /*
-NGram is an implementation type of Algorithm.
+nGram is an implementation type of Algorithm.
 */
-type NGram struct {
+type nGram struct {
 	nValue int
 }
 
 /*
-NewNGram creates an instance of n-gram.
+newNGram creates an instance of n-gram.
 */
-func NewNGram(n int) *NGram {
-	ngram := new(NGram)
+func newNGram(n int) *nGram {
+	ngram := new(nGram)
 	ngram.nValue = n
 	return ngram
 }
@@ -24,18 +24,18 @@ func NewNGram(n int) *NGram {
 /*
 Prepare of NGram do nothing.
 */
-func (ngram *NGram) Prepare(db *Database) error {
+func (ngram *nGram) Prepare(db *Database) error {
 	return nil
 }
 
-func (ngram *NGram) String() string {
+func (ngram *nGram) String() string {
 	return fmt.Sprintf("%dgram", ngram.nValue)
 }
 
 /*
 Parse parses given data and create an instance of License by n-gram.
 */
-func (ngram *NGram) Parse(reader io.Reader, licenseName string) (*License, error) {
+func (ngram *nGram) Parse(reader io.Reader, licenseName string) (*License, error) {
 	result, err := readFully(reader)
 	if err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func ngramFrequency(freq map[string]int, ngram string) int {
 	return value
 }
 
-func (ngram *NGram) buildNGram(result, licenseName string) (*License, error) {
+func (ngram *nGram) buildNGram(result, licenseName string) (*License, error) {
 	freq := map[string]int{}
 	len := len(result) - ngram.nValue + 1
 	data := []byte(result)
@@ -66,6 +66,6 @@ func (ngram *NGram) buildNGram(result, licenseName string) (*License, error) {
 /*
 Compare computes similarity between given two licenses.
 */
-func (ngram *NGram) Compare(license1, license2 *License) float64 {
-	return license1.Similarity(license2)
+func (ngram *nGram) Compare(license1, license2 *License) float64 {
+	return license1.similarity(license2)
 }

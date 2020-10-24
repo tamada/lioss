@@ -13,11 +13,13 @@ func Example_printHelp() {
 	// Output:
 	// spdx2liossdb [OPTIONS] <ARGUMENT>
 	// OPTIONS
-	//     -d, --dest <DEST>           specifies destination.
-	//         --osi-approved          includes only OSI approved licenses.
-	//         --exclude-deprecated    excludes deprecated license.
-	//     -v, --verbose               verbose mode.
-	//     -h, --help                  print this message.
+	//     -d, --dest <DEST>             specifies the destination.
+	//         --with-deprecated         includes deprecated license.
+	//         --without-deprecated      excludes deprecated license.
+	//         --with-osi-approved       includes OSI approved licenses.
+	//         --without-osi-approved    excludes OSI approved licenses.
+	//     -v, --verbose                 verbose mode.
+	//     -h, --help                    prints this message.
 	// ARGUMENT
 	//     the directory contains SPDX license xml files.
 }
@@ -28,10 +30,10 @@ func TestGeneratedDataSize(t *testing.T) {
 		dest     string
 		dataSize int
 	}{
-		{[]string{"spdx2liossdb", "--osi-approved", "--exclude-deprecated", "../../spdx/src"}, "osi.json", 112},
-		{[]string{"spdx2liossdb", "--osi-approved", "../../spdx/src"}, "osi_dep.json", 124},
-		{[]string{"spdx2liossdb", "--exclude-deprecated", "../../spdx/src"}, "dep.json", 381},
-		{[]string{"spdx2liossdb", "../../spdx/src"}, "all.json", 409},
+		{[]string{"spdx2liossdb", "--without-osi-approved", "--without-deprecated", "../../spdx/src"}, "non-osi.liossdb", 269},
+		{[]string{"spdx2liossdb", "--with-osi-approved", "--without-deprecated", "../../spdx/src"}, "osi.liossdb", 112},
+		{[]string{"spdx2liossdb", "--without-osi-approved", "--with-deprecated", "../../spdx/src"}, "deprecated.liossdb", 16},
+		{[]string{"spdx2liossdb", "--with-osi-approved", "--with-deprecated", "../../spdx/src"}, "osi-deprecated.liossdb", 12},
 	}
 
 	wg := new(sync.WaitGroup)
@@ -48,12 +50,9 @@ func testExec(t *testing.T, args []string, dest string, dataSize int, wg *sync.W
 	goMain(args)
 	defer os.Remove(dest)
 	defer wg.Done()
-	db, err := lioss.LoadDatabase(dest)
+	db, err := lioss.ReadDatabase(dest)
 	if err != nil {
-		t.Errorf("database load error: %s", err.Error())
-	}
-	if len(db.Data) != len(lioss.AvailableAlgorithms) {
-		t.Errorf("data size did not match, wont %d, got %d", len(lioss.AvailableAlgorithms), len(db.Data))
+		t.Errorf("testExec(%v): database load error: %s", args, err.Error())
 	}
 	for key, value := range db.Data {
 		if len(value) != dataSize {
@@ -67,7 +66,7 @@ func TestParseOptions(t *testing.T) {
 		args                   []string
 		errorFlag              bool
 		wontHelp               bool
-		wontIncludeOsiApproved bool
+		wontExcludeOsiApproved bool
 		wontExcludeDeprecated  bool
 		wontVerbose            bool
 		wontTarget             string
@@ -75,10 +74,11 @@ func TestParseOptions(t *testing.T) {
 	}{
 		{[]string{}, true, false, false, false, false, "", ""},
 		{[]string{"--unknown-option"}, true, false, false, false, false, "", ""},
-		{[]string{"spdx/src"}, false, false, false, false, false, "spdx/src", "liossdb.json"},
+		{[]string{"spdx/src", "--without-osi-approved", "--without-deprecated"}, false, false, true, true, false, "spdx/src", "default.liossdb"},
 		{[]string{"several", "arguments", "causes", "of", "error"}, true, false, false, false, false, "", ""},
-		{[]string{"-h"}, false, true, false, false, false, "", "liossdb.json"},
-		{[]string{"-v", "-d", "spdx.json", "spdx/src"}, false, false, false, false, true, "spdx/src", "spdx.json"},
+		{[]string{"-h"}, false, true, false, false, false, "", "default.liossdb"},
+		{[]string{"--with-deprecated", "--without-deprecated"}, true, false, false, false, false, "", "default.liossdb"},
+		{[]string{"-v", "-d", "spdx.liossdb", "--with-osi-approved", "--without-deprecated", "spdx/src"}, false, false, false, true, true, "spdx/src", "spdx.liossdb"},
 	}
 
 	for _, td := range testdata {
@@ -94,14 +94,14 @@ func TestParseOptions(t *testing.T) {
 		if opts.helpFlag != td.wontHelp {
 			t.Errorf("parseOptions(%v) helpFlag did not match, wont %v", td.args, td.wontHelp)
 		}
-		if opts.runtimeOpts.verbose != td.wontVerbose {
+		if opts.runtimeOpts.verboseOpt != td.wontVerbose {
 			t.Errorf("parseOptions(%v) verbose flag did not match, wont %v", td.args, td.wontVerbose)
 		}
-		if opts.runtimeOpts.excludeDeprecated != td.wontExcludeDeprecated {
-			t.Errorf("parseOptions(%v) excludeDeprecated flag did not match, wont %v", td.args, td.wontExcludeDeprecated)
+		if opts.runtimeOpts.deprecated.without != td.wontExcludeDeprecated {
+			t.Errorf("parseOptions(%v) withoutDeprecated flag did not match, wont %v", td.args, td.wontExcludeDeprecated)
 		}
-		if opts.runtimeOpts.includeOsiApproved != td.wontIncludeOsiApproved {
-			t.Errorf("parseOptions(%v) includeOsiApproved flag did not match, wont %v", td.args, td.wontIncludeOsiApproved)
+		if opts.runtimeOpts.osiApproved.without != td.wontExcludeOsiApproved {
+			t.Errorf("parseOptions(%v) withoutOsiApproved flag did not match, wont %v", td.args, td.wontExcludeOsiApproved)
 		}
 		if opts.dest != td.wontDest {
 			t.Errorf("parseOptions(%v) dest did not match, wont %s, got %s", td.args, td.wontDest, opts.dest)

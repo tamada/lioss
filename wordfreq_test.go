@@ -16,7 +16,7 @@ I am fine, too!`, results: map[string]int{"today": 1, "is": 1, "fine": 2, "i": 1
 The quick onyx goblin jumps over the lazy dwarf.`, results: map[string]int{"the": 4, "quick": 2, "brown": 1, "fox": 1, "jumps": 2, "over": 2, "lazy": 2, "dog": 1, "onyx": 1, "goblin": 1, "dwarf": 1}},
 	}
 	for _, td := range testdata {
-		wfreq := NewWordFreq()
+		wfreq := newWordFreq()
 		license, err := wfreq.Parse(strings.NewReader(td.givenData), "unknown-license")
 		if err != nil {
 			t.Errorf("parse failed: %s", err.Error())

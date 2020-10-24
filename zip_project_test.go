@@ -24,7 +24,7 @@ func TestNewZipFile(t *testing.T) {
 }
 
 func TestNoLicenseIDs(t *testing.T) {
-	project := &ZipProject{path: "testdata/project3"}
+	project := &zipProject{path: "testdata/project3"}
 	ids := project.LicenseIDs()
 	if len(ids) != 0 {
 		t.Errorf("no zip file, wont 0, got %d", len(ids))

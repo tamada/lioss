@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -14,14 +15,171 @@ import (
 Database represents the database for the lioss.
 */
 type Database struct {
-	Data map[string][]*License `json:"algorithms"`
+	Timestamp *Time                 `json:"create-at"`
+	Data      map[string][]*License `json:"algorithms"`
+}
+
+const DatabasePathEnvName = "LIOSS_DBPATH"
+
+type DatabaseType int
+
+const (
+	OSI_APPROVED_DATABASE      DatabaseType = 1
+	DEPRECATED_DATABASE        DatabaseType = 2
+	OSI_DEPRECATED_DATABASE    DatabaseType = 4
+	NONE_OSI_APPROVED_DATABASE DatabaseType = 8
+	WHOLE_DATABASE             DatabaseType = OSI_APPROVED_DATABASE | DEPRECATED_DATABASE | OSI_DEPRECATED_DATABASE | NONE_OSI_APPROVED_DATABASE
+)
+
+func (dt DatabaseType) IsType(dbType DatabaseType) bool {
+	return dt&dbType == dbType
+}
+
+func (dt DatabaseType) String() string {
+	switch dt {
+	case OSI_DEPRECATED_DATABASE:
+		return "OSI_DEPRECATED_DATABASE"
+	case OSI_APPROVED_DATABASE:
+		return "OSI_APPROVED_DATABASE"
+	case NONE_OSI_APPROVED_DATABASE:
+		return "NONE_OSI_APPROVED_DATABASE"
+	case DEPRECATED_DATABASE:
+		return "DEPRECATED_DATABASE"
+	case WHOLE_DATABASE:
+		return "WHOLE_DATABASE"
+	default:
+		return "UNKNOWN"
+	}
+}
+
+type dbTypeAndPath struct {
+	dbType DatabaseType
+	path   string
+}
+
+/*LoadDatabase loads the lioss database from system path.
+This function search the following directories.
+
+* ENV['LIOSS_DBPATH']
+* /usr/local/opt/lioss/data
+* /opt/lioss/data
+* ./data
+
+If the directory found, this function loads the Base.liossgz, OSIApproved.liossgz, and Deprecated.liossgz as needed.
+*/
+func LoadDatabase(databaseTypes DatabaseType) (*Database, error) {
+	dir, err := availableDatabaseDir()
+	if err != nil {
+		return nil, err
+	}
+	dbTypeAndPaths := []dbTypeAndPath{
+		{NONE_OSI_APPROVED_DATABASE, "NoneOSIApproved.liossgz"},
+		{OSI_DEPRECATED_DATABASE, "OSIDeprecated.liossgz"},
+		{OSI_APPROVED_DATABASE, "OSIApproved.liossgz"},
+		{DEPRECATED_DATABASE, "Deprecated.liossgz"},
+	}
+	db := NewDatabase()
+	for _, typeAndPath := range dbTypeAndPaths {
+		db = loadAndMergeDB(db, dir, databaseTypes, typeAndPath)
+	}
+	return db, nil
+}
+
+func loadAndMergeDB(db *Database, dir string, dbTypes DatabaseType, tp dbTypeAndPath) *Database {
+	if dbTypes.IsType(tp.dbType) {
+		db2, err := ReadDatabase(filepath.Join(dir, tp.path))
+		if err != nil {
+			fmt.Printf("%s/%s: %s\n", dir, tp.path, err.Error())
+			return db
+		}
+		db = db.Merge(db2)
+	}
+	return db
+}
+
+func (db *Database) Merge(other *Database) *Database {
+	newDB := NewDatabase()
+	newDB.Timestamp = db.Timestamp
+	newDB.Data = db.Data
+	for key, licenses := range other.Data {
+		orig := mergeLicense(newDB.Data[key], licenses)
+		newDB.Data[key] = orig
+	}
+	return newDB
+}
+
+func mergeLicense(license1, license2 []*License) []*License {
+	for _, l := range license2 {
+		found := findLicense(l, license1)
+		if !found {
+			license1 = append(license1, l)
+		}
+	}
+	return license1
+}
+
+func findLicense(license *License, array []*License) bool {
+	for _, item := range array {
+		if item.Name == license.Name {
+			return true
+		}
+	}
+	return false
+}
+
+func availableDatabaseDir() (string, error) {
+	bases := []string{
+		os.Getenv(DatabasePathEnvName),
+		"/usr/local/opt/lioss/data",
+		"/opt/lioss/data",
+		"data",
+	}
+	for _, base := range bases {
+		stat, err := os.Stat(base)
+		if err == nil && stat.IsDir() {
+			return base, nil
+		}
+	}
+	return "", fmt.Errorf("lioss database not found.")
 }
 
 /*
 NewDatabase create an instance of database for lioss.
 */
 func NewDatabase() *Database {
-	return &Database{Data: map[string][]*License{}}
+	return &Database{Timestamp: Now(), Data: map[string][]*License{}}
+}
+
+func (db *Database) AlgorithmCount() int {
+	return len(db.Data)
+}
+
+func (db *Database) LicenseCount() int {
+	size := 0
+	for k, v := range db.Data {
+		current := len(v)
+		if size != 0 && size != current {
+			fmt.Printf("%s: license count not match, size: %d, current: %d\n", k, size, current)
+		}
+		size = current
+	}
+	return size
+}
+
+/*WriteTo writes data in the the receiver database into the given file.*/
+func (db *Database) WriteTo(destFile string) error {
+	dest := destination(destFile)
+	writer, err := os.OpenFile(dest, os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	defer writer.Close()
+
+	newWriter := wrapWriter(writer, destFile)
+	err2 := db.Write(newWriter)
+	newWriter.Close() // gzip.Writer should call Close.
+	writer.Close()
+	return err2
 }
 
 /*
@@ -42,32 +200,38 @@ func (db *Database) Write(writer io.Writer) error {
 	return nil
 }
 
-/*
-OutputLiossDB outputs given dbData to file specified in dest.
-*/
-func OutputLiossDB(dest string, dbData map[string][]*License) error {
-	db := NewDatabase()
-	db.Data = dbData
-	writer, err := os.OpenFile(dest, os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		return err
+func replaceExtension(fileName, newExt string) string {
+	index := strings.LastIndex(fileName, ".")
+	if index < 0 {
+		return fileName + "." + newExt
 	}
-	defer writer.Close()
-	newWriter := wrapWriter(writer, dest)
-	return db.Write(newWriter)
+	return fileName[0:index] + "." + newExt
 }
 
-func wrapWriter(writer io.Writer, dest string) io.Writer {
+func destination(dest string) string {
+	if strings.HasSuffix(dest, ".liossdb") || strings.HasSuffix(dest, ".liossgz") {
+		return dest
+	}
+	if strings.HasSuffix(dest, ".liossdb.gz") {
+		return strings.ReplaceAll(dest, ".liossdb.gz", ".liossgz")
+	}
 	if strings.HasSuffix(dest, ".gz") {
+		return strings.ReplaceAll(dest, ".gz", ".liossgz")
+	}
+	return replaceExtension(dest, "liossdb")
+}
+
+func wrapWriter(writer io.WriteCloser, dest string) io.WriteCloser {
+	if strings.HasSuffix(dest, ".gz") || strings.HasSuffix(dest, ".liossgz") {
 		return gzip.NewWriter(writer)
 	}
 	return writer
 }
 
 /*
-LoadDatabase reads database from given path.
+ReadDatabase reads database from given path.
 */
-func LoadDatabase(path string) (*Database, error) {
+func ReadDatabase(path string) (*Database, error) {
 	reader, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -77,20 +241,29 @@ func LoadDatabase(path string) (*Database, error) {
 	if err != nil {
 		return nil, err
 	}
-	return Load(newReader, path)
+	return Read(newReader, path)
+}
+
+func updateHeader(header gzip.Header, name string) gzip.Header {
+	newName := strings.ReplaceAll(name, ".gz", "")
+	newName = strings.ReplaceAll(name, ".liossgz", ".liossdb")
+	header.Name = newName
+	return header
 }
 
 func wrapReader(reader io.Reader, from string) (io.Reader, error) {
-	if strings.HasSuffix(from, ".gz") {
-		return gzip.NewReader(reader)
+	if strings.HasSuffix(from, ".liossgz") || strings.HasSuffix(from, ".gz") {
+		gz, err := gzip.NewReader(reader)
+		gz.Header = updateHeader(gz.Header, from)
+		return gz, err
 	}
 	return reader, nil
 }
 
 /*
-Load reads database from given reader.
+Read reads database from given reader.
 */
-func Load(reader io.Reader, name string) (*Database, error) {
+func Read(reader io.Reader, name string) (*Database, error) {
 	data, err := ioutil.ReadAll(reader)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %s", name, err.Error())

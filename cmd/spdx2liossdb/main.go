@@ -15,11 +15,13 @@ import (
 func helpMessage(prog string) string {
 	return fmt.Sprintf(`%s [OPTIONS] <ARGUMENT>
 OPTIONS
-    -d, --dest <DEST>           specifies destination.
-        --osi-approved          includes only OSI approved licenses.
-        --exclude-deprecated    excludes deprecated license.
-    -v, --verbose               verbose mode.
-    -h, --help                  print this message.
+    -d, --dest <DEST>             specifies the destination.
+        --with-deprecated         includes deprecated license.
+        --without-deprecated      excludes deprecated license.
+        --with-osi-approved       includes OSI approved licenses.
+        --without-osi-approved    excludes OSI approved licenses.
+    -v, --verbose                 verbose mode.
+    -h, --help                    prints this message.
 ARGUMENT
     the directory contains SPDX license xml files.`, prog)
 }
@@ -31,33 +33,74 @@ type cliOptions struct {
 	target      string
 }
 
+type withWithout struct {
+	with    bool
+	without bool
+}
+
 type runtimeOptions struct {
-	verbose            bool
-	includeOsiApproved bool
-	excludeDeprecated  bool
+	verboseOpt  bool
+	osiApproved *withWithout
+	deprecated  *withWithout
 }
 
-func isIgnoreLicense(opts *runtimeOptions, meta *lib.LicenseMeta) bool {
-	if opts.includeOsiApproved && !meta.OsiApproved {
-		return true
+func (ro *runtimeOptions) verbose(message string) {
+	if ro.verboseOpt {
+		fmt.Println(message)
 	}
-	if opts.excludeDeprecated && meta.Deprecated {
-		return true
-	}
-	return false
 }
 
-func readLicense(algo lioss.Comparator, path string, opts *runtimeOptions) (*lioss.License, error) {
+func (ro *runtimeOptions) verbosef(format string, v ...interface{}) {
+	if ro.verboseOpt {
+		fmt.Printf(format, v...)
+	}
+}
+
+func (ww *withWithout) is() bool {
+	return ww.with && !ww.without
+}
+
+func (ww *withWithout) String() string {
+	if ww.is() {
+		return "with"
+	}
+	return "without"
+}
+
+func (ww *withWithout) validate() error {
+	if ww.with && ww.without {
+		return fmt.Errorf("with and without both options cannot be specified")
+	}
+	if !ww.with && !ww.without {
+		return fmt.Errorf("with and without either option must be specified")
+	}
+	return nil
+}
+
+func isTargetLicense(opts *runtimeOptions, meta *lib.LicenseMeta) bool {
+	return isTargetLicenseImpl(opts.deprecated.is(), opts.osiApproved.is(), meta)
+}
+
+func isTargetLicenseImpl(deprecated, osiApproved bool, meta *lib.LicenseMeta) bool {
+	if deprecated && osiApproved {
+		return meta.Deprecated && meta.OsiApproved
+	} else if deprecated && !osiApproved {
+		return meta.Deprecated && !meta.OsiApproved
+	} else if !deprecated && osiApproved {
+		return !meta.Deprecated && meta.OsiApproved
+	}
+	return !meta.Deprecated && !meta.OsiApproved
+}
+
+func readLicense(algo lioss.Algorithm, path string, opts *runtimeOptions) (*lioss.License, error) {
 	meta, licenseData, err := lib.ReadSPDX(path)
 	if err != nil {
 		return nil, err
 	}
-	if isIgnoreLicense(opts, meta) {
+	if !isTargetLicense(opts, meta) {
 		return nil, nil
 	}
-	if opts.verbose {
-		fmt.Printf("\t%s\n", meta.String())
-	}
+	opts.verbosef("\t%s\n", meta.String())
 	return algo.Parse(strings.NewReader(licenseData), meta.Names.ShortName)
 }
 
@@ -68,7 +111,7 @@ func appendLicensesIfNeeded(licenses []*lioss.License, license *lioss.License, e
 	return licenses
 }
 
-func readLicenses(algo lioss.Comparator, target string, opts *runtimeOptions, infoList []os.FileInfo) []*lioss.License {
+func readLicenses(algo lioss.Algorithm, target string, opts *runtimeOptions, infoList []os.FileInfo) []*lioss.License {
 	licenses := []*lioss.License{}
 	for _, info := range infoList {
 		if !info.IsDir() {
@@ -79,48 +122,64 @@ func readLicenses(algo lioss.Comparator, target string, opts *runtimeOptions, in
 	return licenses
 }
 
-func performEachAlgorithm(algo lioss.Comparator, target string, opts *runtimeOptions) ([]*lioss.License, error) {
+func performEachAlgorithm(db *lioss.Database, algo lioss.Algorithm, target string, opts *runtimeOptions) error {
 	infoList, err := ioutil.ReadDir(target)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	licenses := readLicenses(algo, target, opts, infoList)
-	return licenses, nil
+	for _, license := range licenses {
+		db.Put(algo.String(), license)
+	}
+	return nil
 }
 
-func performEach(algoName, target string, opts *runtimeOptions) ([]*lioss.License, error) {
-	algo, err := lioss.CreateComparator(algoName)
+func performEach(db *lioss.Database, algorithmName, target string, opts *runtimeOptions) error {
+	algo, err := lioss.NewAlgorithm(algorithmName)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	if opts.verbose {
-		fmt.Printf("%s\n", algoName)
+	opts.verbose(algorithmName)
+	return performEachAlgorithm(db, algo, target, opts)
+}
+
+func performImpl(db *lioss.Database, target string, opts *runtimeOptions) (int, error) {
+	size := 0
+	for _, algorithmName := range lioss.AvailableAlgorithms {
+		err := performEach(db, algorithmName, target, opts)
+		if err != nil {
+			return size, err
+		}
+		size = len(db.Data[algorithmName])
 	}
-	return performEachAlgorithm(algo, target, opts)
+	return size, nil
 }
 
 func perform(dest, target string, opts *runtimeOptions) error {
-	results := map[string][]*lioss.License{}
-	for _, algoName := range lioss.AvailableAlgorithms {
-		licenses, err := performEach(algoName, target, opts)
-		if err != nil {
-			return err
-		}
-		results[algoName] = licenses
+	fmt.Printf("read SPDX licenses %s-osi-approved, and %s-deprecated\n", opts.osiApproved.String(), opts.deprecated.String())
+	db := lioss.NewDatabase()
+	size, err := performImpl(db, target, opts)
+	if err != nil {
+		return err
 	}
-	return lioss.OutputLiossDB(dest, results)
+	fmt.Printf("parse %d licenses for %d algorithms, and write database to %s...", size, len(db.Data), dest)
+	err2 := db.WriteTo(dest)
+	fmt.Println(" done")
+	return err2
 }
 
 func buildFlagSet(args []string) (*flag.FlagSet, *cliOptions) {
 	opts := new(cliOptions)
-	opts.runtimeOpts = new(runtimeOptions)
+	opts.runtimeOpts = &runtimeOptions{osiApproved: &withWithout{}, deprecated: &withWithout{}}
 	flags := flag.NewFlagSet("spdx2liossdb", flag.ContinueOnError)
 	flags.Usage = func() { fmt.Println(helpMessage(args[0])) }
 	flags.BoolVarP(&opts.helpFlag, "help", "h", false, "print this message")
-	flags.BoolVar(&opts.runtimeOpts.excludeDeprecated, "exclude-deprecated", false, "exclude deprecated licenses")
-	flags.BoolVar(&opts.runtimeOpts.includeOsiApproved, "osi-approved", false, "includes only OSI approved licenses")
-	flags.BoolVarP(&opts.runtimeOpts.verbose, "verbose", "v", false, "verbose mode")
-	flags.StringVarP(&opts.dest, "dest", "d", "liossdb.json", "specifies destination of liossdb")
+	flags.BoolVar(&opts.runtimeOpts.deprecated.without, "without-deprecated", false, "exclude deprecated licenses")
+	flags.BoolVar(&opts.runtimeOpts.osiApproved.without, "without-osi-approved", false, "exclude OSI approved licenses")
+	flags.BoolVar(&opts.runtimeOpts.deprecated.with, "with-deprecated", false, "exclude deprecated licenses")
+	flags.BoolVar(&opts.runtimeOpts.osiApproved.with, "with-osi-approved", false, "exclude OSI approved licenses")
+	flags.BoolVarP(&opts.runtimeOpts.verboseOpt, "verbose", "v", false, "verbose mode")
+	flags.StringVarP(&opts.dest, "dest", "d", "default.liossdb", "specifies destination of liossdb")
 	return flags, opts
 }
 
@@ -131,6 +190,12 @@ func validateOptions(opts *cliOptions, flags *flag.FlagSet) (*cliOptions, error)
 	realArgs := flags.Args()[1:]
 	if len(realArgs) > 1 {
 		return nil, fmt.Errorf("arguments too much: %v", realArgs)
+	}
+	if err := opts.runtimeOpts.deprecated.validate(); err != nil {
+		return nil, fmt.Errorf("deprecated: %s", err.Error())
+	}
+	if err := opts.runtimeOpts.osiApproved.validate(); err != nil {
+		return nil, fmt.Errorf("osi-approved: %s", err.Error())
 	}
 	opts.target = realArgs[0]
 	return opts, nil

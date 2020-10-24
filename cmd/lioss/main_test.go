@@ -1,33 +1,10 @@
 package main
 
 import (
-	"os"
 	"testing"
+
+	"github.com/tamada/lioss"
 )
-
-func TestDatabasePath(t *testing.T) {
-	testdata := []struct {
-		envPath  string
-		givePath string
-		wontPath string
-	}{
-		{"", "testdata/liossdb.json", "testdata/liossdb.json"},
-		{"envpath", "testdata/liossdb.json", "envpath"},
-		{"envpath", "", "envpath"},
-		{"envpath", "argspath", "argspath"},
-	}
-
-	for _, td := range testdata {
-		if td.envPath != "" {
-			os.Setenv(dbpathEnvName, td.envPath)
-			defer os.Unsetenv(dbpathEnvName)
-		}
-		gotPath := databasePath(td.givePath)
-		if gotPath != td.wontPath {
-			t.Errorf("databasePath(%s) did not match, wont %s, got %s", td.givePath, td.wontPath, gotPath)
-		}
-	}
-}
 
 func TestInvalidOptions(t *testing.T) {
 	testdata := []struct {
@@ -37,9 +14,11 @@ func TestInvalidOptions(t *testing.T) {
 		message    string
 	}{
 		{[]string{"lioss"}, true, 2, "no arguments"},
+		{[]string{"lioss", "--algorithm", "tfidf"}, true, 2, "no arguments"},
 		{[]string{"lioss", "-a", "unknown"}, true, 2, "unknown: unknown algorithm"},
 		{[]string{"lioss", "-t", "2.0"}, true, 2, "2.000000: threshold must be 0.0 to 1.0"},
-		{[]string{"lioss", "--dbpath", "no/such/file", "../../LICENSE"}, true, 2, "no/such/file: file not found"},
+		{[]string{"lioss", "--database-path", "no/such/file", "../../LICENSE"}, true, 2, "no/such/file: file not found"},
+		{[]string{"lioss", "--database-type", "unknown", "../../LICENSE"}, true, 2, "unknown: invalid database type"},
 	}
 
 	for _, td := range testdata {
@@ -53,6 +32,26 @@ func TestInvalidOptions(t *testing.T) {
 		}
 		if err != nil && err.Error() != td.message {
 			t.Errorf("error message of parseOptions(%v) did not match, wont %s, got %s", td.args, td.message, err.Error())
+		}
+	}
+}
+
+func TestDatabaseType(t *testing.T) {
+	testdata := []struct {
+		types    string
+		wontType lioss.DatabaseType
+	}{
+		{"osi", lioss.OSI_APPROVED_DATABASE},
+		{"non-osi,osi", lioss.OSI_APPROVED_DATABASE | lioss.NONE_OSI_APPROVED_DATABASE},
+		{"deprecated,osi-deprecated,osi", lioss.OSI_APPROVED_DATABASE | lioss.DEPRECATED_DATABASE | lioss.OSI_DEPRECATED_DATABASE},
+		{"osi,non-osi,deprecated,osi-deprecated", lioss.WHOLE_DATABASE},
+		{"whole", lioss.WHOLE_DATABASE},
+	}
+	for _, td := range testdata {
+		opts := &liossOptions{dbtype: td.types}
+		gotType := dbTypes(opts)
+		if gotType != td.wontType {
+			t.Errorf("%s: result did not match, wont %s, got %s", td.types, td.wontType, gotType)
 		}
 	}
 }
@@ -78,20 +77,19 @@ func TestContains(t *testing.T) {
 }
 
 func Example_invalidDBPath() {
-	goMain([]string{"lioss", "--dbpath", "../../testdata/invalid.json", "../../LICENSE"})
+	goMain([]string{"lioss", "--database-path", "../../testdata/invalid.liossdb", "../../LICENSE"})
 	// Output:
-	// ../../testdata/invalid.json: unexpected end of JSON input
+	// ../../testdata/invalid.liossdb: unexpected end of JSON input
 }
 
 func Example_invalidCLIOptions() {
 	goMain([]string{"lioss", "--unknown"})
 	// Output:
 	// unknown flag: --unknown
-
 }
 
 func Example_lioss() {
-	goMain([]string{"lioss", "--dbpath", "../../testdata/liossdb.json", "--algorithm", "6gram", "../../testdata/project3.jar", "../../testdata/project4", "main.go"})
+	goMain([]string{"lioss", "--database-path", "../../testdata/test.liossdb", "--algorithm", "6gram", "../../testdata/project3.jar", "../../testdata/project4", "main.go"})
 	// Output:
 	// ../../testdata/project3.jar/project3/license
 	// 	Apache-License-2.0 (1.0000)
@@ -104,15 +102,18 @@ func Example_lioss() {
 func Example_printHelp() {
 	goMain([]string{"lioss", "--help"})
 	// Output:
-	// lioss version 0.9.0
+	// lioss version 1.0.0
 	// lioss [OPTIONS] <PROJECTS...>
 	// OPTIONS
-	//         --dbpath <DBPATH>          specifying database path.
+	//         --database-path <PATH>     specifies the database path.
+	//                                    If specifying this option, database-type option is ignored.
+	//         --database-type <TYPE>     specifies the database type. Default is osi.
+	//                                    Available values are: non-osi, osi, deprecated, osi-deprecated, and whole.
 	//     -a, --algorithm <ALGORITHM>    specifies algorithm. Default is 5gram.
 	//                                    Available values are: kgram, wordfreq, and tfidf.
 	//     -t, --threshold <THRESHOLD>    specifies threshold of the similarities of license files.
 	//                                    Each algorithm has default value. Default value is 0.75.
-	//     -h, --help                     print this message.
+	//     -h, --help                     prints this message.
 	// PROJECTS
 	//     project directories, and/or archive files contains LICENSE file.
 }
