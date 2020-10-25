@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"os"
 	"sync"
 	"testing"
@@ -22,6 +24,8 @@ func Example_printHelp() {
 	//     -h, --help                    prints this message.
 	// ARGUMENT
 	//     the directory contains SPDX license xml files.
+	// NOTE
+	//     this is the internal command, and will not be distributed to the users.
 }
 
 func TestGeneratedDataSize(t *testing.T) {
@@ -59,6 +63,32 @@ func testExec(t *testing.T, args []string, dest string, dataSize int, wg *sync.W
 			t.Errorf("data size did not match of %s, wont %d, got %d", key, dataSize, len(value))
 		}
 	}
+}
+
+func TestJson(t *testing.T) {
+	goMain([]string{"spdx2liossdb", "-d", "test.json", "../../spdx/src"})
+	jsonData := &jsonData{}
+	reader, _ := os.Open("test.json")
+	defer reader.Close()
+	defer os.Remove("test.json")
+	data, _ := ioutil.ReadAll(reader)
+	if err := json.Unmarshal(data, jsonData); err != nil {
+		t.Errorf("%s", err.Error())
+	}
+	commitID := readString("../../.git/module/spdx/")
+	if jsonData.CommitID != commitID {
+		t.Errorf("commit id did not match, wont %s, got %s", commitID, jsonData.CommitID)
+	}
+	if len(jsonData.Licenses) != 409 {
+		t.Errorf("license length did not match, wont 409, got %d", len(jsonData.Licenses))
+	}
+}
+
+func readString(path string) string {
+	reader, _ := os.Open(path)
+	defer reader.Close()
+	data, _ := ioutil.ReadAll(reader)
+	return string(data)
 }
 
 func TestParseOptions(t *testing.T) {

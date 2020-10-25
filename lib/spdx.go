@@ -13,18 +13,18 @@ import (
 LicenseMeta shows meta information of license of SPDX.
 */
 type LicenseMeta struct {
-	Names       *Names
-	OsiApproved bool
-	Deprecated  bool
-	Urls        []string
+	Names       *Names   `json:"name"`
+	OsiApproved bool     `json:"osi-approved"`
+	Deprecated  bool     `json:"deprecated"`
+	Urls        []string `json:"urls"`
 }
 
 /*
 Names shows names of license (short and full name)
 */
 type Names struct {
-	ShortName string
-	FullName  string
+	ShortName string `json:"short"`
+	FullName  string `json:"full"`
 }
 
 func (lm *LicenseMeta) String() string {
