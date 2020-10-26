@@ -34,8 +34,8 @@ func Example_Identifier() {
 	// license.txt
 	// 	GPL-3.0-only (0.980265)
 	//	GPL-3.0-or-later (0.980265)
-	//	AGPL-3.0-only (0.965360)
-	//	AGPL-3.0-or-later (0.965360)
+	//	AGPL-3.0-only (0.965428)
+	//	AGPL-3.0-or-later (0.965428)
 }
 
 func TestNewIdentifier(t *testing.T) {

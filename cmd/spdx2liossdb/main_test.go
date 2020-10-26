@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"sync"
 	"testing"
 
@@ -34,9 +35,9 @@ func TestGeneratedDataSize(t *testing.T) {
 		dest     string
 		dataSize int
 	}{
-		{[]string{"spdx2liossdb", "--without-osi-approved", "--without-deprecated", "../../spdx/src"}, "non-osi.liossdb", 269},
-		{[]string{"spdx2liossdb", "--with-osi-approved", "--without-deprecated", "../../spdx/src"}, "osi.liossdb", 112},
-		{[]string{"spdx2liossdb", "--without-osi-approved", "--with-deprecated", "../../spdx/src"}, "deprecated.liossdb", 16},
+		{[]string{"spdx2liossdb", "--without-osi-approved", "--without-deprecated", "../../spdx/src"}, "non-osi.liossdb", 292},
+		{[]string{"spdx2liossdb", "--with-osi-approved", "--without-deprecated", "../../spdx/src"}, "osi.liossdb", 120},
+		{[]string{"spdx2liossdb", "--without-osi-approved", "--with-deprecated", "../../spdx/src"}, "deprecated.liossdb", 18},
 		{[]string{"spdx2liossdb", "--with-osi-approved", "--with-deprecated", "../../spdx/src"}, "osi-deprecated.liossdb", 12},
 	}
 
@@ -75,20 +76,22 @@ func TestJson(t *testing.T) {
 	if err := json.Unmarshal(data, jsonData); err != nil {
 		t.Errorf("%s", err.Error())
 	}
-	commitID := readString("../../.git/module/spdx/")
+	commitID := getHash("../../.git/modules/spdx", "HEAD")
 	if jsonData.CommitID != commitID {
 		t.Errorf("commit id did not match, wont %s, got %s", commitID, jsonData.CommitID)
 	}
-	if len(jsonData.Licenses) != 409 {
-		t.Errorf("license length did not match, wont 409, got %d", len(jsonData.Licenses))
+	if len(jsonData.Licenses) != 442 {
+		t.Errorf("license length did not match, wont 442, got %d", len(jsonData.Licenses))
 	}
 }
 
-func readString(path string) string {
-	reader, _ := os.Open(path)
-	defer reader.Close()
-	data, _ := ioutil.ReadAll(reader)
-	return string(data)
+func getHash(base, name string) string {
+	targetPath := filepath.Join(base, name)
+	str, _ := readString(targetPath)
+	if existFlag(filepath.Join(base, str)) == 2 {
+		return getHash(base, str)
+	}
+	return str
 }
 
 func TestParseOptions(t *testing.T) {

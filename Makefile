@@ -33,19 +33,19 @@ test: setup update_version
 build: test
 	$(GO) build -o lioss -v cmd/lioss/main.go cmd/lioss/validator.go
 	$(GO) build -o mkliossdb -v cmd/mkliossdb/main.go
-	$(GO) build -o spdx2liossdb -v cmd/spdx2liossdb/main.go
+	$(GO) build -o spdx2liossdb -v cmd/spdx2liossdb/main.go cmd/spdx2liossdb/gitpath.go
 
 createdb: build
-	./spdx2liossdb -d data/NoneOSIApproved.liossgz spdx/src --without-deprecated   --without-osi-approved
-	./spdx2liossdb -d data/OSIDeprecated.liossgz   spdx/src --with-deprecated      --with-osi-approved
-	./spdx2liossdb -d data/OSIApproved.liossgz     spdx/src --without-deprecated   --with-osi-approved
-	./spdx2liossdb -d data/Deprecated.liossgz      spdx/src --with-deprecated      --without-osi-approved
+	./spdx2liossdb -d data/NoneOSIApproved.liossgz   spdx/src --without-deprecated   --without-osi-approved
+	./spdx2liossdb -d data/OSIDeprecated.liossgz     spdx/src --with-deprecated      --with-osi-approved
+	./spdx2liossdb -d data/OSIApproved.liossgz       spdx/src --without-deprecated   --with-osi-approved
+	./spdx2liossdb -d data/Deprecated.liossgz        spdx/src --with-deprecated      --without-osi-approved
+	./spdx2liossdb -d docs/static/spdx_licenses.json spdx/src
 
 define _createDist
 	mkdir -p dist/$(1)_$(2)/$(DIST)/data
 	GOOS=$1 GOARCH=$2 go build -o dist/$(1)_$(2)/$(DIST)/lioss$(3) cmd/lioss/main.go cmd/lioss/validator.go
 	GOOS=$1 GOARCH=$2 go build -o dist/$(1)_$(2)/$(DIST)/mkliossdb$(3) cmd/mkliossdb/main.go
-	GOOS=$1 GOARCH=$2 go build -o dist/$(1)_$(2)/$(DIST)/spdx2liossdb$(3) cmd/spdx2liossdb/main.go
 	cp -r README.md LICENSE dist/$(1)_$(2)/$(DIST)
 	cp data/*.liossgz dist/$(1)_$(2)/$(DIST)/data
 	tar cfz dist/$(DIST)_$(1)_$(2).tar.gz -C dist/$(1)_$(2) $(DIST)

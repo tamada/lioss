@@ -5,6 +5,25 @@ import (
 	"testing"
 )
 
+func TestDatabaseTypeString(t *testing.T) {
+	testdata := []struct {
+		giveType   DatabaseType
+		wontString string
+	}{
+		{OSI_APPROVED_DATABASE, "OSI_APPROVED_DATABASE"},
+		{OSI_DEPRECATED_DATABASE, "OSI_DEPRECATED_DATABASE"},
+		{NONE_OSI_APPROVED_DATABASE, "NONE_OSI_APPROVED_DATABASE"},
+		{DEPRECATED_DATABASE, "DEPRECATED_DATABASE"},
+		{WHOLE_DATABASE, "WHOLE_DATABASE"},
+		{-1, "UNKNOWN"},
+	}
+	for _, td := range testdata {
+		if td.giveType.String() != td.wontString {
+			t.Errorf("%s.String() did not match, wont %s, got %s", td.giveType, td.wontString, td.giveType.String())
+		}
+	}
+}
+
 func TestExtension(t *testing.T) {
 	testdata := []struct {
 		giveString string
@@ -31,11 +50,11 @@ func TestLoadDatabase(t *testing.T) {
 		wontLicenseSize   int
 		wontAlgorithmSize int
 	}{
-		{NONE_OSI_APPROVED_DATABASE, 269, 11},
-		{OSI_APPROVED_DATABASE, 112, 11},
-		{OSI_DEPRECATED_DATABASE, 12, 11},
-		{DEPRECATED_DATABASE, 16, 11},
-		{WHOLE_DATABASE, 409, 11},
+		{NONE_OSI_APPROVED_DATABASE, 292, 11},
+		{OSI_APPROVED_DATABASE, 120, 11},
+		{OSI_DEPRECATED_DATABASE, 0, 0},
+		{DEPRECATED_DATABASE, 18, 11},
+		{WHOLE_DATABASE, 430, 11},
 	}
 	for _, td := range testdata {
 		db, _ := LoadDatabase(td.dbTypes)
