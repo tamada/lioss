@@ -79,18 +79,16 @@ func readLink(path string) (string, error) {
 
 func findGitRepository(path string) (string, error) {
 	target := filepath.Join(path, ".git")
-	existFlag := existFlag(target)
-	if existFlag == 1 { // not found
+	switch existFlag(target) {
+	case 1: // not found
 		parentPath, err := findParent(path)
 		if err != nil {
 			return "", fmt.Errorf("%s: not found", path)
 		}
 		return parentPath, nil
-	}
-	if existFlag == 2 { // regular file
+	case 2:
 		return readLink(target)
-	}
-	if existFlag == 3 {
+	case 3:
 		return target, nil
 	}
 	return "", fmt.Errorf("%s: not found", path)

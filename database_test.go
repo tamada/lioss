@@ -5,6 +5,25 @@ import (
 	"testing"
 )
 
+func TestDatabaseTypeString(t *testing.T) {
+	testdata := []struct {
+		giveType   DatabaseType
+		wontString string
+	}{
+		{OSI_APPROVED_DATABASE, "OSI_APPROVED_DATABASE"},
+		{OSI_DEPRECATED_DATABASE, "OSI_DEPRECATED_DATABASE"},
+		{NONE_OSI_APPROVED_DATABASE, "NONE_OSI_APPROVED_DATABASE"},
+		{DEPRECATED_DATABASE, "DEPRECATED_DATABASE"},
+		{WHOLE_DATABASE, "WHOLE_DATABASE"},
+		{-1, "UNKNOWN"},
+	}
+	for _, td := range testdata {
+		if td.giveType.String() != td.wontString {
+			t.Errorf("%s.String() did not match, wont %s, got %s", td.giveType, td.wontString, td.giveType.String())
+		}
+	}
+}
+
 func TestExtension(t *testing.T) {
 	testdata := []struct {
 		giveString string

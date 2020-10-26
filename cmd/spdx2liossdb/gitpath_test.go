@@ -13,7 +13,7 @@ func TestFindGitRepository(t *testing.T) {
 		wontPath string
 	}{
 		{"../..", "../../.git"},
-		{".", filepath.Clean(filepath.Join(wd, "../..", ".git"))},
+		{".", filepath.Join(wd, "../..", ".git")},
 		{"../../spdx", "../../.git/modules/spdx"},
 		{"../../spdx/src", "../../.git/modules/spdx"},
 	}
@@ -23,7 +23,7 @@ func TestFindGitRepository(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if gotPath != td.wontPath {
+		if gotPath != filepath.Clean(td.wontPath) {
 			t.Errorf(`the result of findGitRepository("%s") did not match, wont %s, got %s`, td.givePath, td.wontPath, gotPath)
 		}
 	}
