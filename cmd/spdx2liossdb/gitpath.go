@@ -12,8 +12,8 @@ import (
 
 /*
 1: not found
-2: dir
-3: regular file
+2: regular file
+3: dir
 */
 func existFlag(path string) int {
 	stat, err := os.Stat(path)
@@ -59,14 +59,14 @@ func readString(path string) (string, error) {
 	}
 	defer reader.Close()
 	data, _ := ioutil.ReadAll(reader)
-	strArray := strings.TrimSpace(string(data))
-	for _, str := range strings.Split(strArray, "\n") {
-		if !strings.HasPrefix(str, "gitdir: ") {
-			continue
+	str := strings.TrimSpace(string(data))
+	prefixs := []string{"gitdir: ", "ref: "}
+	for _, prefix := range prefixs {
+		if strings.HasPrefix(str, prefix) {
+			return strings.TrimPrefix(str, prefix), nil
 		}
-		return strings.TrimPrefix(str, "gitdir: "), nil
 	}
-	return strArray, nil
+	return str, nil
 }
 
 func readLink(path string) (string, error) {

@@ -36,10 +36,11 @@ build: test
 	$(GO) build -o spdx2liossdb -v cmd/spdx2liossdb/main.go cmd/spdx2liossdb/gitpath.go
 
 createdb: build
-	./spdx2liossdb -d data/NoneOSIApproved.liossgz spdx/src --without-deprecated   --without-osi-approved
-	./spdx2liossdb -d data/OSIDeprecated.liossgz   spdx/src --with-deprecated      --with-osi-approved
-	./spdx2liossdb -d data/OSIApproved.liossgz     spdx/src --without-deprecated   --with-osi-approved
-	./spdx2liossdb -d data/Deprecated.liossgz      spdx/src --with-deprecated      --without-osi-approved
+	./spdx2liossdb -d data/NoneOSIApproved.liossgz   spdx/src --without-deprecated   --without-osi-approved
+	./spdx2liossdb -d data/OSIDeprecated.liossgz     spdx/src --with-deprecated      --with-osi-approved
+	./spdx2liossdb -d data/OSIApproved.liossgz       spdx/src --without-deprecated   --with-osi-approved
+	./spdx2liossdb -d data/Deprecated.liossgz        spdx/src --with-deprecated      --without-osi-approved
+	./spdx2liossdb -d docs/static/spdx_licenses.json spdx/src
 
 define _createDist
 	mkdir -p dist/$(1)_$(2)/$(DIST)/data
