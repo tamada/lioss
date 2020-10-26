@@ -11,7 +11,6 @@ import (
 	flag "github.com/spf13/pflag"
 	"github.com/tamada/lioss"
 	"github.com/tamada/lioss/lib"
-	"gopkg.in/src-d/go-git.v4"
 )
 
 func helpMessage(prog string) string {
@@ -188,18 +187,6 @@ func newGenerator(dest, from string, opts *runtimeOptions) generator {
 	return &liossdbGenerator{dest: dest, opts: opts}
 }
 
-func readCommitID(dir string) (string, error) {
-	repository, err := git.PlainOpen(dir)
-	if err != nil {
-		return "", err
-	}
-	head, err := repository.Head()
-	if err != nil {
-		return "", err
-	}
-	return head.Hash().String(), nil
-}
-
 type jsonData struct {
 	Timestamp *lioss.Time        `json:"timestamp"`
 	CommitID  string             `json:"git-commit-id"`
@@ -207,7 +194,10 @@ type jsonData struct {
 }
 
 func (jg *jsonGenerator) Perform(data []*LicenseData) error {
-	id, _ := readCommitID(jg.from)
+	id, err := readCommitID(jg.from)
+	if err != nil {
+		fmt.Printf("readCommitID(\"%s\"): failed, %s\n", jg.from, err.Error())
+	}
 	results := &jsonData{Timestamp: lioss.Now(), CommitID: id, Licenses: []*lib.LicenseMeta{}}
 	for _, datum := range data {
 		results.Licenses = append(results.Licenses, datum.meta)

@@ -75,20 +75,16 @@ func TestJson(t *testing.T) {
 	if err := json.Unmarshal(data, jsonData); err != nil {
 		t.Errorf("%s", err.Error())
 	}
-	commitID := readString("../../.git/module/spdx/")
+	commitID, err := readString("../../.git/modules/spdx/HEAD")
+	if err != nil {
+		t.Fatal(err)
+	}
 	if jsonData.CommitID != commitID {
 		t.Errorf("commit id did not match, wont %s, got %s", commitID, jsonData.CommitID)
 	}
 	if len(jsonData.Licenses) != 409 {
 		t.Errorf("license length did not match, wont 409, got %d", len(jsonData.Licenses))
 	}
-}
-
-func readString(path string) string {
-	reader, _ := os.Open(path)
-	defer reader.Close()
-	data, _ := ioutil.ReadAll(reader)
-	return string(data)
 }
 
 func TestParseOptions(t *testing.T) {
