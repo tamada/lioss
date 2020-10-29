@@ -14,14 +14,14 @@ date: 2020-03-08
 
 ## :bookmark: Table of Contents
 
-* [Usage](usage)
+* [:runner: Usage](usage)
     * [`lioss`](usage/#lioss)
         * [Example](usage/#example)
     * [`mkliossdb`](usage/#mkliossdb)
-* [Install](install)
+* [:fork_and_knife: Install](install)
     * [:beer: Homebrew](install/#-homebrew)
     * [Go lang](install/#go-lang)
-    * [:hammer_and_wrench: Build from source](install/#-build-from-source)
+    * [:muscle: Build from source](install/#-build-from-source)
 * [:smile: About](about)
     * [:scroll: License](about/#-license)
     * [:man_office_worker: Developer :woman_office_worker:](about/#-developer-)

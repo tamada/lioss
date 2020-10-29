@@ -32,24 +32,36 @@ const (
 )
 
 func (dt DatabaseType) IsType(dbType DatabaseType) bool {
+	if dt <= 0 {
+		return false
+	}
+	if dbType == WHOLE_DATABASE {
+		return dbType == dt
+	}
 	return dt&dbType == dbType
 }
 
 func (dt DatabaseType) String() string {
-	switch dt {
-	case OSI_DEPRECATED_DATABASE:
-		return "OSI_DEPRECATED_DATABASE"
-	case OSI_APPROVED_DATABASE:
-		return "OSI_APPROVED_DATABASE"
-	case NONE_OSI_APPROVED_DATABASE:
-		return "NONE_OSI_APPROVED_DATABASE"
-	case DEPRECATED_DATABASE:
-		return "DEPRECATED_DATABASE"
-	case WHOLE_DATABASE:
+	array := []string{}
+	if dt.IsType(WHOLE_DATABASE) {
 		return "WHOLE_DATABASE"
-	default:
+	}
+	if dt.IsType(OSI_APPROVED_DATABASE) {
+		array = append(array, "OSI_APPROVED_DATABASE")
+	}
+	if dt.IsType(NONE_OSI_APPROVED_DATABASE) {
+		array = append(array, "NONE_OSI_APPROVED_DATABASE")
+	}
+	if dt.IsType(OSI_DEPRECATED_DATABASE) {
+		array = append(array, "OSI_DEPRECATED_DATABASE")
+	}
+	if dt.IsType(DEPRECATED_DATABASE) {
+		array = append(array, "DEPRECATED_DATABASE")
+	}
+	if len(array) == 0 {
 		return "UNKNOWN"
 	}
+	return strings.Join(array, ",")
 }
 
 type dbTypeAndPath struct {

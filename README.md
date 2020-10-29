@@ -11,9 +11,9 @@ License Identification tool for OSS project.
 
 ## Description
 
-Generally, OSS projects have a license.
-The license grants permissions to users for using, modifying, and sharing the software.
-The users of the software must follow the terms shown in the license.
+Generally, OSS projects have licenses.
+The licenses grant permissions to users for using, modifying, and sharing the software.
+The users of the software must follow the terms shown in the licenses.
 
 On the other hand, today's software generally has some dependencies.
 Additionally, dependant software has some dependencies, too.
@@ -24,10 +24,10 @@ The first problem is to detect a conflict between two given licenses.
 The second problem is to identify the license of a project.
 `lioss` tries to solve the above second problem by identifying the license of the given project.
 
+SPDX is trying to automatically identify licenses, however,  it is hard to say that it became common sense.
+This project detects the OSS licenses from the LICENSE files of the given projects.
+Then, we aim to detect conflicts by identifying OSS licenses from the license files of dependent libraries.
 
-SPDX が機械的なライセンスの特定に向けての整備を行っているが，全てのプロジェクトに浸透しているわけではない．
-そのため本プロジェクトでは，ライセンスファイルから，どのようなOSSのライセンスを定めているかを検出する．
-そして，依存ライブラリのライセンスファイルからもOSSライセンスを特定することで，コンフリクトの検出を目指す．
 
 ## Usage
 
@@ -62,23 +62,6 @@ LICENSE
     specifies license files.
 ```
 
-### `spdx2liossdb`
-
-Creates the database of lioss from SPDX xml files.
-
-```
-spdx2liossdb [OPTIONS] <ARGUMENT>
-OPTIONS
-    -d, --dest <DEST>           specifies destination.
-        --osi-approved          includes only OSI approved licenses.
-        --exclude-deprecated    excludes deprecated license.
-    -v, --verbose               verbose mode.
-    -h, --help                  print this message.
-ARGUMENT
-    the directory contains SPDX license xml files.
-    Typically, src directory of cloned https://github.com/spdx/license-list-XML.git
-```
-
 ## Install
 
 ### Go-lang
@@ -87,11 +70,19 @@ ARGUMENT
 $ go get github.com/tamada/lioss
 ```
 
-### Homebrew
+### :beer: Homebrew
 
 ```
 $ brew tap tamada/brew
 $ brew install lioss
+```
+
+### :muscle: Compiling yourself
+
+```sh
+$ git clone github.com/tamada/lioss
+$ cd lioss
+$ make
 ```
 
 ## References

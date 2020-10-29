@@ -8,16 +8,19 @@ title: "Usage"
 
 ```sh
 lioss version 1.0.0
-lioss [OPTIONS] <PROJECTS...>
+lioss [OPTIONS] <PROJECTs...>
 OPTIONS
-        --dbpath <DBPATH>          specifying database path.
+        --database-path <PATH>     specifies the database path.
+                                   If specifying this option, database-type option is ignored.
+        --database-type <TYPE>     specifies the database type. Default is osi (enable multi options, separating by comma).
+                                   Available values are: non-osi, osi, deprecated, osi-deprecated, and whole.
     -a, --algorithm <ALGORITHM>    specifies algorithm. Default is 5gram.
                                    Available values are: kgram, wordfreq, and tfidf.
     -t, --threshold <THRESHOLD>    specifies threshold of the similarities of license files.
                                    Each algorithm has default value. Default value is 0.75.
-    -h, --help                     print this message.
-PROJECTS
-    project directories, and/or archive files contains LICENSE file.
+    -h, --help                     prints this message.
+PROJECTs
+    LICENSE files, project directories, and/or archive files contains LICENSE file.
 ```
 
 ### Example
@@ -25,31 +28,52 @@ PROJECTS
 ```sh
 $ lioss LICENSE    # run on the lioss directory.
 LICENSE
-	WTFPL (0.9285)
+$ lioss --database-type non-osi LICENSE    # run on the lioss directory.
+LICENSE
+	WTFPL (0.9804)
 $ lioss --algorithm 9gram testdata   # run lioss for identifying project licenses in testdata directory.
 testdata/project1/LICENSE
-	WTFPL (0.9403)
-testdata/project3/license
-	Apache-License-2.0 (1.0000)
 testdata/project2/license.txt
-	GPLv3.0 (1.0000)
-	AGPLv3.0 (0.9694)
+	GPL-3.0-only (0.9803)
+	GPL-3.0-or-later (0.9803)
+	AGPL-3.0-only (0.9654)
+	AGPL-3.0-or-later (0.9654)
+testdata/project3/license
+	Apache-2.0 (1.0000)
+	ECL-2.0 (0.9669)
 testdata/project3/subproject/license
-	BSD (1.0000)
+$ lioss --algorithm 9gram --database-type osi,non-osi testdata   # run lioss for identifying project licenses in testdata directory.
+testdata/project1/LICENSE
+	WTFPL (0.9536)
+testdata/project2/license.txt
+	GPL-3.0-only (0.9803)
+	GPL-3.0-or-later (0.9803)
+	AGPL-3.0-only (0.9654)
+	AGPL-3.0-or-later (0.9654)
+	SSPL-1.0 (0.9234)
+testdata/project3/license
+	Apache-2.0 (1.0000)
+	ECL-2.0 (0.9669)
+	SHL-0.51 (0.9489)
+	SHL-0.5 (0.9488)
+	ImageMagick (0.8764)
+testdata/project3/subproject/license
 ```
 
 ## `mkliossdb`
 
 `mkliossdb` creates database for `lioss` from given LICENSE data.
-The resultant database is written to `liossdb.json` in json format as default.
+The resultant database is written to `default.liossdb` in json format as default.
+if the extension of dest file is `.liossgz`, the resultant database is gzipped json file.
 
 Supported algorithm is `kgram` (k=1, ..., 9), `wordfreq` and `tfidf`.
 
 ```sh
 mkliossdb [OPTIONS] <LICENSE...>
 OPTIONS
-    -d, --dest <DEST>        specifies the destination file path. Default is 'liossdb.json'
+    -d, --dest <DEST>        specifies the destination file path. Default is 'default.liossdb'
     -h, --help               print this message.
 LICENSE
     specifies license files.
 ```
+
