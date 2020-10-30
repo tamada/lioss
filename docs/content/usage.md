@@ -1,5 +1,5 @@
 ---
-title: "Usage"
+title: ":runner: Usage"
 ---
 
 ## `lioss`
@@ -23,7 +23,7 @@ PROJECTs
     LICENSE files, project directories, and/or archive files contains LICENSE file.
 ```
 
-### Example
+### Examples
 
 ```sh
 $ lioss LICENSE    # run on the lioss directory.
@@ -32,6 +32,7 @@ $ lioss --database-type non-osi LICENSE    # run on the lioss directory.
 LICENSE
 	WTFPL (0.9804)
 $ lioss --algorithm 9gram testdata   # run lioss for identifying project licenses in testdata directory.
+osi -> OSI_APPROVED_DATABASE
 testdata/project1/LICENSE
 testdata/project2/license.txt
 	GPL-3.0-only (0.9803)
@@ -42,6 +43,9 @@ testdata/project3/license
 	Apache-2.0 (1.0000)
 	ECL-2.0 (0.9669)
 testdata/project3/subproject/license
+	MIT (0.9677)
+	Xnet (0.8972)
+	MIT-0 (0.8904)
 $ lioss --algorithm 9gram --database-type osi,non-osi testdata   # run lioss for identifying project licenses in testdata directory.
 testdata/project1/LICENSE
 	WTFPL (0.9536)
@@ -58,6 +62,15 @@ testdata/project3/license
 	SHL-0.5 (0.9488)
 	ImageMagick (0.8764)
 testdata/project3/subproject/license
+	MIT (0.9677)
+	JSON (0.9554)
+	Xnet (0.8972)
+	MIT-feh (0.8907)
+	MIT-0 (0.8904)
+	MIT-advertising (0.8424)
+	X11 (0.8340)
+	MITNFA (0.8191)
+	SGI-B-2.0 (0.7619)
 ```
 
 ## `mkliossdb`

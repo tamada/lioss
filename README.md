@@ -9,7 +9,7 @@
 
 License Identification tool for OSS project.
 
-## Description
+## :speaking_head: Overview
 
 Generally, OSS projects have licenses.
 The licenses grant permissions to users for using, modifying, and sharing the software.

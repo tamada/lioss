@@ -1,5 +1,5 @@
 ---
-title: lioss
+title: ":house: Home"
 date: 2020-03-08
 ---
 
@@ -12,6 +12,23 @@ date: 2020-03-08
 
 ## :speaking_head: Overview
 
+Generally, OSS projects have licenses.
+The licenses grant permissions to users for using, modifying, and sharing the software.
+The users of the software must follow the terms shown in the licenses.
+
+On the other hand, today's software generally has some dependencies.
+Additionally, dependant software has some dependencies, too.
+Therefore, the dependant graph of the OSS becomes complex.
+
+In such a situation, it is a quite tough task for checking the conflicts among licenses.
+The first problem is to detect a conflict between two given licenses.
+The second problem is to identify the license of a project.
+`lioss` tries to solve the above second problem by identifying the license of the given project.
+
+SPDX is trying to automatically identify licenses, however,  it is hard to say that it became common sense.
+This project detects the OSS licenses from the LICENSE files of the given projects.
+Then, we aim to detect conflicts by identifying OSS licenses from the license files of dependent libraries.
+
 ## :bookmark: Table of Contents
 
 * [:runner: Usage](usage)
@@ -22,6 +39,7 @@ date: 2020-03-08
     * [:beer: Homebrew](install/#-homebrew)
     * [Go lang](install/#go-lang)
     * [:muscle: Build from source](install/#-build-from-source)
+* [:package: LiossDB](liossdb)
 * [:smile: About](about)
     * [:scroll: License](about/#-license)
     * [:man_office_worker: Developer :woman_office_worker:](about/#-developer-)

@@ -18,3 +18,12 @@ title: ":smile: About"
 
 * [Haruaki Tamada](https://tamada.github.io)
     * [GitHub](https://github.com/tamada)
+
+## :handshake: Attributions
+
+### Icon
+
+This is logo of lioss. This image is obtained from [pixabay.com](https://pixabay.com/ja/illustrations/%E6%81%8B-%E3%82%A2%E3%82%A4%E3%82%B3%E3%83%B3%E3%82%92-koi%E3%82%A2%E3%82%A4%E3%82%B3%E3%83%B3-5568971/).
+
+![lioss.png](/lioss/images/lioss_240x240.png)
+
