@@ -31,7 +31,7 @@ func TestInvalidOptions(t *testing.T) {
 			t.Errorf("status code of parseOptions(%v) did not match, wont %d, got %d", td.args, td.wontStatus, gotStatus)
 		}
 		if err != nil && err.Error() != td.message {
-			t.Errorf("error message of parseOptions(%v) did not match, wont %s, got %s", td.args, td.message, err.Error())
+			t.Errorf("error message of parseOptions(%v) did not match, wont \"%s\", got \"%s\"", td.args, td.message, err.Error())
 		}
 	}
 }

@@ -7,7 +7,8 @@ title: "Install"
 `lioss` is distributed via [Homebrew](https://brew.sh) on macOS platform.
 
 ```sh
-brew install tamada/brew/lioss
+brew tap tamada/brew
+brew install lioss
 ```
 
 ## Go lang
@@ -18,7 +19,7 @@ We can install `lioss` using `go get` command. Type below command, then `lioss` 
 go get github.com/tamada/lioss
 ```
 
-## :hammer_and_wrench: Build from source
+## :muscle: Build from source
 
 If you would build from source, you should clone repository from [GitHub](https://github.com/tamada/lioss) and compile source codes, like below.
 

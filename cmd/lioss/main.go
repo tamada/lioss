@@ -98,6 +98,7 @@ func dbTypes(opts *liossOptions) lioss.DatabaseType {
 			dbtype = dbtype | t
 		}
 	}
+	fmt.Printf("%s -> %s\n", opts.dbtype, dbtype.String())
 	return dbtype
 }
 

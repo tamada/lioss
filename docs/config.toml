@@ -10,7 +10,8 @@ pygmentsStyle = "pygments"
 
 [params]
     project_name = "lioss"
-    project_tagline = "Identifying OSS license name from LICENSE file."
+    project_logo = "images/lioss.png"
+    project_tagline = "Identifying OSS license names from LICENSE files"
     dateFormat = "2006-01-02"
 
     footer = "[![GitHub](https://img.shields.io/badge/GitHub-tamada/lioss-blueviolet.svg?logo=github)](https://github.com/tamada/lioss). Made with [Hugo](https://gohugo.io/). Theme by [Cayman](https://github.com/zwbetz-gh/cayman-hugo-theme). Deployed to [GitHub Pages](https://pages.github.com/)."
@@ -19,18 +20,22 @@ pygmentsStyle = "pygments"
 
 [menu]
     [[menu.nav]]
-        name = "Home"
+        name = ":house: Home"
         url = "/"
         weight = 1
     [[menu.nav]]
-        name = "Usage"
+        name = ":runner: Usage"
         url = "/usage/"
         weight = 2
     [[menu.nav]]
-        name = "Install"
+        name = ":fork_and_knife: Install"
         url = "/install/"
         weight = 3
     [[menu.nav]]
-        name = "About"
+        name = ":package: LiossDB"
+        url = "/liossdb/"
+        weight = 10
+    [[menu.nav]]
+        name = ":smile: About"
         url = "/about/"
         weight = 10

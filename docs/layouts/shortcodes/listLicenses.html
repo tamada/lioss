@@ -1,0 +1,60 @@
+<script src="{{ .Site.BaseURL | relURL }}/licenses.js"></script>
+<script>
+    let licenses
+    window.onload = () => {
+        initLicenses((json) => { licenses = json })
+    }
+    updateLicenseList = () => {
+        layoutLicenses(licenses, {})
+    }
+    resetFilter = () => {
+        elements = Array.from(document.getElementsByTagName("input"))
+        elements.filter(e => e.type == "checkbox").forEach(e => e.checked = true)
+        elements.filter(e => e.type == "text").forEach(e => e.value = "")
+        updateLicenseList()
+    }
+</script>
+<div id="list_licenses">
+    <div class="database_info">commit id: <span id="commitId"></span>, database is created at <span
+            id="timestamp"></span>
+    </div>
+    </p>
+    <ul>
+        <li><input type="checkbox" id="checkbox-osi" value="osi" checked="checked"
+                onChange="updateLicenseList()"></input>
+            <label for="checkbox-osi">OSI Approved Licenses (<code>OSIApproved.liossgz</code>)</label></li>
+        <li><input type="checkbox" id="checkbox-osi-deprecated" value="osi-deprecated" checked="checked"
+                onChange="updateLicenseList()"></input>
+            <label for="checkbox-osi-deprecated">OSI Approved, and Deprecated Licenses
+                (<code>OSIDeprecated.liossgz</code>)</label></li>
+        <li><input type="checkbox" id="checkbox-non-osi" value="non-osi" checked="checked"
+                onChange="updateLicenseList()"></input>
+            <label for="checkbox-non-osi">None-OSI Approved Licenses (<code>NoneOSIApproved.liossgz</code>)</label></li>
+        <li><input type="checkbox" id="checkbox-deprecated" value="deprecated" checked="checked"
+                onChange="updateLicenseList()"></input>
+            <label for="checkbox-deprecated">None-OSI Approved, and Deprecated Licenses
+                (<code>Deprecated.liossgz</code>)</label></li>
+    </ul>
+    <p>Keyword: <input type="text" id="filter-text" placeholder="Filtering by name..."
+            oninput="updateLicenseList()"></input>
+        <input type="button" value="Reset Filter" onclick="resetFilter()"></input></p>
+    <p id="license-count"></p>
+    <div id="licenses">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>
+                        <div class="license-name"><span class="license-full-name">Full name</span>
+                            <span class="license-short-name">Short name</span>
+                        </div>
+                    </th>
+                    <th>Info</th>
+                    <th>External links</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>

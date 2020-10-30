@@ -32,24 +32,43 @@ const (
 )
 
 func (dt DatabaseType) IsType(dbType DatabaseType) bool {
+	if dt <= 0 {
+		return false
+	}
+	if dbType == WHOLE_DATABASE {
+		return dbType == dt
+	}
 	return dt&dbType == dbType
 }
 
+func stringImpl(dt DatabaseType) []string {
+	array := []string{}
+	typeAndNames := []struct {
+		t    DatabaseType
+		name string
+	}{
+		{OSI_APPROVED_DATABASE, "OSI_APPROVED_DATABASE"},
+		{NONE_OSI_APPROVED_DATABASE, "NONE_OSI_APPROVED_DATABASE"},
+		{OSI_DEPRECATED_DATABASE, "OSI_DEPRECATED_DATABASE"},
+		{DEPRECATED_DATABASE, "DEPRECATED_DATABASE"},
+	}
+	for _, tan := range typeAndNames {
+		if dt.IsType(tan.t) {
+			array = append(array, tan.name)
+		}
+	}
+	return array
+}
+
 func (dt DatabaseType) String() string {
-	switch dt {
-	case OSI_DEPRECATED_DATABASE:
-		return "OSI_DEPRECATED_DATABASE"
-	case OSI_APPROVED_DATABASE:
-		return "OSI_APPROVED_DATABASE"
-	case NONE_OSI_APPROVED_DATABASE:
-		return "NONE_OSI_APPROVED_DATABASE"
-	case DEPRECATED_DATABASE:
-		return "DEPRECATED_DATABASE"
-	case WHOLE_DATABASE:
+	if dt.IsType(WHOLE_DATABASE) {
 		return "WHOLE_DATABASE"
-	default:
+	}
+	array := stringImpl(dt)
+	if len(array) == 0 {
 		return "UNKNOWN"
 	}
+	return strings.Join(array, ",")
 }
 
 type dbTypeAndPath struct {

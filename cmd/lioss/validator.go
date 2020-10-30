@@ -43,13 +43,14 @@ func isValidArgs(args []string) error {
 
 func isValidDBType(opts *liossOptions) error {
 	validItems := []string{"whole", "osi", "deprecated", "non-osi", "osi-deprecated"}
-	lower := strings.ToLower(opts.dbtype)
-	for _, item := range validItems {
-		if item == lower {
-			return nil
+	givenItems := strings.Split(opts.dbtype, ",")
+	for _, givenItem := range givenItems {
+		lower := strings.ToLower(givenItem)
+		if !contains(lower, validItems) {
+			return fmt.Errorf("%s: invalid database type", givenItem)
 		}
 	}
-	return fmt.Errorf("%s: invalid database type", opts.dbtype)
+	return nil
 }
 
 func existsFile(filename string) bool {
