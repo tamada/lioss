@@ -8,6 +8,14 @@
   </url>
   
   <url>
+    <loc>https://tamada.github.io/lioss/liossdb/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tamada.github.io/lioss/usage/</loc>
+  </url>
+  
+  <url>
     <loc>https://tamada.github.io/lioss/about/</loc>
   </url>
   
@@ -21,10 +29,6 @@
   
   <url>
     <loc>https://tamada.github.io/lioss/tags/</loc>
-  </url>
-  
-  <url>
-    <loc>https://tamada.github.io/lioss/usage/</loc>
   </url>
   
 </urlset>

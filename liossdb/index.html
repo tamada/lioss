@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Hugo 0.69.0" />
+  <link rel="stylesheet" href="/lioss/css/normalize.css">
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+  
+  
+  
+  <link rel="stylesheet" href="/lioss/css/cayman.ea0e967413f3851071cc8ace3621bc4205fe8fa79b2abe3d7bf94ff2841f0d47.css">
+  <link rel="stylesheet" href="/lioss/style.css">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/harry.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/harry.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/harry.png">
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" integrity="sha384-yFRtMMDnQtDRO8rLpMIKrtPCD5jdktao2TV19YiZYWMDkUR5GQZR/NOVTdquEx1j" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.js" integrity="sha384-9Nhn55MVVN0/4OFx7EE5kpFBPsEMZxKTCnA+4fqDmg12eCTqGi6+BB2LjY8brQxJ" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script>
+
+  <title>📦 LiossDB | Lioss: License Identifier for OSS</title>
+</head>
+
+<body>
+  <section class="page-header">
+  
+  <img src="/lioss/images/lioss.png" class="avatar" alt="project_logo">
+  
+  <h1 class="project-name">
+    lioss
+  </h1>
+  <h2 class="project-tagline">
+    Identifying OSS license names from LICENSE files
+  </h2>
+  <nav>
+    
+    
+    
+    
+    
+    
+    <a href="/lioss/" class="btn">🏠 Home</a>
+    
+    
+    
+    
+    
+    <a href="/lioss/usage/" class="btn">🏃‍♂️ Usage</a>
+    
+    
+    
+    
+    
+    <a href="/lioss/install/" class="btn">🍴 Install</a>
+    
+    
+    
+    
+    
+    <a href="/lioss/liossdb/" class="btn">📦 LiossDB</a>
+    
+    
+    
+    
+    
+    <a href="/lioss/about/" class="btn">😄 About</a>
+    
+  </nav>
+</section>
+  <section class="main-content">
+    
+  <h1>📦 LiossDB</h1>
+  <p><code>lioss</code> has four databases in <code>data</code> directory by default, <code>OSIApproved.liossgz</code>, <code>Deprecated.liossgz</code>, <code>NoneOSIApproved.liossgz</code>, and <code>OSIDeprecated.liossgz</code>.
+The databases are built from <a href="https://github.com/spdx/license-list-XML">spdx/license-list-XML</a> <a href="https://github.com">GitHub</a> repository.</p>
+<p>The following table shows the license list of each database.</p>
+<script src="/lioss/licenses.js"></script>
+<script>
+    let licenses
+    window.onload = () => {
+        initLicenses((json) => { licenses = json })
+    }
+    updateLicenseList = () => {
+        layoutLicenses(licenses, {})
+    }
+    resetFilter = () => {
+        elements = Array.from(document.getElementsByTagName("input"))
+        elements.filter(e => e.type == "checkbox").forEach(e => e.checked = true)
+        elements.filter(e => e.type == "text").forEach(e => e.value = "")
+        updateLicenseList()
+    }
+</script>
+<div id="list_licenses">
+    <div class="database_info">commit id: <span id="commitId"></span>, database is created at <span
+            id="timestamp"></span>
+    </div>
+    </p>
+    <ul>
+        <li><input type="checkbox" id="checkbox-osi" value="osi" checked="checked"
+                onChange="updateLicenseList()"></input>
+            <label for="checkbox-osi">OSI Approved Licenses (<code>OSIApproved.liossgz</code>)</label></li>
+        <li><input type="checkbox" id="checkbox-osi-deprecated" value="osi-deprecated" checked="checked"
+                onChange="updateLicenseList()"></input>
+            <label for="checkbox-osi-deprecated">OSI Approved, and Deprecated Licenses
+                (<code>OSIDeprecated.liossgz</code>)</label></li>
+        <li><input type="checkbox" id="checkbox-non-osi" value="non-osi" checked="checked"
+                onChange="updateLicenseList()"></input>
+            <label for="checkbox-non-osi">None-OSI Approved Licenses (<code>NoneOSIApproved.liossgz</code>)</label></li>
+        <li><input type="checkbox" id="checkbox-deprecated" value="deprecated" checked="checked"
+                onChange="updateLicenseList()"></input>
+            <label for="checkbox-deprecated">None-OSI Approved, and Deprecated Licenses
+                (<code>Deprecated.liossgz</code>)</label></li>
+    </ul>
+    <p>Keyword: <input type="text" id="filter-text" placeholder="Filtering by name..."
+            oninput="updateLicenseList()"></input>
+        <input type="button" value="Reset Filter" onclick="resetFilter()"></input></p>
+    <p id="license-count"></p>
+    <div id="licenses">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>
+                        <div class="license-name"><span class="license-full-name">Full name</span>
+                            <span class="license-short-name">Short name</span>
+                        </div>
+                    </th>
+                    <th>Info</th>
+                    <th>External links</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+    <footer class="site-footer">
+  <span class="site-footer-credits">
+    <a href="https://github.com/tamada/lioss"><img src="https://img.shields.io/badge/GitHub-tamada/lioss-blueviolet.svg?logo=github" alt="GitHub"></a>. Made with <a href="https://gohugo.io/">Hugo</a>. Theme by <a href="https://github.com/zwbetz-gh/cayman-hugo-theme">Cayman</a>. Deployed to <a href="https://pages.github.com/">GitHub Pages</a>.
+  </span>
+</footer>
+
+  </section>
+  
+  
+  <script>
+  window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+  ga('create', 'UA-62401730-13', 'auto');
+  ga('send', 'pageview');
+  </script>
+  <script async src='https://www.google-analytics.com/analytics.js'></script>
+  
+
+</body>
+</html>

@@ -1,15 +1,36 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>lioss on Lioss: License Identifier for OSS</title>
+    <title>:house: Home on Lioss: License Identifier for OSS</title>
     <link>https://tamada.github.io/lioss/</link>
-    <description>Recent content in lioss on Lioss: License Identifier for OSS</description>
+    <description>Recent content in :house: Home on Lioss: License Identifier for OSS</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Sun, 08 Mar 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://tamada.github.io/lioss/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>:package: LiossDB</title>
+      <link>https://tamada.github.io/lioss/liossdb/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://tamada.github.io/lioss/liossdb/</guid>
+      <description>lioss has four databases in data directory by default, OSIApproved.liossgz, Deprecated.liossgz, NoneOSIApproved.liossgz, and OSIDeprecated.liossgz. The databases are built from spdx/license-list-XML GitHub repository.
+The following table shows the license list of each database.
+  let licenses window.onload = () = { initLicenses((json) = { licenses = json }) } updateLicenseList = () = { layoutLicenses(licenses, {}) } resetFilter = () = { elements = Array.from(document.getElementsByTagName(&#34;input&#34;)) elements.filter(e = e.type == &#34;checkbox&#34;).forEach(e = e.</description>
+    </item>
+    
+    <item>
+      <title>:runner: Usage</title>
+      <link>https://tamada.github.io/lioss/usage/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://tamada.github.io/lioss/usage/</guid>
+      <description>lioss lioss identifies license names of specified project directories, zip file and/or LICENSE files.
+lioss version 1.0.0 lioss [OPTIONS] &amp;lt;PROJECTs...&amp;gt; OPTIONS --database-path &amp;lt;PATH&amp;gt; specifies the database path. If specifying this option, database-type option is ignored. --database-type &amp;lt;TYPE&amp;gt; specifies the database type. Default is osi (enable multi options, separating by comma). Available values are: non-osi, osi, deprecated, osi-deprecated, and whole. -a, --algorithm &amp;lt;ALGORITHM&amp;gt; specifies algorithm. Default is 5gram. Available values are: kgram, wordfreq, and tfidf.</description>
+    </item>
     
     <item>
       <title>:smile: About</title>
@@ -19,7 +40,7 @@
       <guid>https://tamada.github.io/lioss/about/</guid>
       <description>📜 License Do What The F*ck You Want To Public License
 
- WTFPL permits  👍 Commercial use, 👍 Modification, 👍 Distribution, and 👍 Private use.    👨‍💼 Developers 👩‍💼  Haruaki Tamada  GitHub    </description>
+ WTFPL permits  👍 Commercial use, 👍 Modification, 👍 Distribution, and 👍 Private use.    👨‍💼 Developers 👩‍💼  Haruaki Tamada  GitHub    🤝 Attributions Icon This is logo of lioss. This image is obtained from pixabay.com.</description>
     </item>
     
     <item>
@@ -29,19 +50,9 @@
       
       <guid>https://tamada.github.io/lioss/install/</guid>
       <description>🍺 Homebrew lioss is distributed via Homebrew on macOS platform.
-brew install tamada/brew/lioss Go lang We can install lioss using go get command. Type below command, then lioss and mkliossdb are installed into ~/go/bin directory.
-go get github.com/tamada/lioss 🛠️ Build from source If you would build from source, you should clone repository from GitHub and compile source codes, like below.
+brew tap tamada/brew brew install lioss Go lang We can install lioss using go get command. Type below command, then lioss and mkliossdb are installed into ~/go/bin directory.
+go get github.com/tamada/lioss 💪 Build from source If you would build from source, you should clone repository from GitHub and compile source codes, like below.
 git clone https://github.com/tamada/lioss.git cd lioss make </description>
-    </item>
-    
-    <item>
-      <title>Usage</title>
-      <link>https://tamada.github.io/lioss/usage/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://tamada.github.io/lioss/usage/</guid>
-      <description>lioss lioss identifies license names of specified project directories, zip file and/or LICENSE files.
-lioss version 1.0.0 lioss [OPTIONS] &amp;lt;PROJECTS...&amp;gt; OPTIONS --dbpath &amp;lt;DBPATH&amp;gt; specifying database path. -a, --algorithm &amp;lt;ALGORITHM&amp;gt; specifies algorithm. Default is 5gram. Available values are: kgram, wordfreq, and tfidf. -t, --threshold &amp;lt;THRESHOLD&amp;gt; specifies threshold of the similarities of license files. Each algorithm has default value. Default value is 0.75. -h, --help print this message. PROJECTS project directories, and/or archive files contains LICENSE file.</description>
     </item>
     
   </channel>

@@ -1,0 +1,28 @@
+.avatar {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 15px;
+    height: 96px;
+    width: 96px;
+}
+
+.avatar_caption {
+    display: inline;
+    width: 50%;
+}
+.project-name {
+    display: inline-block;
+}
+
+.license-full-name {
+    font-size: x-small;
+    display: block;
+}
+
+.license-short-name {
+    display: inline-block;
+}
+
+img {
+    margin-right: 5px;
+}
