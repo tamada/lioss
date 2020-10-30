@@ -90,3 +90,12 @@ LICENSE
     specifies license files.
 ```
 
+## :whale: Docker
+
+we can run `lioss` command on the Docker!
+
+```sh
+docker run -v ABSOLUTE/PATH/OF/TARGET/PROJECT:/home/lioss tamada/lioss:latest LICENSE_FILE_OR_PROJECT_DIR
+```
+
+

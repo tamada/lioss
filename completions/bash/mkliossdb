@@ -1,0 +1,23 @@
+__mkliossdb() {
+    local cur prev words cwords split
+    _init_completion -s || return
+
+    case "${prev}" in
+        "--dest" | "-d")
+            compopt -o filenames
+            COMPREPLY=($(compgen -f -- "${cur}"))
+            return 0
+            ;;
+    esac
+    local opts="-d -h --dest --help"
+    if [[ "$cur" =~ ^\- ]]; then
+        COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+        return 0
+    else
+        compopt -o filenames
+        COMPREPLY=($(compgen -d -- "$cur"))
+    fi
+    return 0
+}
+
+complete -F __mkliossdb mkliossdb
