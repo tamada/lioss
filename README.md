@@ -4,6 +4,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/tamada/lioss)](https://goreportcard.com/report/github.com/tamada/lioss)
 [![License](https://img.shields.io/badge/License-WTFPL-blue.svg)](https://github.com/tamada/lioss/blob/master/LICENSE)
 [![Version](https://img.shields.io/badge/Version-0.9.0-yellowgreen.svg)](https://github.com/tamada/lioss/releases/tag/v1.0.0)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Ftamada%2Flioss.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Ftamada%2Flioss?ref=badge_shield)
 
 # lioss
 
@@ -48,6 +49,9 @@ OPTIONS
 PROJECTS
     project directories, archive files (jar, and zip) contains LICENSE file, and/or LICENSE file.
 ```
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Ftamada%2Flioss.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Ftamada%2Flioss?ref=badge_large)
 
 ### `mkliossdb`
 
@@ -94,4 +98,4 @@ $ make
 * [pivotal/LicenseFinder](https://github.com/pivotal/LicenseFinder)
     * This product finds dependencies from build file, and find license.
 * [SPDX](https://spdx.org) (Software Package Data Exchange).
-    * 
+    *
