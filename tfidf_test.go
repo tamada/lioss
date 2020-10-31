@@ -51,7 +51,7 @@ func TestCompare(t *testing.T) {
 	}{
 		{"MIT", "data/misc/MIT", 0.99},
 		{"WTFPL", "data/misc/WTFPL", 0.95},
-		{"WTFPL", "LICENSE", 0.9},
+		{"WTFPL", "testdata/project1/LICENSE", 0.9},
 	}
 	for _, td := range testdata {
 		gotSimilarity := tfidf.Compare(&License{Name: td.license}, createLicenseFromFile(tfidf, td.path))
