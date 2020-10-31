@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"testing"
 
 	"github.com/tamada/lioss"
@@ -86,6 +87,17 @@ func Example_invalidCLIOptions() {
 	goMain([]string{"lioss", "--unknown"})
 	// Output:
 	// unknown flag: --unknown
+}
+
+func Example() {
+	os.Setenv("LIOSS_DBPATH", "../../data")
+	goMain([]string{"lioss", "../../testdata/project3.jar"})
+	defer os.Unsetenv("LIOSS_DBPATH")
+	// Output:
+	// ../../testdata/project3.jar/project3/license
+	// 	Apache-2.0 (1.0000)
+	// 	ECL-2.0 (0.9884)
+	// ../../testdata/project3.jar/project3/subproject/license
 }
 
 func Example_lioss() {

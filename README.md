@@ -2,8 +2,8 @@
 [![Coverage Status](https://coveralls.io/repos/github/tamada/lioss/badge.svg?branch=master)](https://coveralls.io/github/tamada/lioss?branch=master)
 [![codebeat badge](https://codebeat.co/badges/dc3481f5-852b-4537-a5f5-150e2bfa998c)](https://codebeat.co/projects/github-com-tamada-lioss-master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/tamada/lioss)](https://goreportcard.com/report/github.com/tamada/lioss)
-[![License](https://img.shields.io/badge/License-WTFPL-blue.svg)](https://github.com/tamada/lioss/blob/master/LICENSE)
-[![Version](https://img.shields.io/badge/Version-0.9.0-yellowgreen.svg)](https://github.com/tamada/lioss/releases/tag/v1.0.0)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/tamada/lioss/blob/master/LICENSE)
+[![Version](https://img.shields.io/badge/Version-1.0.0-yellowgreen.svg)](https://github.com/tamada/lioss/releases/tag/v1.0.0)
 
 # lioss
 

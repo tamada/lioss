@@ -6,9 +6,9 @@ title: ":smile: About"
 
 [Do What The F*ck You Want To Public License](https://github.com/tamada/uniq2/blob/master/LICENSE)
 
-[![WTFPL](https://img.shields.io/badge/License-WTFPL-blue.svg)](https://github.com/tamada/uniq2/blob/master/LICENSE)
+[![MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/tamada/lioss/blob/master/LICENSE)
 
-* WTFPL permits
+* MIT permits
     * :thumbsup: Commercial use,
     * :thumbsup: Modification,
     * :thumbsup: Distribution, and

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -24,6 +25,7 @@ type liossOptions struct {
 }
 
 func helpMessage(appName string) string {
+	app := filepath.Base(appName)
 	return fmt.Sprintf(`%s version %s
 %s [OPTIONS] <PROJECTS...>
 OPTIONS
@@ -37,8 +39,7 @@ OPTIONS
                                    Each algorithm has default value. Default value is 0.75.
     -h, --help                     prints this message.
 PROJECTS
-    project directories, and/or archive files contains LICENSE file.
-`, appName, VERSION, appName)
+    project directories, and/or archive files contains LICENSE file.`, app, VERSION, app)
 }
 
 func printResult(project lioss.Project, id string, results []*lioss.Result) {
@@ -98,7 +99,6 @@ func dbTypes(opts *liossOptions) lioss.DatabaseType {
 			dbtype = dbtype | t
 		}
 	}
-	fmt.Printf("%s -> %s\n", opts.dbtype, dbtype.String())
 	return dbtype
 }
 

@@ -1,0 +1,33 @@
+__lioss() {
+    local cur prev words cwords split
+    _init_completion -s || return
+
+    case "${prev}" in
+        "--database-path")
+            compopt -o filenames
+            COMPREPLY=($(compgen -f -- "${cur}"))
+            return 0
+            ;;
+        "--database-type")
+            availableType="osi non-osi deprecated osi-deprecated whole"
+            COMPREPLY=( $(compgen -W "${availableType}" -- ${cur}) )
+            return 0
+            ;;
+        "--algorithm" | "-a")
+            algorithms="1gram 2gram 3gram 4gram 5gram 6gram 7gram 8gram 9gram tfidf wordfreq"
+            COMPREPLY=($(compgen -W "${algorithms}" -- "${cur}"))
+            return 0
+            ;;
+    esac
+    local opts="-a -t -h --database-path --database-type --algorithm --threshold --help"
+    if [[ "$cur" =~ ^\- ]]; then
+        COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+        return 0
+    else
+        compopt -o filenames
+        COMPREPLY=($(compgen -d -- "$cur"))
+    fi
+    return 0
+}
+
+complete -F __lioss lioss
