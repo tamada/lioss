@@ -27,12 +27,12 @@ PROJECTs
 
 ```sh
 $ lioss LICENSE    # run on the lioss directory.
-LICENSE
-$ lioss --database-type non-osi LICENSE    # run on the lioss directory.
-LICENSE
-	WTFPL (0.9804)
+./LICENSE
+	MIT (0.9801)
+	MIT-0 (0.9194)
+	Xnet (0.9180)
+	NCSA (0.7946)
 $ lioss --algorithm 9gram testdata   # run lioss for identifying project licenses in testdata directory.
-osi -> OSI_APPROVED_DATABASE
 testdata/project1/LICENSE
 testdata/project2/license.txt
 	GPL-3.0-only (0.9803)
