@@ -90,12 +90,12 @@ PROJECTs
     LICENSE files, project directories, and/or archive files contains LICENSE file.
 </code></pre></div><h3 id="examples">Examples</h3>
 <div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ lioss LICENSE    <span style="color:#408080;font-style:italic"># run on the lioss directory.</span>
-LICENSE
-$ lioss --database-type non-osi LICENSE    <span style="color:#408080;font-style:italic"># run on the lioss directory.</span>
-LICENSE
-	WTFPL <span style="color:#666">(</span>0.9804<span style="color:#666">)</span>
+./LICENSE
+	MIT <span style="color:#666">(</span>0.9801<span style="color:#666">)</span>
+	MIT-0 <span style="color:#666">(</span>0.9194<span style="color:#666">)</span>
+	Xnet <span style="color:#666">(</span>0.9180<span style="color:#666">)</span>
+	NCSA <span style="color:#666">(</span>0.7946<span style="color:#666">)</span>
 $ lioss --algorithm 9gram testdata   <span style="color:#408080;font-style:italic"># run lioss for identifying project licenses in testdata directory.</span>
-osi -&gt; OSI_APPROVED_DATABASE
 testdata/project1/LICENSE
 testdata/project2/license.txt
 	GPL-3.0-only <span style="color:#666">(</span>0.9803<span style="color:#666">)</span>
@@ -145,6 +145,9 @@ OPTIONS
     -h, --help               print this message.
 LICENSE
     specifies license files.
+</code></pre></div><h2 id="-docker">🐳 Docker</h2>
+<p>we can run <code>lioss</code> command on the Docker!</p>
+<div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">docker run -v ABSOLUTE/PATH/OF/TARGET/PROJECT:/home/lioss tamada/lioss:latest LICENSE_FILE_OR_PROJECT_DIR
 </code></pre></div>
 
     <footer class="site-footer">
