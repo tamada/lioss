@@ -1,7 +1,7 @@
 # lioss
 
 > [!CAUTION]
-> This project is no longer maintained.
+> This project is no longer maintained. Use [licensee](https://github.com/licensee/licensee) instead.
 
 [![GitHub Action Build](https://github.com/tamada/lioss/workflows/build/badge.svg?branch=master)](https://github.com/tamada/lioss/actions?workflow=build)
 [![Coverage Status](https://coveralls.io/repos/github/tamada/lioss/badge.svg?branch=master)](https://coveralls.io/github/tamada/lioss?branch=master)
